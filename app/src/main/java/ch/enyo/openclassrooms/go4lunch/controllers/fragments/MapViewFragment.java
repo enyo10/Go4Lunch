@@ -20,6 +20,7 @@ public class MapViewFragment extends BaseFragment {
     public BaseFragment newInstance() {
 
         MapViewFragment mapViewFragment=new MapViewFragment();
+        mapViewFragment.name="Map View";
         return mapViewFragment;
     }
 

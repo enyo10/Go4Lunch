@@ -18,7 +18,9 @@ public class WorkmatesFragment extends BaseFragment {
 
     @Override
     public BaseFragment newInstance() {
-        return null;
+        WorkmatesFragment workmatesFragment=new WorkmatesFragment();
+        workmatesFragment.name="Workmates";
+        return workmatesFragment;
     }
 
     @Override
