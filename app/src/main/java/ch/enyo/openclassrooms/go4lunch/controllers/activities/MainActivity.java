@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.widget.Button;
 
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -47,7 +48,7 @@ public class MainActivity extends BaseActivity {
         // 3 - Launch Sign-In Activity when user clicked on Login Button
         if (this.isCurrentUserLogged()){
           //  this.startProfileActivity();
-            this.startMapActivity();
+            this.startWelcomeActivity();
         } else {
             this.startSignInActivity();
         }
@@ -87,8 +88,8 @@ public class MainActivity extends BaseActivity {
                         .setAvailableProviders(
                                 Arrays.asList(
                                         new AuthUI.IdpConfig.EmailBuilder().build()
-                                      //,  new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                      //  new AuthUI.IdpConfig.FacebookBuilder().build()
+                                    //    ,  new AuthUI.IdpConfig.GoogleBuilder().build()
+                                        ,  new AuthUI.IdpConfig.FacebookBuilder().build()
                                         )
                                                 )
 
@@ -108,6 +109,10 @@ public class MainActivity extends BaseActivity {
     private void startMapActivity(){
         Intent intent =new Intent(this, MapsActivity.class);
         startActivity(intent);
+    }
+
+    private void startWelcomeActivity(){
+        
     }
 
     // --------------------
@@ -159,5 +164,6 @@ public class MainActivity extends BaseActivity {
         super.onResume();
         Log.i(TAG," On Resume");
         this.updateUIWhenResuming();
+
     }
 }
