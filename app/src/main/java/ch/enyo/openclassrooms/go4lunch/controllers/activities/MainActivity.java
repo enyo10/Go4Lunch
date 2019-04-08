@@ -47,6 +47,7 @@ public class MainActivity extends BaseActivity {
     public void onClickLoginButton() {
         // 3 - Launch Sign-In Activity when user clicked on Login Button
         if (this.isCurrentUserLogged()){
+            Log.i(TAG," Welcome activity call");
           //  this.startProfileActivity();
             this.startWelcomeActivity();
         } else {
@@ -111,8 +112,13 @@ public class MainActivity extends BaseActivity {
         startActivity(intent);
     }
 
+    /**
+     * This method call the Welcome activity.
+     */
     private void startWelcomeActivity(){
-        
+        Intent intent =new Intent(this, WelcomeActivity.class);
+        startActivity(intent);
+
     }
 
     // --------------------
