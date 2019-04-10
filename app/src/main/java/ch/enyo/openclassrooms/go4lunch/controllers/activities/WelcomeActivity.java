@@ -27,6 +27,12 @@ import ch.enyo.openclassrooms.go4lunch.views.MyPagerAdapter;
 public class WelcomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private int[] mTabIcons = {
+            R.drawable.baseline_map_black_48,
+            R.drawable.baseline_view_list_black_48,
+            R.drawable.baseline_group_black_48
+    };
+
     @BindView(R.id.activity_main_view_pager)
     ViewPager mViewPager;
 
@@ -44,14 +50,14 @@ public class WelcomeActivity extends AppCompatActivity
 
         configureViewPagerAndTabs();
 
-        FloatingActionButton fab =  findViewById(R.id.fab);
+       /* FloatingActionButton fab =  findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -131,8 +137,19 @@ public class WelcomeActivity extends AppCompatActivity
 
         //Glue TabLayout and ViewPager together
         mTabLayout.setupWithViewPager(mViewPager);
+
+        setUpIcons();
         //Design purpose. Tabs have the same width
         mTabLayout.setTabMode(TabLayout.MODE_FIXED);
+
+    }
+
+
+    private void setUpIcons(){
+
+        mTabLayout.getTabAt(0).setIcon(mTabIcons[0]);
+        mTabLayout.getTabAt(1).setIcon(mTabIcons[1]);
+        mTabLayout.getTabAt(2).setIcon(mTabIcons[2]);
 
     }
 }
