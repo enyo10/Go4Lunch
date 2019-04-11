@@ -23,8 +23,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.Places;
 
 
+// Add import statements for the new library.
+
+import com.google.android.libraries.places.api.net.PlacesClient;
+
+
+import ch.enyo.openclassrooms.go4lunch.BuildConfig;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 
@@ -35,7 +42,19 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback 
     private static final String TAG =MapViewFragment.class.getSimpleName();
     private GoogleMap mGoogleMap=null;
     MapView mMapView;
+    String apiKey = BuildConfig.ApiKey;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Initialize Places.
+      //  Places.initialize(getActivity().getApplicationContext(),getString( R.string.google_maps_key));
+
+       // Create a new Places client instance.
+       // PlacesClient placesClient = Places.createClient(getActivity());
+
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,9 +63,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback 
         //use SuppoprtMapFragment for using in fragment instead of activity  MapFragment = activity   SupportMapFragment = fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(this);
-
-
-
 
         return view;
     }
@@ -61,13 +77,15 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback 
 
     @Override
     public void onMapReady(GoogleMap gMap) {
+        Log.i(TAG, "The key "+apiKey);
         mGoogleMap = gMap;
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         mGoogleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+       // mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mGoogleMap.clear();
 
                 CameraPosition googlePlex = CameraPosition.builder()

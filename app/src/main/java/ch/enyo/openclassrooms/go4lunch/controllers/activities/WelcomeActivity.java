@@ -16,6 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.enyo.openclassrooms.go4lunch.R;
@@ -146,8 +148,13 @@ public class WelcomeActivity extends AppCompatActivity
 
 
     private void setUpIcons(){
+        View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
+        view1.findViewById(R.id.icon).setBackgroundResource(R.drawable.baseline_map_black_48);
+       // tabLayout.addTab(tabLayout.newTab().setCustomView(view1));
 
-        mTabLayout.getTabAt(0).setIcon(mTabIcons[0]);
+
+        mTabLayout.getTabAt(0).setCustomView(view1);
+
         mTabLayout.getTabAt(1).setIcon(mTabIcons[1]);
         mTabLayout.getTabAt(2).setIcon(mTabIcons[2]);
 
