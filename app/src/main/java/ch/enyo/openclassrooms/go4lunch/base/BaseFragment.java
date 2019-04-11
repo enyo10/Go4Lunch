@@ -34,6 +34,8 @@ public abstract class BaseFragment extends Fragment {
         View view =    inflater.inflate(getFragmentLayout(), container, false);
 
         ButterKnife.bind(this,view);
+
+        configureView();
         return view;
     }
 
@@ -55,5 +57,7 @@ public abstract class BaseFragment extends Fragment {
      * This method to configure the fragment view.
      */
     protected abstract void configureDesign(View v);
+
+    protected abstract void configureView();
 
 }

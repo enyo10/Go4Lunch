@@ -56,16 +56,13 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback 
 
     }
 
-    @Override
+    /*@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view= super.onCreateView(inflater, container, savedInstanceState);
 
-        //use SuppoprtMapFragment for using in fragment instead of activity  MapFragment = activity   SupportMapFragment = fragment
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFragment);
-        mapFragment.getMapAsync(this);
 
         return view;
-    }
+    }*/
 
     @Override
     public BaseFragment newInstance() {
@@ -128,6 +125,14 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback 
 
     @Override
     protected void configureDesign(View v) {
+
+    }
+
+    @Override
+    protected void configureView() {
+        //use SuppoprtMapFragment for using in fragment instead of activity  MapFragment = activity   SupportMapFragment = fragment
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFragment);
+        mapFragment.getMapAsync(this);
 
     }
 
