@@ -148,15 +148,19 @@ public class WelcomeActivity extends AppCompatActivity
 
 
     private void setUpIcons(){
-        View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
+        /*View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
         view1.findViewById(R.id.icon).setBackgroundResource(R.drawable.baseline_map_black_48);
-       // tabLayout.addTab(tabLayout.newTab().setCustomView(view1));
-
 
         mTabLayout.getTabAt(0).setCustomView(view1);
 
         mTabLayout.getTabAt(1).setIcon(mTabIcons[1]);
-        mTabLayout.getTabAt(2).setIcon(mTabIcons[2]);
+        mTabLayout.getTabAt(2).setIcon(mTabIcons[2]);*/
+
+        int size =3;
+        for(int i=0;i<size;i++){
+            mTabLayout.getTabAt(i).setIcon(mTabIcons[i]);
+
+        }
 
     }
 }

@@ -7,7 +7,6 @@ import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.widget.Button;
 
-import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -16,7 +15,6 @@ import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import ch.enyo.openclassrooms.go4lunch.MapsActivity;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.auth.ProfileActivity;
@@ -30,7 +28,7 @@ public class MainActivity extends BaseActivity {
     private static final int RC_SIGN_IN = 123;
 
     @BindView(R.id.main_activity_coordinator_layout)
-    CoordinatorLayout mCoordinatorLayour;
+    CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.main_activity_button_login)
     Button mButtonLogin;
 
@@ -107,10 +105,10 @@ public class MainActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    private void startMapActivity(){
+    /*private void startMapActivity(){
         Intent intent =new Intent(this, MapsActivity.class);
         startActivity(intent);
-    }
+    }*/
 
     /**
      * This method call the Welcome activity.
@@ -149,15 +147,15 @@ public class MainActivity extends BaseActivity {
         if(requestCode==RC_SIGN_IN){
             if (resultCode==RESULT_OK){ // SUCCESS
                 this.createUserInFirestore();
-                showSnackBar(this.mCoordinatorLayour,getString(R.string.connection_succeed));
+                showSnackBar(this.mCoordinatorLayout,getString(R.string.connection_succeed));
 
             }else {
                 if(response==null){
-                    showSnackBar(this.mCoordinatorLayour,getString(R.string.error_authentication_canceled));
+                    showSnackBar(this.mCoordinatorLayout,getString(R.string.error_authentication_canceled));
                 }else if (response.getError().getErrorCode()== ErrorCodes.NO_NETWORK){
-                    showSnackBar(this.mCoordinatorLayour,getString(R.string.error_no_internet));
+                    showSnackBar(this.mCoordinatorLayout,getString(R.string.error_no_internet));
                 }else if (response.getError().getErrorCode()==ErrorCodes.UNKNOWN_ERROR){
-                    showSnackBar(this.mCoordinatorLayour,getString(R.string.error_unknown_error));
+                    showSnackBar(this.mCoordinatorLayout,getString(R.string.error_unknown_error));
 
                 }
             }

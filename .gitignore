@@ -9,5 +9,13 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+# Facebook Key
+
+facebook_authentication.xml
+#Google services Key
+
+google_maps_api.xml
+
+google-services.json
 /captures
 .externalNativeBuild

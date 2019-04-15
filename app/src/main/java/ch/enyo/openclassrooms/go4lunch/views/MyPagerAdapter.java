@@ -15,8 +15,8 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
 
     private static final String TAG=MyPagerAdapter.class.getSimpleName();
 
-private List<BaseFragment> mBaseFragmentList=new ArrayList<>();
-private List<String>mFragmentTitleList=new ArrayList<>();
+    private List<BaseFragment> mBaseFragmentList=new ArrayList<>();
+    private List<String>mFragmentTitleList=new ArrayList<>();
 
 
 

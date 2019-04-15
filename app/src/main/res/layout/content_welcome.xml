@@ -25,8 +25,8 @@
         android:background="@color/browser_actions_bg_grey"
         app:tabIndicatorColor="@android:color/holo_green_light"
         app:tabIndicatorHeight="5dp"
-        app:tabSelectedTextColor="#fff"
-        app:tabTextColor="#aafe" />
+        app:tabSelectedTextColor="@color/baseColor"
+        app:tabTextColor="@android:color/black" />
 
 
 

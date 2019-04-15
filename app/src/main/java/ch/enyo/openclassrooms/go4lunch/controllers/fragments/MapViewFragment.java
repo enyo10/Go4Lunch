@@ -9,9 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,12 +21,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.libraries.places.api.Places;
-
-
-// Add import statements for the new library.
-
-import com.google.android.libraries.places.api.net.PlacesClient;
 
 
 import ch.enyo.openclassrooms.go4lunch.BuildConfig;
@@ -81,8 +73,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback 
         LatLng sydney = new LatLng(-34, 151);
         mGoogleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-       // mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mGoogleMap.clear();
 
                 CameraPosition googlePlex = CameraPosition.builder()
