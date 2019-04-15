@@ -87,7 +87,7 @@ public class ListViewFragment extends BaseFragment {
                 .subscribeWith(new DisposableObserver<NearBySearchResult>() {
                     @Override
                     public void onNext(NearBySearchResult nearBySearchResult) {
-                        Log.i(TAG," NearBySearchResult downloading...");
+                        Log.i(TAG,"Downloading ....");
 
                         updateUIWithResult(nearBySearchResult.getResults());
 
