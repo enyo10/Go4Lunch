@@ -14,8 +14,8 @@
 facebook_authentication.xml
 #Google services Key
 
-google_maps_api.xml
+/google_maps_api.xml
 
-google-services.json
+/google-services.json
 /captures
 .externalNativeBuild
