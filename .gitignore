@@ -7,6 +7,7 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/gradle.properties
 .DS_Store
 /build
 # Facebook Key
@@ -19,3 +20,4 @@ facebook_authentication.xml
 /google-services.json
 /captures
 .externalNativeBuild
+app/libs/
