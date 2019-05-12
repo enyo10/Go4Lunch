@@ -1,11 +1,17 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
 
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch;
+
+import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.common.Geometry;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.common.OpeningHours;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.common.Photo;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.common.PlusCode;
 
 public class Result {
+
     @SerializedName("geometry")
     @Expose
     private Geometry geometry;

@@ -1,8 +1,9 @@
-package ch.enyo.openclassrooms.go4lunch.models;
+package ch.enyo.openclassrooms.go4lunch.models.firebase;
 
 import android.support.annotation.Nullable;
 
 public class User {
+
     private String uid;
     private String username;
     private Boolean isMentor;

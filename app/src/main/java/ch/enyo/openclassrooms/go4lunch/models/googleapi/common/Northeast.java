@@ -1,11 +1,14 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
+
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.common;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Southwest {@SerializedName("lat")
-@Expose
-private Double lat;
+public class Northeast {
+
+    @SerializedName("lat")
+    @Expose
+    private Double lat;
     @SerializedName("lng")
     @Expose
     private Double lng;

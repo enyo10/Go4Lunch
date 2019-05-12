@@ -1,7 +1,8 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.fragments;
 
-
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
+
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,18 +12,16 @@ import android.view.View;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import ch.enyo.openclassrooms.go4lunch.BuildConfig;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
-import ch.enyo.openclassrooms.go4lunch.models.google.NearBySearchResult;
-import ch.enyo.openclassrooms.go4lunch.models.google.Result;
+import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
-import ch.enyo.openclassrooms.go4lunch.views.NearbyResultViewAdapter;
+import ch.enyo.openclassrooms.go4lunch.views.NearbySearchViewAdapter;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
@@ -30,21 +29,30 @@ import io.reactivex.observers.DisposableObserver;
  * A simple {@link Fragment} subclass.
  */
 public class ListViewFragment extends BaseFragment {
-    private static final String TAG= ListViewFragment.class.getSimpleName();
 
+    private static final String TAG = ListViewFragment.class.getSimpleName();
+
+    private NearbySearchViewAdapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private List<PlaceDetails> mPlaceDetailsList;
     Disposable mDisposable;
+    DataSingleton mDataSingleton;
 
     @BindView(R.id.fragment_list_view_recycleView)
     RecyclerView mRecyclerView;
     @BindView(R.id.fragment_list_view_swipeRefresh)
     SwipeRefreshLayout mSwipeRefreshLayout;
 
+    private Map<String,String>mMap;
 
-    private NearbyResultViewAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
-    private List<Result> mResultList;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mDataSingleton=DataSingleton.getInstance();
+        mMap=mDataSingleton.getParametersMap();
 
+    }
 
     @Override
     public BaseFragment newInstance() {
@@ -52,8 +60,8 @@ public class ListViewFragment extends BaseFragment {
         listViewFragment.name="List View";
 
         return listViewFragment;
-
     }
+
 
     @Override
     protected int getFragmentLayout() {
@@ -65,89 +73,75 @@ public class ListViewFragment extends BaseFragment {
 
     }
 
-
     @Override
     protected void configureView() {
         configureSwipeRefreshLayout();
         configureRecyclerView();
         executeHttpRequestWithRetrofit();
+
     }
 
-
-    protected void executeHttpRequestWithRetrofit(){
-
-        Map<String, String> map=new HashMap<>();
-        map.put("key", BuildConfig.ApiKey);
-        map.put("keyword","cruise");
-        map.put("type","restaurant");
-        map.put("radius","5000");
-        map.put("location","-33.8670522,151.1957362");
-
-        mDisposable= GoogleApiPlaceStreams.getNearBySearchResultStream(map)
-                .subscribeWith(new DisposableObserver<NearBySearchResult>() {
-                    @Override
-                    public void onNext(NearBySearchResult nearBySearchResult) {
-                        Log.i(TAG,"Downloading ....");
-
-                        updateUIWithResult(nearBySearchResult.getResults());
-
-                      /* Log.i(TAG," size " +mResultList.size());
-                       for(Result r:mResultList) {
-                           Log.i(TAG, "NAME " + r.getName());
-                           Log.i(TAG, " Id " +r.getPlaceId());
-                           Log.i(TAG, " Opening Hour " +r.getOpeningHours());
-                           Log.i(TAG, " Type "+r.getTypes());
-                           Log.i(TAG, " User Rating  "+r.getUserRatingsTotal());
-                           Log.i(TAG, " Vicinity  "+r.getVicinity());
-                           Log.i(TAG, " Scope  "+r.getScope());
-                           Log.i(TAG, " Lat "+r.getGeometry().getViewport().getNortheast().getLat());
-                       }
-*/
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG,"OOOps, aie aie "+Log.getStackTraceString(e));
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.i(TAG,"Downloaded");
-
-                    }
-                });
-    }
 
 
     protected void configureRecyclerView(){
 
-        this.mResultList =new ArrayList<>();
-        this.mAdapter = new NearbyResultViewAdapter(mResultList);
+        this.mPlaceDetailsList =new ArrayList<>();
+        this.mAdapter = new NearbySearchViewAdapter(mPlaceDetailsList, Glide.with(this));
         this.mRecyclerView.setAdapter(mAdapter);
         this.mLayoutManager= new LinearLayoutManager(getActivity());
         this.mRecyclerView.setLayoutManager(mLayoutManager);
 
         Log.i(TAG, " Recycler view configured ");
     }
-    /**
-     * This method to refresh the layout.
-     */
+    //**
+    // * This method to refresh the layout.
+     //*
     protected void configureSwipeRefreshLayout(){
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                executeHttpRequestWithRetrofit();
+
             }
         });
     }
 
-
-    private void updateUIWithResult(List<Result>list){
+    private void updateUIWithResult(List<PlaceDetails>list){
         this.mSwipeRefreshLayout.setRefreshing(false);
-        this.mResultList.clear();
-        this.mResultList.addAll(list);
+        this.mPlaceDetailsList.clear();
+        this.mPlaceDetailsList.addAll(list);
         this.mAdapter.notifyDataSetChanged();
+    }
+
+
+    protected void executeHttpRequestWithRetrofit(){
+        Log.i(TAG, "parameter map value "+mMap.toString());
+
+       mDisposable=GoogleApiPlaceStreams.streamFPlaceDetailsList(mMap)
+               .subscribeWith(new DisposableObserver<List<PlaceDetails>>() {
+
+                   @Override
+                   public void onNext(List<PlaceDetails> placeDetailsList) {
+                       Log.i(TAG," Downloading...");
+                       Log.i(TAG," Details list size "+placeDetailsList.size());
+                       Log.i(TAG," place name "+placeDetailsList.get(0).getResult().getName());
+                       updateUIWithResult(placeDetailsList);
+
+                   }
+
+                   @Override
+                   public void onError(Throwable e) {
+                       Log.i("TAG","aie, error in place nearby search: "  +Log.getStackTraceString(e));
+
+                   }
+
+                   @Override
+                   public void onComplete() {
+
+                       Log.i(TAG," Downloaded ");
+
+                   }
+               });
+
     }
 
 

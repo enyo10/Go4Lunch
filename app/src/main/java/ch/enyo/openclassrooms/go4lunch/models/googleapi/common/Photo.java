@@ -1,9 +1,9 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.common;
 
 import java.util.List;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 public class Photo {
 

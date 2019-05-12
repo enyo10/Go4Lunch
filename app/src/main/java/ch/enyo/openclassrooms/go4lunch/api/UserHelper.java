@@ -5,7 +5,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import ch.enyo.openclassrooms.go4lunch.models.User;
+import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
 
 public class UserHelper {
     private static final String COLLECTION_NAME = "users";

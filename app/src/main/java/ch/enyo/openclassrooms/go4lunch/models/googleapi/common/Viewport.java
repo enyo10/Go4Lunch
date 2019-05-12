@@ -1,9 +1,12 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
 
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.common;
+
+import com.example.Southwest;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Viewport {
+
     @SerializedName("northeast")
     @Expose
     private Northeast northeast;
@@ -26,4 +29,5 @@ public class Viewport {
     public void setSouthwest(Southwest southwest) {
         this.southwest = southwest;
     }
+
 }

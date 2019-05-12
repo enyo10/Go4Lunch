@@ -2,6 +2,7 @@ package ch.enyo.openclassrooms.go4lunch.views;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,9 +16,8 @@ import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetailsResult;
 
-public class NearbyResultViewHolder extends RecyclerView.ViewHolder {
-
-    private static final String TAG = NearbyResultViewHolder.class.getSimpleName();
+public class PlaceDetailsViewHolder extends ViewHolder {
+    private static final String TAG=PlaceDetailsViewHolder.class.getSimpleName();
 
     @BindView(R.id.fragment_item_name)
     TextView mNameTextView;
@@ -26,20 +26,21 @@ public class NearbyResultViewHolder extends RecyclerView.ViewHolder {
     ImageView mImageView;
 
 
-    public NearbyResultViewHolder(@NonNull View itemView) {
+    public PlaceDetailsViewHolder(@NonNull View itemView) {
         super(itemView);
         ButterKnife.bind(this,itemView);
     }
 
-    public void updateWithResult(PlaceDetails placeDetails, RequestManager glide){
+
+    protected void updateWithPlaceDetails(PlaceDetails placeDetails, RequestManager glide){
         PlaceDetailsResult result= placeDetails.getResult();
         mNameTextView.setText(placeDetails.getResult().getName());
         mAddressTextView.setText(result.getVicinity());
 
         if(result.getPhotos().size()!=0)
-        glide.load(result.getPhotos().get(0).getPhotoReference()).into(mImageView);
+            glide.load(result.getPhotos().get(0).getPhotoReference()).into(mImageView);
 
-        Log.i(TAG, " Update white result."+result.getPlaceId());
+        Log.i(TAG, " place name ."+result.getName());
 
 
     }

@@ -1,4 +1,4 @@
-package ch.enyo.openclassrooms.go4lunch.models;
+package ch.enyo.openclassrooms.go4lunch.models.firebase;
 
 import android.support.annotation.Nullable;
 

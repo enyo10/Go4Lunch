@@ -1,9 +1,11 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
+
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.common;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class OpeningHours {
+
     @SerializedName("open_now")
     @Expose
     private Boolean openNow;
@@ -15,4 +17,5 @@ public class OpeningHours {
     public void setOpenNow(Boolean openNow) {
         this.openNow = openNow;
     }
+
 }

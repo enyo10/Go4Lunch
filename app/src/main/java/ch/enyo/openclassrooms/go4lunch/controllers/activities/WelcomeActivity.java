@@ -1,39 +1,74 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 
+import android.annotation.TargetApi;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.View;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Objects;
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnSuccessListener;
+import android.location.Location;
+import android.widget.Toast;
+
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
+
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import ch.enyo.openclassrooms.go4lunch.BuildConfig;
 import ch.enyo.openclassrooms.go4lunch.R;
+import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.ListViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
+import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyo.openclassrooms.go4lunch.utils.LocationTrack;
 import ch.enyo.openclassrooms.go4lunch.views.MyPagerAdapter;
 
-public class WelcomeActivity extends AppCompatActivity
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
+public class WelcomeActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final String TAG = WelcomeActivity.class.getSimpleName();
+
+    // 2 - Identify each Http Request
+    private static final int SIGN_OUT_TASK = 10;
+    private static final int DELETE_USER_TASK = 20;
+
+    private PlacesClient mPlacesClient;
+
+
+    private ArrayList<String> permissionsToRequest;
+    private ArrayList<String> permissionsRejected = new ArrayList<>();
+    private ArrayList<String> permissions = new ArrayList<>();
+
+    private final static int ALL_PERMISSIONS_RESULT = 101;
+    LocationTrack locationTrack;
 
     private int[] mTabIcons = {
             R.drawable.baseline_map_black_48,
             R.drawable.baseline_view_list_black_48,
             R.drawable.baseline_group_black_48
     };
+
 
     @BindView(R.id.activity_main_view_pager)
     ViewPager mViewPager;
@@ -45,12 +80,16 @@ public class WelcomeActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
+
         Toolbar toolbar =  findViewById(R.id.toolbar);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        configurePermission();
 
         configureViewPagerAndTabs();
+
+        Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
+         mPlacesClient =Places.createClient(this);
 
        /* FloatingActionButton fab =  findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -67,13 +106,13 @@ public class WelcomeActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView =  findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -97,6 +136,10 @@ public class WelcomeActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if(id==R.id.action_logout){
+            this.signOutFromFirebase();
             return true;
         }
 
@@ -130,12 +173,12 @@ public class WelcomeActivity extends AppCompatActivity
 
     protected void configureViewPagerAndTabs(){
         mFragmentPagerAdapter=new MyPagerAdapter(getSupportFragmentManager());
+      // ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new MapViewFragment()).newInstance());
         ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new MapViewFragment()).newInstance());
-        ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new ListViewFragment()).newInstance());
+        ((MyPagerAdapter) mFragmentPagerAdapter).addFragment(new ListViewFragment().newInstance());
         ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new WorkmatesFragment()).newInstance());
 
         mViewPager.setAdapter(mFragmentPagerAdapter);
-
 
         //Glue TabLayout and ViewPager together
         mTabLayout.setupWithViewPager(mViewPager);
@@ -163,4 +206,159 @@ public class WelcomeActivity extends AppCompatActivity
         }
 
     }
+
+    /**
+     * This to sign out from firebae.
+     */
+    private void signOutFromFirebase(){
+        Log.d(TAG," sign out");
+
+            AuthUI.getInstance()
+                    .signOut(this)
+                    .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
+
+    }
+
+
+
+    private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin) {
+
+        return aVoid -> {
+            switch (origin) {
+                case SIGN_OUT_TASK:
+                    finish();
+                    break;
+                case DELETE_USER_TASK:
+                    finish();
+                    break;
+                default:
+                    break;
+            }
+        };
+    }
+
+    @Override
+    public int getActivityLayout() {
+        return R.layout.activity_welcome;
+    }
+
+
+
+    //*******************************************************************
+    //        Here we handle the localisation process.
+    //*******************************************************************
+
+    private void configurePermission() {
+
+        permissions.add(ACCESS_FINE_LOCATION);
+        permissions.add(ACCESS_COARSE_LOCATION);
+        permissionsToRequest = findUnAskedPermissions(permissions);
+        //get the permissions we have asked for before but are not granted..
+        //we will store this in a global list to access later.
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (permissionsToRequest.size() > 0)
+                requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
+
+        }
+
+        locationTrack = new LocationTrack(WelcomeActivity.this);
+
+
+        if (locationTrack.canGetLocation()) {
+           DataSingleton dataSingleton= DataSingleton.getInstance();
+
+            double longitude = locationTrack.getLongitude();
+            double latitude = locationTrack.getLatitude();
+            dataSingleton.setLongitude(longitude);
+            dataSingleton.setLatitude(latitude);
+
+            Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude), Toast.LENGTH_SHORT).show();
+        } else {
+
+            locationTrack.showSettingsAlert();
+        }
+
+    }
+
+
+    private ArrayList<String> findUnAskedPermissions(ArrayList<String> wanted) {
+        ArrayList<String> result = new ArrayList<>();
+
+        for (String perm : wanted) {
+            if (!hasPermission(perm)) {
+                result.add(perm);
+            }
+        }
+
+        return result;
+    }
+
+
+    private boolean hasPermission(String permission) {
+        if (canMakeSmores()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                return (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
+            }
+        }
+        return true;
+    }
+
+    private boolean canMakeSmores() {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+
+        switch (requestCode) {
+            case ALL_PERMISSIONS_RESULT:
+                for (String perms : permissionsToRequest) {
+                    if (!hasPermission(perms)) {
+                        permissionsRejected.add(perms);
+                    }
+                }
+
+                if (permissionsRejected.size() > 0) {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0))) {
+                            showMessageOKCancel("These permissions are mandatory for the application. Please allow access.",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT);
+                                            }
+                                        }
+                                    });
+                            return;
+                        }
+                    }
+
+                }
+
+                break;
+        }
+
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(WelcomeActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        locationTrack.stopListener();
+    }
+
 }

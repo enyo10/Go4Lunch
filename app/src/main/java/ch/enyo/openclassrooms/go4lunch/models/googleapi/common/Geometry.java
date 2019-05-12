@@ -1,9 +1,11 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
+
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.common;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Geometry {
+
     @SerializedName("location")
     @Expose
     private Location location;
@@ -26,4 +28,5 @@ public class Geometry {
     public void setViewport(Viewport viewport) {
         this.viewport = viewport;
     }
+
 }

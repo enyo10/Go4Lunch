@@ -1,18 +1,17 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails;
 
+import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
-public class NearBySearchResult {
+public class PlaceDetails {
 
     @SerializedName("html_attributions")
     @Expose
     private List<Object> htmlAttributions = null;
-    @SerializedName("results")
+    @SerializedName("result")
     @Expose
-    private List<Result> results = null;
+    private PlaceDetailsResult result;
     @SerializedName("status")
     @Expose
     private String status;
@@ -25,12 +24,12 @@ public class NearBySearchResult {
         this.htmlAttributions = htmlAttributions;
     }
 
-    public List<Result> getResults() {
-        return results;
+    public PlaceDetailsResult getResult() {
+        return result;
     }
 
-    public void setResults(List<Result> results) {
-        this.results = results;
+    public void setResult(PlaceDetailsResult result) {
+        this.result = result;
     }
 
     public String getStatus() {
@@ -40,4 +39,5 @@ public class NearBySearchResult {
     public void setStatus(String status) {
         this.status = status;
     }
+
 }

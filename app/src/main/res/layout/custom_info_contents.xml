@@ -2,19 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
-
+    android:layoutDirection="locale"
+    android:orientation="vertical">
     <TextView
-        android:id="@+id/item_number"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:layout_gravity="center_horizontal"
+        android:textColor="#ff000000"
+        android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/content"
+        android:id="@+id/snippet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:textColor="#ff7f7f7f" />
 </LinearLayout>

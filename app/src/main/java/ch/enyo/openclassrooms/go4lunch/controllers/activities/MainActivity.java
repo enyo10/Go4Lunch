@@ -21,6 +21,7 @@ import ch.enyo.openclassrooms.go4lunch.auth.ProfileActivity;
 import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 
 public class MainActivity extends BaseActivity {
+
     private static final String TAG= MainActivity.class.getSimpleName();
 
     //FOR DATA
@@ -45,9 +46,9 @@ public class MainActivity extends BaseActivity {
     public void onClickLoginButton() {
         // 3 - Launch Sign-In Activity when user clicked on Login Button
         if (this.isCurrentUserLogged()){
-            Log.i(TAG," Welcome activity call");
-          //  this.startProfileActivity();
+
             this.startWelcomeActivity();
+
         } else {
             this.startSignInActivity();
         }
@@ -72,7 +73,10 @@ public class MainActivity extends BaseActivity {
 
     //  Update UI when activity is resuming
     private void updateUIWhenResuming(){
-        this.mButtonLogin.setText(this.isCurrentUserLogged() ? getString(R.string.button_login_text_logged) : getString(R.string.button_login_text_not_logged));
+       // this.mButtonLogin.setText(this.isCurrentUserLogged() ? getString(R.string.button_login_text_logged) : getString(R.string.button_login_text_not_logged));
+        if(this.isCurrentUserLogged()){
+            this.startWelcomeActivity();
+        }
     }
 
     // --------------------
@@ -87,7 +91,7 @@ public class MainActivity extends BaseActivity {
                         .setAvailableProviders(
                                 Arrays.asList(
                                         new AuthUI.IdpConfig.EmailBuilder().build()
-                                    //    ,  new AuthUI.IdpConfig.GoogleBuilder().build()
+                                     //  ,  new AuthUI.IdpConfig.GoogleBuilder().build()
                                         ,  new AuthUI.IdpConfig.FacebookBuilder().build()
                                         )
                                                 )
@@ -105,11 +109,6 @@ public class MainActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    /*private void startMapActivity(){
-        Intent intent =new Intent(this, MapsActivity.class);
-        startActivity(intent);
-    }*/
-
     /**
      * This method call the Welcome activity.
      */
@@ -119,9 +118,25 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    // --------------------
-    // REST REQUEST
-    // --------------------
+
+    private void startMyLocationActivity(){
+        Intent intent =new Intent(this, MyLocation.class);
+        startActivity(intent);
+        Log.i(TAG," Location activity is called");
+
+    }
+    public void startPlacesActivity(){
+        Intent intent =new Intent(this, PlacesActivity.class);
+        startActivity(intent);
+        Log.i(TAG," Location activity is called");
+
+    }
+
+
+
+    // -------------------------
+    // REST REQUEST FIRE BASE
+    // ------------------------
 
     private void createUserInFirestore(){
 
@@ -170,4 +185,6 @@ public class MainActivity extends BaseActivity {
         this.updateUIWhenResuming();
 
     }
+
+
 }

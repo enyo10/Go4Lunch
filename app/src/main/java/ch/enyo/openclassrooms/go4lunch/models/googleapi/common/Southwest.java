@@ -1,9 +1,11 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
+
+package com.example;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Northeast {
+public class Southwest {
+
     @SerializedName("lat")
     @Expose
     private Double lat;
@@ -26,4 +28,5 @@ public class Northeast {
     public void setLng(Double lng) {
         this.lng = lng;
     }
+
 }

@@ -7,24 +7,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.RequestManager;
+
 import java.util.List;
 
 import ch.enyo.openclassrooms.go4lunch.R;
-import ch.enyo.openclassrooms.go4lunch.models.google.Result;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 
-public class NearbyResultViewAdapter extends RecyclerView.Adapter<NearbyResultViewHolder> {
+
+public class NearbySearchViewAdapter extends RecyclerView.Adapter<NearbyResultViewHolder> {
     // FOR DATA.
-    private List<Result>mResultList;
+    private List<PlaceDetails>mResultList;
+    private RequestManager mRequestManager;
 
     /**
      * A constructor
-     * @param resultList,
-     * A list to initialise.
+     * @param
      */
-    public NearbyResultViewAdapter(List<Result> resultList){
+    public NearbySearchViewAdapter(List<PlaceDetails> resultList, RequestManager manager){
         this.mResultList=resultList;
+        this.mRequestManager=manager;
 
     }
+
 
     @NonNull
     @Override
@@ -39,12 +44,12 @@ public class NearbyResultViewAdapter extends RecyclerView.Adapter<NearbyResultVi
 
     @Override
     public void onBindViewHolder(@NonNull NearbyResultViewHolder nearbyResultViewHolder, int i) {
-        nearbyResultViewHolder.updateWithResult(this.mResultList.get(i));
+        nearbyResultViewHolder.updateWithResult(this.mResultList.get(i),mRequestManager);
 
     }
 
     @Override
     public int getItemCount() {
-        return this.mResultList.size();
+        return mResultList.size();
     }
 }

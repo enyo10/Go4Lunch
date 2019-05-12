@@ -1,6 +1,5 @@
 package ch.enyo.openclassrooms.go4lunch.auth;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
@@ -15,14 +14,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
-import ch.enyo.openclassrooms.go4lunch.models.User;
+import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
 
 public class ProfileActivity extends BaseActivity {
     //FOR DATA
@@ -51,8 +49,7 @@ public class ProfileActivity extends BaseActivity {
 
     @Override
     public int getActivityLayout() {
-        return R.layout.activity_profile
-                ;
+        return R.layout.activity_profile;
     }
 
 
@@ -78,13 +75,7 @@ public class ProfileActivity extends BaseActivity {
         new AlertDialog.Builder(this)
 
                 .setMessage(R.string.popup_message_confirmation_delete_account)
-                .setPositiveButton(R.string.popup_message_choice_yes, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        deleteUserFromFirebase();
-                    }
-                })
+                .setPositiveButton(R.string.popup_message_choice_yes, (dialogInterface, i) -> deleteUserFromFirebase())
                 .setNegativeButton(R.string.popup_message_choice_no, null)
                 .show();
 
@@ -180,19 +171,15 @@ public class ProfileActivity extends BaseActivity {
 
             // 5 - Get additional data from Firestore
 
-            UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(documentSnapshot -> {
 
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                User currentUser = documentSnapshot.toObject(User.class);
 
-                    User currentUser = documentSnapshot.toObject(User.class);
+                String username = TextUtils.isEmpty(currentUser.getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
 
-                    String username = TextUtils.isEmpty(currentUser.getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
+              //  mCheckBoxIsMentor.setChecked(currentUser.getIsMentor());
 
-                  //  mCheckBoxIsMentor.setChecked(currentUser.getIsMentor());
-
-                    mTextInputEditTextUsername.setText(username);
-                }
+                mTextInputEditTextUsername.setText(username);
             });
         }
     }
@@ -200,27 +187,23 @@ public class ProfileActivity extends BaseActivity {
 
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin) {
 
-        return new OnSuccessListener<Void>() {
+        return aVoid -> {
 
-            @Override
-            public void onSuccess(Void aVoid) {
+            switch (origin) {
+                case UPDATE_USERNAME:
+                    mProgressBar.setVisibility(View.INVISIBLE);
+                    break;
 
-                switch (origin) {
-                    case UPDATE_USERNAME:
-                        mProgressBar.setVisibility(View.INVISIBLE);
-                        break;
+                case SIGN_OUT_TASK:
+                    finish();
+                    break;
 
-                    case SIGN_OUT_TASK:
-                        finish();
-                        break;
+                case DELETE_USER_TASK:
+                    finish();
+                    break;
 
-                    case DELETE_USER_TASK:
-                        finish();
-                        break;
-
-                    default:
-                        break;
-                }
+                default:
+                    break;
             }
         };
     }

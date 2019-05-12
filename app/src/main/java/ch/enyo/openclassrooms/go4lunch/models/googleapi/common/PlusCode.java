@@ -1,9 +1,11 @@
-package ch.enyo.openclassrooms.go4lunch.models.google;
+
+package ch.enyo.openclassrooms.go4lunch.models.googleapi.common;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class PlusCode {
+
     @SerializedName("compound_code")
     @Expose
     private String compoundCode;
@@ -26,4 +28,5 @@ public class PlusCode {
     public void setGlobalCode(String globalCode) {
         this.globalCode = globalCode;
     }
+
 }
