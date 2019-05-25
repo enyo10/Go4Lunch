@@ -105,10 +105,10 @@ public class GoogleApiPlaceStreams {
                     }
                 }).concatMap(new Function<List<Result>, Observable<List<PlaceDetails>>>() {
                     @Override
-                    public Observable<List<PlaceDetails>> apply(List<Result> results) throws Exception {
-                        return (Observable<List<PlaceDetails>>) Observable.fromIterable(results).concatMap(new Function<Result, Observable<PlaceDetails>>() {
+                    public Observable<List<PlaceDetails>> apply(List<Result> results){
+                        return Observable.fromIterable(results).concatMap(new Function<Result, Observable<PlaceDetails>>() {
                             @Override
-                            public Observable<PlaceDetails> apply(Result result) throws Exception {
+                            public Observable<PlaceDetails> apply(Result result){
                                 return fetchPlaceDetailsStream(filter.get("key"),result.getPlaceId());
                             }
                         }).toList()

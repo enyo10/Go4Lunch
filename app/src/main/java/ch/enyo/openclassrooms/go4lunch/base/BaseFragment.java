@@ -3,6 +3,7 @@ package ch.enyo.openclassrooms.go4lunch.base;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import butterknife.ButterKnife;
 
 
 public abstract class BaseFragment extends Fragment {
+    private static final String TAG=BaseFragment.class.getSimpleName();
 
    public  String name;
 
@@ -34,6 +36,7 @@ public abstract class BaseFragment extends Fragment {
         View view =    inflater.inflate(getFragmentLayout(), container, false);
 
         ButterKnife.bind(this,view);
+        Log.i(TAG, " On create View method.");
 
         configureView();
         return view;

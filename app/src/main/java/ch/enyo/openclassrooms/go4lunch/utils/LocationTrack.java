@@ -24,10 +24,12 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
+import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
+
 
 public class LocationTrack extends Service implements LocationListener {
 
-    private static final String TAG=LocationTrack.class.getSimpleName();
+    private static final String TAG = LocationTrack.class.getSimpleName();
 
     private final Context mContext;
     boolean checkGPS = false;
@@ -81,6 +83,7 @@ public class LocationTrack extends Service implements LocationListener {
                         if (loc != null) {
                             latitude = loc.getLatitude();
                             longitude = loc.getLongitude();
+
                         }
                     }
                 }

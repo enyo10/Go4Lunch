@@ -10,6 +10,7 @@ import android.widget.Button;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.location.FusedLocationProviderClient;
 
 import java.util.Arrays;
 
@@ -32,6 +33,7 @@ public class MainActivity extends BaseActivity {
     CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.main_activity_button_login)
     Button mButtonLogin;
+
 
     @Override
     public int getActivityLayout() {
