@@ -23,7 +23,7 @@ import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 
 public class MainActivity extends BaseActivity {
 
-    private static final String TAG= MainActivity.class.getSimpleName();
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     //FOR DATA
     // 1 - Identifier for Sign-In Activity
@@ -105,32 +105,12 @@ public class MainActivity extends BaseActivity {
                 RC_SIGN_IN);
     }
 
-    // 3 - Launching Profile Activity
-    private void startProfileActivity(){
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
-    }
-
     /**
      * This method call the Welcome activity.
      */
     private void startWelcomeActivity(){
         Intent intent =new Intent(this, WelcomeActivity.class);
         startActivity(intent);
-
-    }
-
-
-    private void startMyLocationActivity(){
-        Intent intent =new Intent(this, MyLocation.class);
-        startActivity(intent);
-        Log.i(TAG," Location activity is called");
-
-    }
-    public void startPlacesActivity(){
-        Intent intent =new Intent(this, PlacesActivity.class);
-        startActivity(intent);
-        Log.i(TAG," Location activity is called");
 
     }
 

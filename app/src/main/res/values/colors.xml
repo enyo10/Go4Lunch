@@ -6,9 +6,10 @@
     <color name="baseColor">#F3EC3C14</color>
     <color name="colorError">#FF5252</color>
     <color name="colorGreen">#6BB18C</color>
-    <color name="colorSandLight">#ECDAAF</color>
+    <color name="colorSandLight">#F3F0E9</color>
     <color name="colorSand">#EBCB94</color>
     <color name="black">#272822</color>
     <color name="yellow">#FDD835</color>
+    <color name="white">#FFFFFF</color>
 
 </resources>

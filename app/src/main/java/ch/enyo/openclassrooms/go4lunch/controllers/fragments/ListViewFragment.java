@@ -19,6 +19,7 @@ import java.util.Map;
 import butterknife.BindView;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
+import ch.enyo.openclassrooms.go4lunch.controllers.activities.PlaceDetailsActivity;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
@@ -88,10 +89,13 @@ public class ListViewFragment extends BaseFragment {
 
                      PlaceDetails placeDetails =  mAdapter.getItem(position);
 
-                        Log.i("TAG","  selected item : "+placeDetails.getResult().getName());
+                        Log.i(TAG,"  selected item : "+placeDetails.getResult().getName());
 
                         Toast.makeText(getContext(), "CLICK on position: " + position + " name: " +
                                 placeDetails.getResult().getName(), Toast.LENGTH_SHORT).show();
+
+                        // start place details activity.
+                        startActivity(PlaceDetailsActivity.class);
                     }
                 });
     }

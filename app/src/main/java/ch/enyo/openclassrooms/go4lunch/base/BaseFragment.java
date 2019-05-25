@@ -1,6 +1,7 @@
 package ch.enyo.openclassrooms.go4lunch.base;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -41,6 +42,12 @@ public abstract class BaseFragment extends Fragment {
         configureView();
         configureOnclickRecyclerView();
         return view;
+    }
+
+    //Generic activity launcher method
+    public void startActivity(Class activity) {
+        Intent intent = new Intent(getContext(), activity);
+        startActivity(intent);
     }
 
 
