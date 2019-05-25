@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -21,6 +22,7 @@ import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
+import ch.enyo.openclassrooms.go4lunch.utils.ItemClickSupport;
 import ch.enyo.openclassrooms.go4lunch.views.PlaceDetailsViewAdapter;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
@@ -46,7 +48,6 @@ public class ListViewFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
     }
 
@@ -75,7 +76,24 @@ public class ListViewFragment extends BaseFragment {
         configureRecyclerView();
         executeHttpRequestWithRetrofit();
 
+    }
 
+    @Override
+    protected void configureOnclickRecyclerView() {
+        ItemClickSupport.addTo(mRecyclerView, R.layout.fragment_list_view_item)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Log.e("TAG", "Position : "+position);
+
+                     PlaceDetails placeDetails =  mAdapter.getItem(position);
+
+                        Log.i("TAG","  selected item : "+placeDetails.getResult().getName());
+
+                        Toast.makeText(getContext(), "CLICK on position: " + position + " name: " +
+                                placeDetails.getResult().getName(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 
@@ -116,8 +134,6 @@ public class ListViewFragment extends BaseFragment {
                     public void onNext(List<PlaceDetails> placeDetailsList) {
                         Log.i(TAG," Place details list downloading...");
                         Log.i(TAG," Details list size "+placeDetailsList.size());
-                        if(placeDetailsList.size()!=0)
-                            Log.i(TAG," place name "+placeDetailsList.get(0).getResult().getName());
 
                         updateUIWithResult(placeDetailsList);
 

@@ -49,7 +49,6 @@ import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.Result;
-import ch.enyo.openclassrooms.go4lunch.utils.FetchAddressTask;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 
 import icepick.Icepick;
@@ -158,6 +157,11 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     }
 
+    @Override
+    protected void configureOnclickRecyclerView() {
+
+    }
+
 
     public void executeRequestWithRetrofit(){
 
@@ -170,10 +174,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                    @Override
                    public void onNext(PlaceNearBySearch placeNearBySearch) {
                        Log.i(TAG, " restaurant by near size "+placeNearBySearch.getResults().size());
-                       //updateUI(placeNearBySearch);
 
-                       //updateResultList(placeNearBySearch.getResults());
-                      // updateUI(placeNearBySearch.getResults());
                        try {
 
                            mGoogleMap.clear();
@@ -199,8 +200,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                        }catch (Exception e){
                            Log.d(TAG, "onNext: error");
                        }
-
-
                    }
 
                    @Override
@@ -235,7 +234,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 markerOptions.position(latLng);
                 markerOptions.title(placeName +" : "+vinicity);
                 // Adding camera
-                //  Marker marker = mGoogleMap.addMarker(markerOptions);
+                Marker marker = mGoogleMap.addMarker(markerOptions);
                 // Adding color to the marker.
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 // move map camera

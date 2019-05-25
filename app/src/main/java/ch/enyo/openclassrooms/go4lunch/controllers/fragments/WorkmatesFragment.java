@@ -38,7 +38,10 @@ public class WorkmatesFragment extends BaseFragment {
 
     }
 
+    @Override
+    protected void configureOnclickRecyclerView() {
 
+    }
 
 
 }

@@ -39,6 +39,7 @@ public abstract class BaseFragment extends Fragment {
         Log.i(TAG, " On create View method.");
 
         configureView();
+        configureOnclickRecyclerView();
         return view;
     }
 
@@ -62,5 +63,7 @@ public abstract class BaseFragment extends Fragment {
     protected abstract void configureDesign(View v);
 
     protected abstract void configureView();
+
+    protected abstract void configureOnclickRecyclerView();
 
 }

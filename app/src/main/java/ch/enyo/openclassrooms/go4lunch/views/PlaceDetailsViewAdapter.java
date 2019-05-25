@@ -40,7 +40,7 @@ public class PlaceDetailsViewAdapter extends RecyclerView.Adapter<PlaceDetailsVi
         Context context = viewGroup.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
      //   View view= inflater.inflate(R.layout.fragment_list_view_item,viewGroup,false);
-        View view= inflater.inflate(R.layout.recycler_view_item_restaurants,viewGroup,false);
+        View view= inflater.inflate(R.layout.fragment_list_view_item,viewGroup,false);
 
         return new PlaceDetailsViewHolder(view);
 
@@ -56,4 +56,15 @@ public class PlaceDetailsViewAdapter extends RecyclerView.Adapter<PlaceDetailsVi
     public int getItemCount() {
         return mPlaceDetailsList.size();
     }
+
+    /**
+     * This method to return the item at position "position" on the recycler view.
+     * @param position, the position
+     * @return Object, the item to return.
+     */
+    public PlaceDetails getItem(int position){
+        return this.mPlaceDetailsList.get(position);
+    }
+
+
 }

@@ -141,6 +141,11 @@ public class MyMapViewFragment extends BaseFragment implements OnMapReadyCallbac
 */
     }
 
+    @Override
+    protected void configureOnclickRecyclerView() {
+
+    }
+
 
     private void instantiatePlacesApiClients() {
 
