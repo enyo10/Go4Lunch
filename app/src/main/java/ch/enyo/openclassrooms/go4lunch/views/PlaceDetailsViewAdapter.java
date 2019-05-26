@@ -39,7 +39,6 @@ public class PlaceDetailsViewAdapter extends RecyclerView.Adapter<PlaceDetailsVi
         // CREATE VIEW HOLDER AND INFLATE ITS XML LAYOUT.
         Context context = viewGroup.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-     //   View view= inflater.inflate(R.layout.fragment_list_view_item,viewGroup,false);
         View view= inflater.inflate(R.layout.fragment_list_view_item,viewGroup,false);
 
         return new PlaceDetailsViewHolder(view);

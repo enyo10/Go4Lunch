@@ -10,7 +10,6 @@ import android.widget.Button;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.location.FusedLocationProviderClient;
 
 import java.util.Arrays;
 
@@ -18,7 +17,6 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
-import ch.enyo.openclassrooms.go4lunch.auth.ProfileActivity;
 import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 
 public class MainActivity extends BaseActivity {
@@ -38,6 +36,11 @@ public class MainActivity extends BaseActivity {
     @Override
     public int getActivityLayout() {
         return R.layout.activity_main;
+    }
+
+    @Override
+    public void configureView() {
+
     }
 
     // --------------------

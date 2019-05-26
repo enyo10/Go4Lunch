@@ -16,6 +16,8 @@ public class PlaceDetails {
     @Expose
     private String status;
 
+   private String imageUrl;
+
     public List<Object> getHtmlAttributions() {
         return htmlAttributions;
     }
@@ -40,4 +42,11 @@ public class PlaceDetails {
         this.status = status;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

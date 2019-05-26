@@ -40,16 +40,16 @@ public class ProfileActivity extends BaseActivity {
     @BindView(R.id.profile_activity_progress_bar)
     ProgressBar mProgressBar;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        this.configureToolbar();
-        this.updateUIWhenCreating();
-    }
 
     @Override
     public int getActivityLayout() {
         return R.layout.activity_profile;
+    }
+
+    @Override
+    public void configureView() {
+        this.configureToolbar();
+        this.updateUIWhenCreating();
     }
 
 

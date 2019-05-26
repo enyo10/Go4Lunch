@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,35 +72,17 @@ public class ListViewFragment extends BaseFragment {
 
     }
 
+    //----------------------------------------------------------------------------------------------
+    //                      CONFIGURE VIEWS
+    //----------------------------------------------------------------------------------------------
+
     @Override
     protected void configureView() {
-        configureSwipeRefreshLayout();
         configureRecyclerView();
+        configureSwipeRefreshLayout();
         executeHttpRequestWithRetrofit();
 
     }
-
-    @Override
-    protected void configureOnclickRecyclerView() {
-        ItemClickSupport.addTo(mRecyclerView, R.layout.fragment_list_view_item)
-                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                    @Override
-                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                        Log.e("TAG", "Position : "+position);
-
-                     PlaceDetails placeDetails =  mAdapter.getItem(position);
-
-                        Log.i(TAG,"  selected item : "+placeDetails.getResult().getName());
-
-                        Toast.makeText(getContext(), "CLICK on position: " + position + " name: " +
-                                placeDetails.getResult().getName(), Toast.LENGTH_SHORT).show();
-
-                        // start place details activity.
-                        startActivity(PlaceDetailsActivity.class);
-                    }
-                });
-    }
-
 
     protected void configureRecyclerView(){
 
@@ -112,20 +95,53 @@ public class ListViewFragment extends BaseFragment {
 
         Log.i(TAG, " Recycler view configured ");
     }
-    //**
-    // * This method to refresh the layout.
-     //*
+
+    /**
+     * Configure the swipeRefreshLayout. It execute a request and refresh the page.
+     */
     protected void configureSwipeRefreshLayout(){
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-               // updateUIWithResult(DataSingleton.getInstance().getPlaceDetailsList());
                 executeHttpRequestWithRetrofit();
 
             }
         });
     }
 
+
+
+    //-----------------------------------------------------------------------------------------
+    //                                  CONFIGURE ACTIONS
+    //------------------------------------------------------------------------------------------
+
+    @Override
+    protected void configureOnclickRecyclerView() {
+        ItemClickSupport.addTo(mRecyclerView, R.layout.fragment_list_view_item)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+
+                     PlaceDetails placeDetails =  mAdapter.getItem(position);
+                     DataSingleton.getInstance().setPlaceDetail(placeDetails);
+
+                        Log.i(TAG,"  selected photo reference : "+placeDetails.getImageUrl());
+                        Log.i(TAG," selected status: "+ placeDetails.getStatus());
+
+                        Toast.makeText(getContext(), "CLICK on position: " + position + " name: " +
+                                placeDetails.getResult().getName(), Toast.LENGTH_SHORT).show();
+
+                        // start place details activity.
+                        startActivity(PlaceDetailsActivity.class);
+                    }
+                });
+    }
+
+
+
+    //----------------------------------------------------------------------------------------------
+    //                           REQUESTS
+    //----------------------------------------------------------------------------------------------
 
     protected void executeHttpRequestWithRetrofit(){
         Map<String,String> map=DataSingleton.getInstance().getParametersMap();
@@ -161,12 +177,38 @@ public class ListViewFragment extends BaseFragment {
     }
 
 
+
+
+    //----------------------------------------------------------------------------------------------
+    //                                   HELP METHODS
+    //----------------------------------------------------------------------------------------------
+
     private void updateUIWithResult(List<PlaceDetails>list){
         this.mSwipeRefreshLayout.setRefreshing(false);
         this.mPlaceDetailsList.clear();
+        setImageUrls(list);
         this.mPlaceDetailsList.addAll(list);
         this.mAdapter.notifyDataSetChanged();
     }
+    /**
+     * This method is a helper that help to add an image url to the place details.
+     * @param list, a list of place details that will be modify.
+     */
+    private void setImageUrls(List<PlaceDetails>list){
+        String url= DataSingleton.getInstance().getUrl();
+        String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
+        for(int i=0;i<list.size();i++){
+            if (list.get(i).getResult().getPhotos() != null) {
+                String imageUrl=url +list.get(i).getResult().getPhotos().get(0).getPhotoReference() + apiKey;
+                list.get(i).setImageUrl(imageUrl);
+
+                Log.i(TAG, "image Url "+ list.get(i).getImageUrl());
+            }
+
+        }
+
+    }
+
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();

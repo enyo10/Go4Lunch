@@ -80,23 +80,18 @@ public class WelcomeActivity extends BaseActivity
     private FragmentPagerAdapter mFragmentPagerAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public int getActivityLayout() {
+        return R.layout.activity_welcome;
+    }
 
+    @Override
+    public void configureView() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
 
-       //mSharedPreferences=getSharedPreferences(DataSingleton.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
-
         setSupportActionBar(toolbar);
-
-       // fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
         configurePermission();
-
-
         configureViewPagerAndTabs();
-
         executeRequestWithRetrofit();
 
        /* FloatingActionButton fab =  findViewById(R.id.fab);
@@ -116,7 +111,9 @@ public class WelcomeActivity extends BaseActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
+
 
     @Override
     public void onBackPressed() {
@@ -243,10 +240,7 @@ public class WelcomeActivity extends BaseActivity
         };
     }
 
-    @Override
-    public int getActivityLayout() {
-        return R.layout.activity_welcome;
-    }
+
 
 
     //*******************************************************************

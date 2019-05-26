@@ -8,9 +8,9 @@
 
     <!--RESTAURANT INFO PHOTO-->
     <ImageView
-        android:id="@+id/restaurant_info_photo"
+        android:id="@+id/restaurant_image"
         android:layout_width="match_parent"
-        android:layout_height="230dp"
+        android:layout_height="240dp"
         android:contentDescription="@string/restaurant_image"
         />
 
@@ -27,24 +27,24 @@
         android:src="@drawable/ic_checked_circle"
         app:backgroundTint="@color/white"
         app:fabSize="auto"
-        app:layout_constraintBottom_toBottomOf="@+id/restaurant_info_photo"
+        app:layout_constraintBottom_toBottomOf="@+id/restaurant_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/restaurant_info_photo" />
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image" />
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:background="@color/quantum_amber900"
-        app:layout_constraintTop_toBottomOf="@+id/restaurant_info_photo">
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image">
 
     </RelativeLayout>
 
     <!--RESTAURANT INFO NAME-->
     <TextView
-        android:id="@+id/restaurant_info_name"
+        android:id="@+id/restaurant_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -54,11 +54,11 @@
         android:textColor="@color/white"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/restaurant_info_photo" />
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image" />
 
     <!--RESTAURANT INFO ADDRESS-->
     <TextView
-        android:id="@+id/restaurant_info_address"
+        android:id="@+id/restaurant_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -69,12 +69,12 @@
         android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/restaurant_info_name"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_name"
         app:layout_constraintVertical_bias="0.0" />
 
     <!--RESTAURANT INFO RATING BAR-->
     <RatingBar
-        android:id="@+id/restaurant_info_rating_bar"
+        android:id="@+id/restaurant_rating_bar"
         style="?android:attr/ratingBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -86,8 +86,8 @@
         android:rating="0"
         android:stepSize="0.5"
         android:theme="@style/RatingBar"
-        app:layout_constraintStart_toEndOf="@+id/restaurant_info_name"
-        app:layout_constraintTop_toBottomOf="@+id/restaurant_info_photo" />
+        app:layout_constraintStart_toEndOf="@+id/restaurant_name"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -101,7 +101,7 @@
 
         <!--RESTAURANT INFO PHONE-->
         <Button
-            android:id="@+id/restaurant_info_phone_button"
+            android:id="@+id/restaurant_phone_button"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -116,7 +116,7 @@
 
         <!--RESTAURANT INFO LIKE BUTTON-->
         <Button
-            android:id="@+id/restaurant_info_like_button"
+            android:id="@+id/restaurant_like_button"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -131,7 +131,7 @@
 
         <!--RESTAURANT INFO WEBSITE-->
         <Button
-            android:id="@+id/restaurant_info_website_button"
+            android:id="@+id/restaurant_website_button"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

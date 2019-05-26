@@ -60,8 +60,9 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
     }
 
     public void updateWithPlaceDetails(PlaceDetails placeDetails, RequestManager glide){
-        String url= DataSingleton.getInstance().getUrl();
+        String url= "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&maxheight=100&photoreference=";
         String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
+        String urlbis= "https://maps.googleapis.com/maps/api/place/photo?key=AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8&photoreference=";
         int nbOfWorkmate=1;
 
         if ( placeDetails.getResult() != null)
@@ -70,7 +71,9 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
             this.mRestaurantName.setText(placeDetails.getResult().getName());
             //Restaurant photo
             if (placeDetails.getResult().getPhotos() != null) {
-                glide.load(url + placeDetails.getResult().getPhotos().get(0).getPhotoReference() + apiKey)
+                String imageUrl=url + placeDetails.getResult().getPhotos().get(0).getPhotoReference() + apiKey;
+                //String imageUrl =placeDetails.getImageUrl();
+                glide.load(imageUrl)
                         .apply(RequestOptions.centerCropTransform())
                         .into(this.mRestaurantPhoto);
             }

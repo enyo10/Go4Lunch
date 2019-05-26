@@ -21,15 +21,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     //--------------------
     // LIFE CYCLE
     // --------------------
-    FusedLocationProviderClient mFusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(this.getActivityLayout());
+        setContentView(getActivityLayout());
+        configureView();
         FirebaseApp.initializeApp(this);
-
-        mFusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
 
         ButterKnife.bind(this);
     }
@@ -44,6 +42,9 @@ public abstract class BaseActivity extends AppCompatActivity {
             ab.setDisplayHomeAsUpEnabled(true);
         }
     }
+    //     Some abstract methods.
+    public abstract int getActivityLayout();
+    public abstract void configureView();
 
     // --------------------
     // ERROR HANDLER
@@ -58,7 +59,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected Boolean isCurrentUserLogged(){ return (this.getCurrentUser() != null); }
 
-    public abstract int getActivityLayout();
+
 
 
 
