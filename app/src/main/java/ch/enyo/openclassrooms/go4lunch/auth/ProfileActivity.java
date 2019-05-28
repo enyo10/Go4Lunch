@@ -163,22 +163,17 @@ public class ProfileActivity extends BaseActivity {
 
             }
             //Get email & username from Firebase
-
             String email = TextUtils.isEmpty(this.getCurrentUser().getEmail()) ? getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
-
             //Update views with data
             this.mTextViewEmail.setText(email);
 
-            // 5 - Get additional data from Firestore
-
+            // 5 - Get additional data from Fire store
             UserHelper.getUser(this.getCurrentUser().getUid()).addOnSuccessListener(documentSnapshot -> {
 
                 User currentUser = documentSnapshot.toObject(User.class);
-
                 String username = TextUtils.isEmpty(currentUser.getUsername()) ? getString(R.string.info_no_username_found) : currentUser.getUsername();
 
               //  mCheckBoxIsMentor.setChecked(currentUser.getIsMentor());
-
                 mTextInputEditTextUsername.setText(username);
             });
         }
