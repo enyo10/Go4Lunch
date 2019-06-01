@@ -4,8 +4,13 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -64,17 +69,9 @@ public class WelcomeActivity extends BaseActivity
 
     LocationTrack locationTrack;
 
-    private int[] mTabIcons = {
-            R.drawable.ic_action_map,
-            R.drawable.ic_action_list,
-            R.drawable.ic_action_groupe};
+    @BindView(R.id.activity_welcome_bottom_navigation)
+    BottomNavigationView mBottomNavigationView;
 
-    @BindView(R.id.activity_main_view_pager)
-    ViewPager mViewPager;
-    @BindView(R.id.activity_main_tabs)
-    TabLayout mTabLayout;
-
-    private FragmentPagerAdapter mFragmentPagerAdapter;
 
     @Override
     public int getActivityLayout() {
@@ -88,7 +85,8 @@ public class WelcomeActivity extends BaseActivity
 
         setSupportActionBar(toolbar);
         configurePermission();
-        configureViewPagerAndTabs();
+        configureBottomNavigationView();
+      //  configureViewPagerAndTabs();
        // executeRequestWithRetrofit();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -147,11 +145,12 @@ public class WelcomeActivity extends BaseActivity
             // start profile Activity
            startActivity(ProfileActivity.class);
         } else if (id == R.id.logout) {
-           // Log out.
+           this.signOutFromFirebase();
 
         } else if (id == R.id.your_lunch) {
            // Go to your lunch.
        }
+
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -163,6 +162,46 @@ public class WelcomeActivity extends BaseActivity
     //                                   CONFIGURE VIEWS.
     //----------------------------------------------------------------------------------------------
 
+
+    // Configure BottomNavigationView
+    public void configureBottomNavigationView() {
+       // mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                int id=menuItem.getItemId();
+
+                    if(id==R.id.bottom_navigation_map){
+                        Log.i( TAG, " navigation 1 selected");
+                        configureContentFrameFragment(new MapViewFragment());
+
+                    }else
+                    if(id==R.id.bottom_navigation_restaurants){
+                        Log.i( TAG, " navigation 2 selected");
+                        configureContentFrameFragment(new ListViewFragment());
+
+                    }else
+                    if(id==R.id.bottom_navigation_workmates){
+                        Log.i( TAG, " navigation 3 selected");
+                        configureContentFrameFragment(new WorkmatesFragment());
+
+                    }
+
+                return true;
+            }
+        });
+    }
+
+
+
+    // Launch fragments
+    private void configureContentFrameFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.activity_welcome_frame_layout, fragment).commit();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -170,36 +209,7 @@ public class WelcomeActivity extends BaseActivity
         return true;
     }
 
-    protected void configureViewPagerAndTabs() {
-        mFragmentPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
-        ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new MapViewFragment()).newInstance());
-       // ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new MyMapViewFragment()).newInstance());
-        ((MyPagerAdapter) mFragmentPagerAdapter).addFragment(new ListViewFragment().newInstance());
-        ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new WorkmatesFragment()).newInstance());
 
-        mViewPager.setAdapter(mFragmentPagerAdapter);
-
-        //Glue TabLayout and ViewPager together
-        mTabLayout.setupWithViewPager(mViewPager);
-
-        setUpIcons();
-        //Design purpose. Tabs have the same width
-        mTabLayout.setTabMode(TabLayout.MODE_FIXED);
-
-    }
-
-
-    private void setUpIcons() {
-        /*View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
-        view1.findViewById(R.id.icon).setBackgroundResource(R.drawable.baseline_map_black_48);
-        mTabLayout.getTabAt(0).setCustomView(view1);
-        mTabLayout.getTabAt(1).setIcon(mTabIcons[1]);
-        mTabLayout.getTabAt(2).setIcon(mTabIcons[2]);*/
-        for (int i = 0; i < mTabIcons.length; i++) {
-
-            mTabLayout.getTabAt(i).setIcon(mTabIcons[i]);
-        }
-    }
 
     /**
      * This to sign out from firebae.

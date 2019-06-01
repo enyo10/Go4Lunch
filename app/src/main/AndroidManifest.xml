@@ -47,7 +47,7 @@
         <activity
             android:name=".auth.ProfileActivity"
             android:label="@string/toolbar_title_login_activity"
-            android:parentActivityName=".controllers.activities.MainActivity" />
+            android:parentActivityName=".controllers.activities.WelcomeActivity" />
 
         <activity
             android:name=".controllers.activities.WelcomeActivity"

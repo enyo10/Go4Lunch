@@ -27,10 +27,11 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getActivityLayout());
+        ButterKnife.bind(this);
         configureView();
         FirebaseApp.initializeApp(this);
 
-        ButterKnife.bind(this);
+
     }
 
     // --------------------
@@ -48,6 +49,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         Intent intent = new Intent(this, activity);
         startActivity(intent);
     }
+
+
     //     Some abstract methods.
     public abstract int getActivityLayout();
     public abstract void configureView();

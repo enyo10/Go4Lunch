@@ -37,10 +37,12 @@ public abstract class BaseFragment extends Fragment {
         View view =    inflater.inflate(getFragmentLayout(), container, false);
 
         ButterKnife.bind(this,view);
+
         Log.i(TAG, " On create View method.");
 
         configureView();
         configureOnclickRecyclerView();
+
         return view;
     }
 

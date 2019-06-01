@@ -51,6 +51,12 @@
 
     <string name="title_activity_welcome">J\'ai faim!</string>
 
+    <!-- BOTTOM NAVIGATION VIEW -->
+
+    <string name="map_view"> Carte</string>
+    <string name="list_view">Liste Resto</string>
+    <string name="workmates">Collègue</string>
+
 
     <!-- FACEBOOK PURPOSE -->
     <string name="facebook_application_id" translatable="false">398159407688031</string>
@@ -84,5 +90,7 @@
     <string name="toast_message_geolocation">La dernière localisation</string>
     <string name="workmate_default_decision">N\'a pas encore choisi</string>
     <string name="workmate_profil">Collègue</string>
+
+
 
 </resources>

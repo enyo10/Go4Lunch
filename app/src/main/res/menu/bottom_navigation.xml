@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/bottom_navigation_map"
+        android:icon="@drawable/ic_action_map"
+        android:title="@string/map_view"/>
+
+    <item
+        android:id="@+id/bottom_navigation_restaurants"
+        android:icon="@drawable/ic_action_list"
+        android:title="@string/list_view"/>
+
+    <item
+        android:id="@+id/bottom_navigation_workmates"
+        android:icon="@drawable/ic_action_groupe"
+        android:title="@string/workmates"/>
+
+</menu>

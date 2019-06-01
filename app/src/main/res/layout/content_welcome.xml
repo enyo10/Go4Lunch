@@ -17,8 +17,6 @@
         android:layout_weight="1" />
 
 
-
-
     <!-- 1 | Add TabLayout to handle tabs -->
     <android.support.design.widget.TabLayout
         android:id="@+id/activity_main_tabs"
@@ -28,6 +26,7 @@
         app:tabIndicatorColor="@android:color/holo_green_light"
         app:tabIndicatorHeight="5dp"
         app:tabSelectedTextColor="@color/baseColor"
+        app:tabIconTintMode="src_in"
         app:tabTextColor="@android:color/black" />
 
 

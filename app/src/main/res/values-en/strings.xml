@@ -47,6 +47,12 @@
     <!-- WELCOME ACTIVITY -->
     <string name="title_activity_welcome">I\' am Hungry!</string>
 
+    <!-- BOTTOM NAVIGATION VIEW -->
+
+    <string name="map_view">MAP VIEW</string>
+    <string name="list_view">LIST Rest.</string>
+    <string name="workmates">WORKMATES</string>
+
 
     <!-- FACEBOOK PURPOSE -->
     <string name="facebook_application_id" translatable="false">398159407688031</string>
