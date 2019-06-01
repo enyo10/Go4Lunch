@@ -1,5 +1,6 @@
 package ch.enyo.openclassrooms.go4lunch.base;
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import android.os.Bundle;
@@ -41,6 +42,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (ab != null) {
             ab.setDisplayHomeAsUpEnabled(true);
         }
+    }
+    //Generic activity launcher method
+    public void startActivity(Class activity) {
+        Intent intent = new Intent(this, activity);
+        startActivity(intent);
     }
     //     Some abstract methods.
     public abstract int getActivityLayout();

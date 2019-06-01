@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -30,6 +29,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.enyo.openclassrooms.go4lunch.R;
+import ch.enyo.openclassrooms.go4lunch.auth.ProfileActivity;
 import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.ListViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
@@ -50,12 +50,9 @@ public class WelcomeActivity extends BaseActivity
 
     private static final String TAG = WelcomeActivity.class.getSimpleName();
 
-    // 2 - Identify each Http Request
+    //  - Identify each Http Request
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
-
-  //  private SharedPreferences mSharedPreferences;
-
 
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
@@ -63,7 +60,7 @@ public class WelcomeActivity extends BaseActivity
     Disposable mDisposable;
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
-    private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION=102;
+  //  private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION=102;
 
     LocationTrack locationTrack;
 
@@ -92,16 +89,7 @@ public class WelcomeActivity extends BaseActivity
         setSupportActionBar(toolbar);
         configurePermission();
         configureViewPagerAndTabs();
-        executeRequestWithRetrofit();
-
-       /* FloatingActionButton fab =  findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+       // executeRequestWithRetrofit();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -125,12 +113,10 @@ public class WelcomeActivity extends BaseActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.welcome, menu);
-        return true;
-    }
+
+    //----------------------------------------------------------------------------------------------
+    //---------------    ACTIONS
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -139,8 +125,9 @@ public class WelcomeActivity extends BaseActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        //no inspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(ProfileActivity.class);
             return true;
         } else if (id == R.id.action_logout) {
             this.signOutFromFirebase();
@@ -156,29 +143,37 @@ public class WelcomeActivity extends BaseActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-       /* if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+       if (id == R.id.setting) {
+            // start profile Activity
+           startActivity(ProfileActivity.class);
+        } else if (id == R.id.logout) {
+           // Log out.
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
+        } else if (id == R.id.your_lunch) {
+           // Go to your lunch.
+       }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);*/
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+    //                                   CONFIGURE VIEWS.
+    //----------------------------------------------------------------------------------------------
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.welcome, menu);
         return true;
     }
 
     protected void configureViewPagerAndTabs() {
         mFragmentPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
-        // ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new MapViewFragment()).newInstance());
         ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new MapViewFragment()).newInstance());
+       // ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new MyMapViewFragment()).newInstance());
         ((MyPagerAdapter) mFragmentPagerAdapter).addFragment(new ListViewFragment().newInstance());
         ((MyPagerAdapter) mFragmentPagerAdapter).addFragment((new WorkmatesFragment()).newInstance());
 
@@ -197,18 +192,13 @@ public class WelcomeActivity extends BaseActivity
     private void setUpIcons() {
         /*View view1 = getLayoutInflater().inflate(R.layout.customtab, null);
         view1.findViewById(R.id.icon).setBackgroundResource(R.drawable.baseline_map_black_48);
-
         mTabLayout.getTabAt(0).setCustomView(view1);
-
         mTabLayout.getTabAt(1).setIcon(mTabIcons[1]);
         mTabLayout.getTabAt(2).setIcon(mTabIcons[2]);*/
-
-
         for (int i = 0; i < mTabIcons.length; i++) {
+
             mTabLayout.getTabAt(i).setIcon(mTabIcons[i]);
-
         }
-
     }
 
     /**
@@ -220,7 +210,6 @@ public class WelcomeActivity extends BaseActivity
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
-
     }
 
 
@@ -241,8 +230,6 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-
-
     //*******************************************************************
     //        Here we handle the localisation process.
     //*******************************************************************
@@ -261,18 +248,17 @@ public class WelcomeActivity extends BaseActivity
                 requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
 
         }
-
+        // Initialise location tracker.
         locationTrack = new LocationTrack(WelcomeActivity.this);
 
-
         if (locationTrack.canGetLocation()) {
-            DataSingleton dataSingleton =DataSingleton.getInstance();
+            DataSingleton dataSingleton = DataSingleton.getInstance();
 
             double longitude = locationTrack.getLongitude();
             double latitude = locationTrack.getLatitude();
              dataSingleton.setLongitude(longitude);
              dataSingleton.setLatitude(latitude);
-            Log.i(TAG, ""+"Longitude:" + longitude + "\nLatitude:" + latitude);
+            Log.i(TAG, "Longitude by tracker : " + longitude + "\nLatitude:" + latitude);
 
             Toast.makeText(getApplicationContext(), "Longitude:" + longitude + "\nLatitude:" + latitude, Toast.LENGTH_SHORT).show();
         } else {
@@ -357,22 +343,18 @@ public class WelcomeActivity extends BaseActivity
                                     new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                         //   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                                 requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT);
-                                            }
+                                           // }
                                         }
                                     });
                             return;
                         }
                     }
-
                 }
-
                 break;
         }
-
     }
-
 
     public void executeRequestWithRetrofit(){
         Map<String,String> parametersMap= DataSingleton.getInstance().getParametersMap();
@@ -383,11 +365,7 @@ public class WelcomeActivity extends BaseActivity
                     @Override
                     public void onNext(PlaceNearBySearch placeNearBySearch) {
                         DataSingleton.getInstance().setNearbySearchResultList(placeNearBySearch.getResults());
-
-
-
                         Log.i(TAG, " restaurant by near size "+placeNearBySearch.getResults().size());
-
                     }
 
                     @Override
@@ -398,42 +376,9 @@ public class WelcomeActivity extends BaseActivity
                     @Override
                     public void onComplete() {
                         Log.i(TAG, "Restaurant near by search completed.");
-
                     }
                 });
-
-
-       /* Map<String,String> parametersMap= DataSingleton.getInstance().getParametersMap();
-
-        Log.i(TAG, "parameter map value "+parametersMap.toString());
-
-        mDisposable= GoogleApiPlaceStreams.fetchPlaceNearBySearchStream(parametersMap)
-                .subscribeWith(new DisposableObserver<PlaceNearBySearch>() {
-                    @Override
-                    public void onNext(PlaceNearBySearch placeNearBySearch) {
-                        Log.i(TAG, " restaurant by near size "+placeNearBySearch.getResults().size());
-
-                        // updateResultList(placeNearBySearch.getResults());
-                        //  mResultList=new ArrayList<>();
-                         DataSingleton.getInstance().setNearbySearchResultList(placeNearBySearch.getResults());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                        Log.i("TAG","aie, error in place nearby search: "  +Log.getStackTraceString(e));
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.i(TAG, "Restaurant near by search completed.");
-
-                    }
-                });*/
-
     }
-
 
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(WelcomeActivity.this)
@@ -445,13 +390,10 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         locationTrack.stopListener();
     }
-
-
 
 }

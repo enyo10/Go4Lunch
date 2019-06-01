@@ -50,7 +50,7 @@ public class LocationTrack extends Service implements LocationListener {
         getLocation();
     }
 
-    private Location getLocation() {
+    private  Location getLocation() {
 
         try {
             locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
@@ -142,15 +142,11 @@ public class LocationTrack extends Service implements LocationListener {
         return this.canGetLocation;
     }
 
+
     public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-
-
         alertDialog.setTitle("GPS is not Enabled!");
-
         alertDialog.setMessage("Do you want to turn on GPS?");
-
-
         alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -158,13 +154,11 @@ public class LocationTrack extends Service implements LocationListener {
             }
         });
 
-
         alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
         });
-
 
         alertDialog.show();
     }
@@ -194,7 +188,7 @@ public class LocationTrack extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i(TAG, "Location "+location);
+        Log.i(TAG, "Location change "+location);
 
     }
 

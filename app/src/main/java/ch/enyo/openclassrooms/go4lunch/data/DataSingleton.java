@@ -49,8 +49,8 @@ public class DataSingleton implements Serializable {
         mParameterMap = new HashMap<>();
         mParameterMap.put("key", "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8");
         mParameterMap.put("type", "restaurant");
-        mParameterMap.put("radius", "15000");
-        mParameterMap.put("location", " 47.1431, 7.2821");
+        mParameterMap.put("radius", "5000");
+        mParameterMap.put("location", "47.1431,7.2821");
         url="https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&maxheight=100&photoreference=";
     }
 

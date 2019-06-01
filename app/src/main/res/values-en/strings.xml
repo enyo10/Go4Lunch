@@ -44,12 +44,15 @@
     <string name="popup_message_choice_no">NO</string>
     <string name="check_box_is_mentor">Are you mentor ?</string>
 
+    <!-- WELCOME ACTIVITY -->
+    <string name="title_activity_welcome">I\' am Hungry!</string>
+
 
     <!-- FACEBOOK PURPOSE -->
     <string name="facebook_application_id" translatable="false">398159407688031</string>
     <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb398159407688031</string>
     <string name="title_activity_maps">Map</string>
-    <string name="title_activity_welcome">Welcome Activity</string>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -73,5 +76,9 @@
     <string name="setting">SETTINGS</string>
     <string name="your_lunch">YOUR LUNCH</string>
     <string name="logout">LOG OUT</string>
-    <string name="loging_out">logout</string>
+    <string name="log_out">Logout</string>
+    <string name="workmate_profil">Workmate</string>
+
+    <string name="toast_message_geolocation">The last location</string>
+    <string name="workmate_default_decision">No choice yet </string>
 </resources>

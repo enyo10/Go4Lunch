@@ -1,31 +1,18 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.fragments;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.Toast;
-
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
-//import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -36,26 +23,26 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import butterknife.BindView;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
-import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.Result;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 
 import icepick.Icepick;
-import icepick.State;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -67,32 +54,25 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     // Constant
     private static final int REQUEST_LOCATION_PERMISSION=11;
     private static final String TRACKING_LOCATION_KEY = "tracking_location";
-
-
-    private GoogleMap mGoogleMap=null;
+    public static final float DEFAULT_ZOOM = 16f;
+    private GoogleMap mMap;
     // Location classes
     LocationCallback mLocationCallback;
+    Location mLastKnownLocation;
+    private final LatLng mDefaultLocation=new LatLng(DataSingleton.getInstance().getLatitude(),DataSingleton.getInstance().getLongitude());
     private boolean mTrackingLocation;
     private FusedLocationProviderClient mFusedLocationProviderClient;
+    private List<PlaceDetails>mPlaceDetailsList;
     MapView mMapView;
     Disposable mDisposable;
-    private List<Result> mResultList;
-
-    @State
-    Double mLongitude;
-    @State
-    Double mLatitude;
-    //LatLngBound will cover all your marker on Google Maps
-    LatLngBounds.Builder builder;
-
+    private boolean mLocationPermissionGranted=false;
+   // @BindView(R.id.position_icon)
+    Button mGpsButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DataSingleton dataSingleton=DataSingleton.getInstance();
-        mLatitude=dataSingleton.getLatitude();
-        mLongitude=dataSingleton.getLongitude();
-        builder = new LatLngBounds.Builder();
+        mPlaceDetailsList= new ArrayList<>();
 
         // Initialize the FusedLocationClient.
         if(getActivity()!=null)
@@ -106,25 +86,60 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         }
 
         // Initialize the location callbacks.
-        mLocationCallback=new LocationCallback(){
+        mLocationCallback = new LocationCallback(){
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 // If tracking is turned on, reverse geocode into an address
                 if (mTrackingLocation) {
                     locationResult.getLastLocation();
                     Log.i(TAG, " latitude "+ locationResult.getLastLocation().getLatitude());
+                    Log.i(TAG, " longitude "+ locationResult.getLastLocation().getLongitude());
 
                 }
             }
         };
         startTrackingLocation();
-
         Icepick.restoreInstanceState (this,savedInstanceState);
-
 
     }
 
+    @Override
+    public void onMapReady(GoogleMap gMap) {
 
+        mMap = gMap;
+
+        getLocationPermission();
+        updateUI();
+
+        // Do other setup activities here too, as described elsewhere in this tutorial.
+
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
+
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
+
+       /* Log.d(TAG, "On MapReady latitude. "+DataSingleton.getInstance().getLatitude());
+        Log.d(TAG, " On MapReady longitude "+DataSingleton.getInstance().getLongitude());
+
+        // Add a marker in Sydney and move the camera
+        LatLng latLng = new LatLng(DataSingleton.getInstance().getLatitude(),DataSingleton.getInstance().getLongitude());
+        mGoogleMap.addMarker(new MarkerOptions().position(latLng).title("Marker in Sydney"));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(DataSingleton.getInstance().getLatitude(),
+                        DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);*/
+
+    }
+
+   /* private void addMarkerOnMap(List<PlaceDetails> placeDetailList) {
+        //Initialize and store data in both array and singleton
+        this.mPlaceDetailsList.addAll(placeDetailList);
+        DataSingleton.getInstance().setPlaceDetailsList(placeDetailList);
+
+        
+    }*/
 
     @Override
     public BaseFragment newInstance() {
@@ -154,7 +169,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
          executeRequestWithRetrofit();
         Log.i(TAG, " Configure view method.");
 
-
     }
 
     @Override
@@ -177,7 +191,15 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
                        try {
 
-                           mGoogleMap.clear();
+                           mMap.clear();
+                           // Add a marker in Sydney and move the camera
+                          // LatLng latLng1 = new LatLng(DataSingleton.getInstance().getLatitude(),DataSingleton.getInstance().getLongitude());
+                          // mGoogleMap.addMarker(new MarkerOptions().position(latLng1).title("Marker in Sydney"));
+                           mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                   new LatLng(DataSingleton.getInstance().getLatitude(),
+                                           DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
+                           mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
                            for(int i=0;i<placeNearBySearch.getResults().size();i++){
                                Double lat =placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLat();
                                Double lng=placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLng();
@@ -189,12 +211,12 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                                markerOptions.position(latLng);
                                markerOptions.title(placename +" : "+vinicity);
                                // Adding camera
-                               mGoogleMap.addMarker(markerOptions);
+                               mMap.addMarker(markerOptions);
                                // Adding color to the marker.
                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                                // move map camera
-                               mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                               mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+                               mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                               mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
                            }
 
                        }catch (Exception e){
@@ -219,123 +241,24 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     }
 
 
-    public void updateUI(PlaceNearBySearch placeNearBySearch){
-        try {
+/*
+    private void addPointToViewPort(LatLng newPoint) {
+        mBounds.include(newPoint);
+        //mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds.build(),
+           //     findViewById(R.id.checkout_button).getHeight()));
+    }*/
 
-            mGoogleMap.clear();
-            for(int i=0;i<placeNearBySearch.getResults().size();i++){
-                Double lat = placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLat();
-                Double lng=  placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLng();
-                String placeName =placeNearBySearch.getResults().get(i).getName();
-                String vinicity =placeNearBySearch.getResults().get(i).getVicinity();
-
-                MarkerOptions markerOptions=new MarkerOptions();
-                LatLng latLng =new LatLng(lat,lng);
-                markerOptions.position(latLng);
-                markerOptions.title(placeName +" : "+vinicity);
-                // Adding camera
-                Marker marker = mGoogleMap.addMarker(markerOptions);
-                // Adding color to the marker.
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                // move map camera
-                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(11));
-            }
-
-        }catch (Exception e){
-            Log.d(TAG, "onNext: error");
-        }
-
-
-    }
-
-    @Override
-    public void onMapReady(GoogleMap gMap) {
-
-       // Log.i(TAG, "The key "+apiKey);
-        mGoogleMap = gMap;
-
-       Log.d(TAG, "On MapReady latitude. "+DataSingleton.getInstance().getLatitude());
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(DataSingleton.getInstance().getLongitude(),DataSingleton.getInstance().getLatitude());
-        mGoogleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-       // mGoogleMap.clear();
-       // updateResultList(mResultList);
-//        updateUI(mResultList);
-
-
-
-      //  LatLng latLng =new LatLng(-33.8670522,151.1957362);
-             //  CameraPosition googlePlex = CameraPosition.builder()
-               // .target(new LatLng(37.4219999,-122.0862462))
-               //        .target(sydney)
-              //  .zoom(10)
-              //  .bearing(0)
-              //  .tilt(45)
-             //   .build();
-
-               /*for(Result result:mResultList){
-                   Log.i(TAG, " marker "+result.getName());
-                   this.addMarker(result,R.drawable.baseline_restaurant_white_36);
-               }*/
-
-     //   mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(googlePlex), 10000, null);
-
-       /* LatLng customMarkerLocationFour=new LatLng(37.4219999, -122.0862462);
-
-        mGoogleMap.addMarker(new MarkerOptions()
-                .position(customMarkerLocationFour)
-                .title("Spider Man")
-               .icon(bitmapDescriptorFromVector(getActivity(),R.drawable.spider)));
-
-        LatLng customMarkerLocationOne= new LatLng(37.3092293,-122.1136845);
-
-        mGoogleMap.addMarker(new MarkerOptions()
-                .position(customMarkerLocationOne)
-                .icon(BitmapDescriptorFactory.fromBitmap( createCustomMarker(getActivity(),R.drawable.baseline_restaurant_white_36, Glide.with(this))))).setTitle("iPragmatech Solutions Pvt Lmt");
-
-
-        mGoogleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(37.4629101,-122.2449094))
-                .title("Iron Man")
-                .snippet("His Talent : Plenty of money"));
-
-        mGoogleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(37.3092293,-122.1136845))
-                .title("Captain America"));*/
-
-        /*LatLng customMarkerLocationtwo = new LatLng(37.3092293,-122.1136845);
-        mGoogleMap.addMarker(new MarkerOptions()
-                .position(customMarkerLocationtwo)
-                .icon(BitmapDescriptorFactory.fromBitmap(
-                        createCustomMarker(getActivity(),R.drawable.baseline_restaurant_white_36, Glide.with(this))))).setTitle("iPragmatech Solutions Pvt Lmt");
-
-
-        //LatLngBound will cover all your marker on Google Maps
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        builder.include(customMarkerLocationFour); //Taking Point B (Second LatLng)
-        builder.include(customMarkerLocationOne);
-        builder.include(customMarkerLocationtwo);
-        LatLngBounds bounds = builder.build();
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
-        mGoogleMap.moveCamera(cu);
-        mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);*/
-    }
-
-    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+  /*  private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
         Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
+    }*/
 
 
-    public static Bitmap createCustomMarker(Context context, @DrawableRes int resource, RequestManager glide) {
+   /* public static Bitmap createCustomMarker(Context context, @DrawableRes int resource, RequestManager glide) {
 
         View marker = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.marker_custom_layout, null);
 
@@ -358,7 +281,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
         return bitmap;
     }
-
+*/
 
 
    private void destroyMap(){
@@ -393,6 +316,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     @Override
     public void onLocationChanged(Location location) {
 
+        Log.i(TAG, " Location changed "+location.getLongitude());
+
     }
 
     @Override
@@ -410,7 +335,62 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     }
 
+    //---------------------------------------------------------------------------------------------//
+    //                         LOCATION PERMISSION & LOCATION TRACKING.                                        //
+    //---------------------------------------------------------------------------------------------//
 
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if(getActivity()!=null)
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION);
+        }
+    }
+
+    /**
+     * Callback that is invoked when the user responds to the permissions
+     * dialog.
+     *
+     * @param requestCode  Request code representing the permission request
+     *                     issued by the app.
+     * @param permissions  An array that contains the permissions that were
+     *                     requested.
+     * @param grantResults An array with the results of the request for each
+     *                     permission requested.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION_PERMISSION:
+                // If the permission is granted, get the location,
+                // otherwise, show a Toast
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted=true;
+                    //Update Ui
+                    updateUI();
+
+                } else {
+                    Toast.makeText(getContext(), R.string.location_permission_denied,
+                            Toast.LENGTH_SHORT).show();
+                }
+               // break;
+        }
+        updateLocationUI();
+    }
+
+    /**
+     * This method to start location tracking. Check for permission, if not granted yet, request it..
+     */
     private void startTrackingLocation(){
 
         if (ActivityCompat.checkSelfPermission(getContext(),
@@ -442,9 +422,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 }
             });
 */          mTrackingLocation = true;
-            mFusedLocationProviderClient.requestLocationUpdates
-                    (getLocationRequest(), mLocationCallback,
-                            null /* Looper */);
+            mFusedLocationProviderClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null /* Looper */);
             // Set a loading text while you wait for the address to be
             // returned
            /* mLocationTextView.setText(getString(R.string.address_text,
@@ -467,34 +445,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
         }
     }
-    /**
-     * Callback that is invoked when the user responds to the permissions
-     * dialog.
-     *
-     * @param requestCode  Request code representing the permission request
-     *                     issued by the app.
-     * @param permissions  An array that contains the permissions that were
-     *                     requested.
-     * @param grantResults An array with the results of the request for each
-     *                     permission requested.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_LOCATION_PERMISSION:
-                // If the permission is granted, get the location,
-                // otherwise, show a Toast
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startTrackingLocation();
-                } else {
-                    Toast.makeText(getContext(), R.string.location_permission_denied,
-                            Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
-    }
-
 
 
     private LocationRequest getLocationRequest() {
@@ -503,6 +453,104 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return locationRequest;
+    }
+
+
+    /**
+     * This method to update the location on the map.
+     */
+    private void updateLocationUI() {
+        if (mMap == null) {
+            return;
+        }
+        try {
+            if (mLocationPermissionGranted) {
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(false);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                mLastKnownLocation = null;
+                getLocationPermission();
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+
+    /**
+     * This method to get the device localisation.
+     */
+    private void getDeviceLocation() {
+        try {
+            if (mLocationPermissionGranted && getActivity() != null) {
+                Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(getActivity(), task -> {
+                    if (task.isSuccessful()) {
+                        // Set the map's camera position to the current location of the device.
+                        mLastKnownLocation = task.getResult();
+
+                        if (mLastKnownLocation != null) {
+
+                            // Store device coordinates
+                            Double latitude = mLastKnownLocation.getLatitude();
+                            Double longitude = mLastKnownLocation.getLongitude();
+                            DataSingleton.getInstance().setLatitude(latitude);
+                            DataSingleton.getInstance().setLongitude(longitude);
+
+                            //Move camera toward device position
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(latitude, longitude), DEFAULT_ZOOM));
+
+                            //Execute http request with retrofit and RxJava2
+                            this.executeRequestWithRetrofit();
+
+                        } else {
+                            Toast.makeText(getContext(),
+                                    R.string.toast_message_geolocation,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                    } else {
+                        Log.d(TAG, "Current location is null. Using defaults.");
+                        Log.e(TAG, "getDeviceLocation => Exception: %s" + task.getException());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+                        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    }
+                });
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage());
+
+        }
+    }
+    //---------------------------------------------------------------------------------------------
+    //                                          UI
+    //---------------------------------------------------------------------------------------------
+
+    public void updateUI(){
+        if (mMap == null) {
+            return;
+        }
+        try {
+            if (mLocationPermissionGranted) {
+             //   mGpsButton.setVisibility(View.VISIBLE);
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                getDeviceLocation();
+            } else {
+            //    mGpsButton.setVisibility(View.GONE);
+                mMap.setMyLocationEnabled(false);
+                Toast.makeText(this.getActivity(), "ERROR", Toast.LENGTH_SHORT).show();
+                mLastKnownLocation = null;
+//              Try to obtain location permission
+                getLocationPermission();
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "updateUI: SecurityException " + e.getMessage());
+        }
+
     }
 
 

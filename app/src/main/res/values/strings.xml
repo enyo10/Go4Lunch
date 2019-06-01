@@ -47,12 +47,16 @@
     <string name="popup_message_choice_no">Non</string>
     <string name="check_box_is_mentor">Etes-vous un mentor ?</string>
 
+    <!-- WELCOME ACTIVITY -->
+
+    <string name="title_activity_welcome">J\'ai faim!</string>
+
 
     <!-- FACEBOOK PURPOSE -->
     <string name="facebook_application_id" translatable="false">398159407688031</string>
     <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb398159407688031</string>
     <string name="title_activity_maps">Carte</string>
-    <string name="title_activity_welcome">Activity de Bienvenue</string>
+
     <string name="navigation_drawer_open">Ouvrir la  navigation drawer</string>
     <string name="navigation_drawer_close">Fermer la navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -75,7 +79,10 @@
     <string name="like">Like</string>
     <string name="setting">REGLAGE</string>
     <string name="your_lunch">VOTRE RESTAURANT</string>
-    <string name="logout">SORTIR</string>
-    <string name="loging_out">SORTIR</string>
+   <string name="logout">SORTIR</string>
+    <string name="log_out">sortir</string>
+    <string name="toast_message_geolocation">La dernière localisation</string>
+    <string name="workmate_default_decision">N\'a pas encore choisi</string>
+    <string name="workmate_profil">Collègue</string>
 
 </resources>
