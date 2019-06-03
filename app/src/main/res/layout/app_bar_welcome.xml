@@ -12,19 +12,20 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/baseColor"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
+<!--
 
     <include
         layout="@layout/content_welcome_activity"
         app:layout_anchor="@+id/fab"
         app:layout_anchorGravity="right|center" />
-
+-->
 
 
 </android.support.design.widget.CoordinatorLayout>

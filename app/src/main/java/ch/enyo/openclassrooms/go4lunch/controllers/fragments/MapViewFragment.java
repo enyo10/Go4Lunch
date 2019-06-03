@@ -59,7 +59,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     // Location classes
     LocationCallback mLocationCallback;
     Location mLastKnownLocation;
-    private final LatLng mDefaultLocation=new LatLng(DataSingleton.getInstance().getLatitude(),DataSingleton.getInstance().getLongitude());
+    private final LatLng mDefaultLocation = new LatLng(17,43);
     private boolean mTrackingLocation;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private List<PlaceDetails>mPlaceDetailsList;

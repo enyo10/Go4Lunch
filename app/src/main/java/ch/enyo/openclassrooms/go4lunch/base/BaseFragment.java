@@ -57,7 +57,7 @@ public abstract class BaseFragment extends Fragment {
     // ABSTRACT METHODS
     //----------------------------//
 
-    public abstract BaseFragment newInstance();
+    public abstract  BaseFragment newInstance();
 
     /**
      * This method to get the fragment layout resource id.

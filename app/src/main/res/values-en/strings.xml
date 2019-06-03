@@ -87,4 +87,10 @@
 
     <string name="toast_message_geolocation">The last location</string>
     <string name="workmate_default_decision">No choice yet </string>
+
+    <string name="title_workmates">Available workmates</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
 </resources>

@@ -85,12 +85,15 @@
     <string name="like">Like</string>
     <string name="setting">REGLAGE</string>
     <string name="your_lunch">VOTRE RESTAURANT</string>
-   <string name="logout">SORTIR</string>
+    <string name="logout">SORTIR</string>
     <string name="log_out">sortir</string>
     <string name="toast_message_geolocation">La dernière localisation</string>
     <string name="workmate_default_decision">N\'a pas encore choisi</string>
     <string name="workmate_profil">Collègue</string>
-
+    <string name="title_workmates">Collègues disponibles</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 
 
 </resources>

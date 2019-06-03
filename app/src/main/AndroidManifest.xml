@@ -20,15 +20,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning"
-        >
-
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".controllers.activities.PlaceDetailsActivity"
             android:theme="@style/AppTheme.NoTitle" />
-
-        <activity android:name=".controllers.activities.MyLocation" />
-        <activity android:name=".controllers.activities.PlacesActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -48,13 +43,11 @@
             android:name=".auth.ProfileActivity"
             android:label="@string/toolbar_title_login_activity"
             android:parentActivityName=".controllers.activities.WelcomeActivity" />
-
         <activity
             android:name=".controllers.activities.WelcomeActivity"
             android:label="@string/title_activity_welcome"
             android:parentActivityName=".controllers.activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".controllers.activities.MainActivity"
             android:theme="@style/AppTheme.NoTitle">

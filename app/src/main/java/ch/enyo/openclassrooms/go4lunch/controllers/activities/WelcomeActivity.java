@@ -6,12 +6,10 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -43,7 +41,6 @@ import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 import ch.enyo.openclassrooms.go4lunch.utils.LocationTrack;
-import ch.enyo.openclassrooms.go4lunch.views.MyPagerAdapter;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
@@ -69,9 +66,19 @@ public class WelcomeActivity extends BaseActivity
 
     LocationTrack locationTrack;
 
-    @BindView(R.id.activity_welcome_bottom_navigation)
-    BottomNavigationView mBottomNavigationView;
+    @BindView(R.id.activity_welcome_bottom_navigation) BottomNavigationView mBottomNavigationView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
+    private ActionBar mActionBar;
+
+    final MapViewFragment mMapViewFragment=new MapViewFragment();
+    final ListViewFragment mListViewFragment=new ListViewFragment();
+    final WorkmatesFragment mWorkmatesFragment=new WorkmatesFragment();
+
+    final FragmentManager mFragmentManager = getSupportFragmentManager();
+    Fragment activeFragment;
+
+    //
 
     @Override
     public int getActivityLayout() {
@@ -80,14 +87,13 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void configureView() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
+       toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
+        mActionBar= getSupportActionBar();
         configurePermission();
         configureBottomNavigationView();
-      //  configureViewPagerAndTabs();
-       // executeRequestWithRetrofit();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -98,7 +104,60 @@ public class WelcomeActivity extends BaseActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        // load the store fragment by default
+        toolbar.setTitle(R.string.title_activity_maps);
+       // loadFragment(new MapViewFragment());
+        initFragments();
+
     }
+
+
+    //----------------------------------------------------------------------------------------------
+    //                                   CONFIGURE VIEWS.
+    //----------------------------------------------------------------------------------------------
+
+
+    // Configure BottomNavigationView
+    public void configureBottomNavigationView() {
+
+        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+
+                switch (menuItem.getItemId()) {
+
+                    case R.id.bottom_navigation_map:
+                        loadFragment(mMapViewFragment,R.string.title_activity_welcome);
+                        return true;
+
+                    case R.id.bottom_navigation_restaurants:
+                        loadFragment(mListViewFragment,R.string.title_activity_welcome);
+                        return true;
+
+                    case R.id.bottom_navigation_workmates:
+                        loadFragment(mWorkmatesFragment,R.string.title_workmates);
+                        return true;
+
+                }
+
+                return false;
+            }
+        });
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.welcome, menu);
+        return true;
+    }
+
+
+
+    //----------------------------------------------------------------------------------------------
+    //---------------    ACTIONS
+    //----------------------------------------------------------------------------------------------
 
 
     @Override
@@ -111,11 +170,6 @@ public class WelcomeActivity extends BaseActivity
         }
     }
 
-
-    //----------------------------------------------------------------------------------------------
-    //---------------    ACTIONS
-    //----------------------------------------------------------------------------------------------
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -126,10 +180,10 @@ public class WelcomeActivity extends BaseActivity
         //no inspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivity(ProfileActivity.class);
-            return true;
+
         } else if (id == R.id.action_logout) {
             this.signOutFromFirebase();
-            return true;
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -157,59 +211,39 @@ public class WelcomeActivity extends BaseActivity
         return true;
     }
 
-
+//--------------------------------------------------------------------------------------------------
+    //               HELPER.
     //----------------------------------------------------------------------------------------------
-    //                                   CONFIGURE VIEWS.
+
+    private void initFragments(){
+        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mWorkmatesFragment, "3").hide(mWorkmatesFragment).commit();
+        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
+        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame,mMapViewFragment, "1").commit();
+        activeFragment = mMapViewFragment;
+
+    }
+
+    /**
+     * This method to load the fragment in to the frame.
+     * @param fragment,
+     *                the fragment to load.
+     * @param toolbarTextId,
+     *                    the text to set to toolbar.
+     */
+    private void loadFragment(Fragment fragment, int toolbarTextId){
+
+        toolbar.setTitle(toolbarTextId);
+        mFragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
+        activeFragment = fragment;
+
+    }
+
+
+
+
+    //--------------------------------------------------------------------------------------------------
+    //    AUTHENTICATION MANAGEMENT
     //----------------------------------------------------------------------------------------------
-
-
-    // Configure BottomNavigationView
-    public void configureBottomNavigationView() {
-       // mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                int id=menuItem.getItemId();
-
-                    if(id==R.id.bottom_navigation_map){
-                        Log.i( TAG, " navigation 1 selected");
-                        configureContentFrameFragment(new MapViewFragment());
-
-                    }else
-                    if(id==R.id.bottom_navigation_restaurants){
-                        Log.i( TAG, " navigation 2 selected");
-                        configureContentFrameFragment(new ListViewFragment());
-
-                    }else
-                    if(id==R.id.bottom_navigation_workmates){
-                        Log.i( TAG, " navigation 3 selected");
-                        configureContentFrameFragment(new WorkmatesFragment());
-
-                    }
-
-                return true;
-            }
-        });
-    }
-
-
-
-    // Launch fragments
-    private void configureContentFrameFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.activity_welcome_frame_layout, fragment).commit();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.welcome, menu);
-        return true;
-    }
-
-
 
     /**
      * This to sign out from firebae.
@@ -278,34 +312,7 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
-  /* private void requestPermission(){
-       // Here, thisActivity is the current activity
-       if (ContextCompat.checkSelfPermission(this,
-               ACCESS_COARSE_LOCATION)
-               != PackageManager.PERMISSION_GRANTED) {
 
-           // Permission is not granted
-           // Should we show an explanation?
-           if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                   ACCESS_COARSE_LOCATION)) {
-               // Show an explanation to the user *asynchronously* -- don't block
-               // this thread waiting for the user's response! After the user
-               // sees the explanation, try again to request the permission.
-           } else {
-               // No explanation needed; request the permission
-               ActivityCompat.requestPermissions(this,
-                       new String[]{ACCESS_COARSE_LOCATION},
-                       MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
-
-               // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-               // app-defined int constant. The callback method gets the
-               // result of the request.
-           }
-       } else {
-           // Permission has already been granted
-       }
-   }
-*/
     private ArrayList<String> findUnAskedPermissions(ArrayList<String> wanted) {
         ArrayList<String> result = new ArrayList<>();
 
