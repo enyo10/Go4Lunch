@@ -1,7 +1,7 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 
 
-import android.support.design.widget.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;

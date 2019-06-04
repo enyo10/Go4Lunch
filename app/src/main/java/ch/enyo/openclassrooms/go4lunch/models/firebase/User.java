@@ -1,6 +1,6 @@
 package ch.enyo.openclassrooms.go4lunch.models.firebase;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class User {
 

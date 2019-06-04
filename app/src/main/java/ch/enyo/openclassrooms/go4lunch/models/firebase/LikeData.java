@@ -10,9 +10,9 @@ public class LikeData {
     private LikeData(){
 
     }
-    private LikeData(String likeDataId){
+    public LikeData(String likeDataId){
         this.likeDataId=likeDataId;
-        this.likeSum=1;
+
     }
 
     public double getLikeSum(){
@@ -23,7 +23,7 @@ public class LikeData {
         return this.likeDataId;
     }
 
-    public void like(){
+    public void likeIt(){
         ++this.likeSum;
     }
 }

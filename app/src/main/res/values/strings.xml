@@ -70,7 +70,7 @@
     <string name="nav_header_desc"> En-tête de Navigation </string>
     <string name="action_settings">Paramètres</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Bonjour, fragment blanc</string>
     <string name="description">Image</string>
     <string name="search">Recherche</string>

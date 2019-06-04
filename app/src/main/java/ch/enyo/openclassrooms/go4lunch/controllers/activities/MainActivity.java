@@ -2,8 +2,8 @@ package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 
 
 import android.content.Intent;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import com.google.android.material.snackbar.Snackbar;
 import android.util.Log;
 import android.widget.Button;
 

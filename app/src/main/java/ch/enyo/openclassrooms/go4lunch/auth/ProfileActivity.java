@@ -1,8 +1,7 @@
 package ch.enyo.openclassrooms.go4lunch.auth;
 
-import android.os.Bundle;
-import android.support.design.widget.TextInputEditText;
-import android.support.v7.app.AlertDialog;
+import com.google.android.material.textfield.TextInputEditText;
+import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
