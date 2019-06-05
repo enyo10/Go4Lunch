@@ -12,6 +12,7 @@ public class LikeData {
     }
     public LikeData(String likeDataId){
         this.likeDataId=likeDataId;
+        likeSum=0;
 
     }
 

@@ -13,7 +13,7 @@ import ch.enyo.openclassrooms.go4lunch.models.firebase.LikeData;
  * This class help make the CRUD of likes.
  */
 public class LikeDataHelper {
-    private static final String COLLECTION_NAME = "LikeData";
+    private static final String COLLECTION_NAME = "likes";
 
 
 
@@ -40,7 +40,7 @@ public class LikeDataHelper {
     }
 
     public static Query getAllLikeData() {
-        return LikeDataHelper.getLikeDataCollection().orderBy("username").limit(20);
+        return LikeDataHelper.getLikeDataCollection().orderBy("likeSum").limit(20);
     }
 
     // --- UPDATE ---
@@ -54,7 +54,7 @@ public class LikeDataHelper {
     // --- DELETE ---
 
     public static Task<Void> deleteUser(String uid) {
-        return UserHelper.getUsersCollection().document(uid).delete();
+        return LikeDataHelper.getLikeDataCollection().document(uid).delete();
     }
 
 }
