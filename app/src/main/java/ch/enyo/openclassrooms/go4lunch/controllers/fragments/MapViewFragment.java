@@ -25,18 +25,29 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
+import ch.enyo.openclassrooms.go4lunch.BuildConfig;
 import ch.enyo.openclassrooms.go4lunch.R;
+import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
-import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.Result;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 
 import icepick.Icepick;
@@ -55,13 +66,16 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private static final String TRACKING_LOCATION_KEY = "tracking_location";
     public static final float DEFAULT_ZOOM = 16f;
     private GoogleMap mMap;
+    private Marker mMarker;
     // Location classes
     LocationCallback mLocationCallback;
     Location mLastKnownLocation;
     private final LatLng mDefaultLocation = new LatLng(17,43);
     private boolean mTrackingLocation;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private List<PlaceDetails>mPlaceDetailsList;
+    private List<Result>mPlaceList;
+    private List<User>mUserList;
+
     MapView mMapView;
     Disposable mDisposable;
     private boolean mLocationPermissionGranted=false;
@@ -71,7 +85,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPlaceDetailsList= new ArrayList<>();
+        mPlaceList= new ArrayList<>();
 
         // Initialize the FusedLocationClient.
         if(getActivity()!=null)
@@ -91,8 +105,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 // If tracking is turned on, reverse geocode into an address
                 if (mTrackingLocation) {
                     locationResult.getLastLocation();
-                    Log.i(TAG, " latitude "+ locationResult.getLastLocation().getLatitude());
-                    Log.i(TAG, " longitude "+ locationResult.getLastLocation().getLongitude());
+                   /* Log.i(TAG, " latitude "+ locationResult.getLastLocation().getLatitude());
+                    Log.i(TAG, " longitude "+ locationResult.getLastLocation().getLongitude());*/
 
                 }
             }
@@ -118,6 +132,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
+
        /* Log.d(TAG, "On MapReady latitude. "+DataSingleton.getInstance().getLatitude());
         Log.d(TAG, " On MapReady longitude "+DataSingleton.getInstance().getLongitude());
 
@@ -132,13 +147,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     }
 
-   /* private void addMarkerOnMap(List<PlaceDetails> placeDetailList) {
-        //Initialize and store data in both array and singleton
-        this.mPlaceDetailsList.addAll(placeDetailList);
-        DataSingleton.getInstance().setPlaceDetailsList(placeDetailList);
 
-        
-    }*/
+
 
     @Override
     public BaseFragment newInstance() {
@@ -175,6 +185,53 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     }
 
+    /**
+     * this method to add the marker on the map.
+     * @param placeNearbyResult,
+     *          the placeNearbyResult containing the restaurant to be add.
+     */
+    private void addMarkerOnMap(List<Result> placeNearbyResult) {
+
+        for (int i = 0; i < placeNearbyResult.size(); i++) {
+            Double lat = placeNearbyResult.get(i).getGeometry().getLocation().getLat();
+            Double lng = placeNearbyResult.get(i).getGeometry().getLocation().getLng();
+            String placename = placeNearbyResult.get(i).getName();
+            String vinicity = placeNearbyResult.get(i).getVicinity();
+
+            MarkerOptions markerOptions = new MarkerOptions();
+            LatLng latLng = new LatLng(lat, lng);
+            markerOptions.position(latLng);
+            markerOptions.title(placename + " : " + vinicity);
+
+            mMarker =  mMap.addMarker(new MarkerOptions()
+                      .position(latLng)
+                      .title(placename + " :" + vinicity)
+                      .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
+
+
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+        }
+
+        
+    }
+
+
+
+
+
+    /**
+         * This method to update the restaurant list.
+         * @param list
+         */
+    public void updatePlaceList(List<Result>list){
+        mPlaceList.clear();
+        mPlaceList.addAll(list);
+
+    }
+
+
 
     public void executeRequestWithRetrofit(){
 
@@ -187,13 +244,12 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                    @Override
                    public void onNext(PlaceNearBySearch placeNearBySearch) {
                        Log.i(TAG, " restaurant by near size "+placeNearBySearch.getResults().size());
+                       // Update the restaurantList.
+                       updatePlaceList(placeNearBySearch.getResults());
 
                        try {
-
                            mMap.clear();
-                           // Add a marker in Sydney and move the camera
-                          // LatLng latLng1 = new LatLng(DataSingleton.getInstance().getLatitude(),DataSingleton.getInstance().getLongitude());
-                          // mGoogleMap.addMarker(new MarkerOptions().position(latLng1).title("Marker in Sydney"));
+
                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                    new LatLng(DataSingleton.getInstance().getLatitude(),
                                            DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
@@ -209,14 +265,15 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                                LatLng latLng =new LatLng(lat,lng);
                                markerOptions.position(latLng);
                                markerOptions.title(placename +" : "+vinicity);
-                               // Adding camera
-                               mMap.addMarker(markerOptions);
-                               // Adding color to the marker.
-                               markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                               // move map camera
+
+                               mMap.addMarker(new MarkerOptions()
+                                       .position(latLng)
+                                       .title(placename+ " :" +vinicity)
+                                       .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
                                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
                            }
+
 
                        }catch (Exception e){
                            Log.d(TAG, "onNext: error");
@@ -225,7 +282,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
                    @Override
                    public void onError(Throwable e) {
-
                        Log.i("TAG","aie, error in place nearby search: "  +Log.getStackTraceString(e));
 
                    }
@@ -257,7 +313,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     }*/
 
 
-   /* public static Bitmap createCustomMarker(Context context, @DrawableRes int resource, RequestManager glide) {
+  /*  public static Bitmap createCustomMarker(Context context, @DrawableRes int resource, RequestManager glide) {
 
         View marker = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.marker_custom_layout, null);
 

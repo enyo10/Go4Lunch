@@ -103,7 +103,7 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
     // --------------------
 
 
-    private void getUsersList(){
+   /* private void getUsersList(){
 
         UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -123,7 +123,7 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
             }
         });
     }
-
+*/
 
     // 6 - Create options for RecyclerView from a Query
     private FirestoreRecyclerOptions<User> generateOptionsForAdapter(Query query){

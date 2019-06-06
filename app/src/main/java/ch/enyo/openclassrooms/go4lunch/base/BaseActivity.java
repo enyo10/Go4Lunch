@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import butterknife.ButterKnife;
 import ch.enyo.openclassrooms.go4lunch.R;
+import icepick.Icepick;
 
 public abstract class BaseActivity extends AppCompatActivity {
     //--------------------
@@ -28,7 +29,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         configureView();
         FirebaseApp.initializeApp(this);
-
+        Icepick.restoreInstanceState (this,savedInstanceState);
 
     }
 
