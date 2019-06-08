@@ -14,10 +14,14 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.annotations.Nullable;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -65,7 +69,7 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
 
     @Override
     protected void configureView() {
-       // getUsersList();
+       getAllUsers();
         this.configureRecyclerView();
 
     }
@@ -79,6 +83,7 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
             mWorkmatesViewAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
                 public void onItemRangeInserted(int positionStart, int itemCount) {
+
                     mRecyclerView.smoothScrollToPosition(mWorkmatesViewAdapter.getItemCount());
                 }
 
@@ -101,6 +106,33 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
     // --------------------
     // REST REQUESTS
     // --------------------
+
+    private void getAllUsers(){
+        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    // Handle error
+                    //...
+                    Log.i(TAG, " Error -->: "+e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+
+                // Convert query snapshot to a list of chats
+                List<User> userList = snapshot.toObjects(User.class);
+                for (User u:userList
+                     ) {
+                    Log.i(TAG, " user :"+u.getUsername());
+
+                }
+
+                // Update UI
+                // ...
+            }
+        });
+    }
 
 
    /* private void getUsersList(){

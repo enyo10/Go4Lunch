@@ -130,17 +130,12 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.1.16'
 
     // Adding Retrofit Library ( REST client ) for used to make network requests
-
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
 
 
     // Adding Support Library for execute network requests with the Streams
-
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
-
-
-
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
 
 
     // FireBase Integration
@@ -148,9 +143,7 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-core:16.0.9' // For FireBase Integration
 
-    implementation 'com.google.firebase:firebase-messaging:17.6.0' // For FireBase Messaging
-
-
+    implementation 'com.google.firebase:firebase-messaging:18.0.0' // For FireBase Messaging
 
     implementation 'com.firebaseui:firebase-ui-database:5.0.0' // FirebaseUI for Firebase Realtime Database
     implementation 'com.firebaseui:firebase-ui-firestore:5.0.0'  // FirebaseUI for Cloud Firestore
@@ -167,12 +160,10 @@ dependencies {
 
 
     //BUTTER KNIFE
-
     implementation 'com.jakewharton:butterknife:10.1.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
 
     implementation 'frankiesardo:icepick:3.2.0'
-
 
 
     // FACEBOOK LOGIN SUPPORT

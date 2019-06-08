@@ -143,11 +143,11 @@ public class ListViewFragment extends BaseFragment {
     //----------------------------------------------------------------------------------------------
 
     protected void executeHttpRequestWithRetrofit(){
-        Map<String,String> map=DataSingleton.getInstance().getParametersMap();
+      //  Map<String,String> map=DataSingleton.getInstance().getParametersMap();
 
-        Log.i(TAG, "parameter map value "+map.toString());
+      //  Log.i(TAG, "parameter map value "+map.toString());
 
-        mDisposable = GoogleApiPlaceStreams.streamFPlaceDetailsList(map)
+        mDisposable = GoogleApiPlaceStreams.streamFPlaceDetailsList("47.1431,7.2821")
                 .subscribeWith(new DisposableObserver<List<PlaceDetails>>() {
 
                     @Override

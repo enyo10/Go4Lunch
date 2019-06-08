@@ -26,8 +26,6 @@ import android.widget.Toast;
 
 
 import java.util.ArrayList;
-import java.util.Map;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.enyo.openclassrooms.go4lunch.R;
@@ -37,11 +35,8 @@ import ch.enyo.openclassrooms.go4lunch.controllers.fragments.ListViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
-import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
-import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 import ch.enyo.openclassrooms.go4lunch.utils.LocationTrack;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableObserver;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -58,7 +53,7 @@ public class WelcomeActivity extends BaseActivity
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
     private ArrayList<String> permissions = new ArrayList<>();
-    Disposable mDisposable;
+  //  Disposable mDisposable;
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
   //  private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION=102;
@@ -238,8 +233,6 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-
-
     //--------------------------------------------------------------------------------------------------
     //    AUTHENTICATION MANAGEMENT
     //----------------------------------------------------------------------------------------------
@@ -277,6 +270,7 @@ public class WelcomeActivity extends BaseActivity
     //        Here we handle the localisation process.
     //*******************************************************************
 
+
     private void configurePermission() {
 
         permissions.add(ACCESS_FINE_LOCATION);
@@ -291,6 +285,7 @@ public class WelcomeActivity extends BaseActivity
                 requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
 
         }
+
         // Initialise location tracker.
         locationTrack = new LocationTrack(WelcomeActivity.this);
 
@@ -341,7 +336,7 @@ public class WelcomeActivity extends BaseActivity
 
     @TargetApi(Build.VERSION_CODES.M)
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         switch (requestCode) {
             case ALL_PERMISSIONS_RESULT:
@@ -350,7 +345,6 @@ public class WelcomeActivity extends BaseActivity
                         permissionsRejected.add(perms);
                     }
                 }
-
                 if (permissionsRejected.size() > 0) {
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -372,11 +366,11 @@ public class WelcomeActivity extends BaseActivity
         }
     }
 
-    public void executeRequestWithRetrofit(){
-        Map<String,String> parametersMap= DataSingleton.getInstance().getParametersMap();
-        Log.i(TAG," parameters "+parametersMap.toString());
+   /* public void executeRequestWithRetrofit(){
+       // Map<String,String> parametersMap= DataSingleton.getInstance().getParametersMap();
+       // Log.i(TAG," parameters "+parametersMap.toString());
 
-        mDisposable = GoogleApiPlaceStreams.fetchPlaceNearBySearchStream(parametersMap)
+        mDisposable = GoogleApiPlaceStreams.fetchPlaceNearBySearchStream("47.1431,7.2821")
                 .subscribeWith(new DisposableObserver<PlaceNearBySearch>() {
                     @Override
                     public void onNext(PlaceNearBySearch placeNearBySearch) {
@@ -395,7 +389,7 @@ public class WelcomeActivity extends BaseActivity
                     }
                 });
     }
-
+*/
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(WelcomeActivity.this)
                 .setMessage(message)

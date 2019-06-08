@@ -34,7 +34,8 @@ public class UserHelper {
     }
 
     public static Query getAllUsers() {
-        return UserHelper.getUsersCollection().orderBy("username").limit(20);
+        return UserHelper.getUsersCollection()
+                .orderBy("username").limit(20);
     }
 
     // --- UPDATE ---

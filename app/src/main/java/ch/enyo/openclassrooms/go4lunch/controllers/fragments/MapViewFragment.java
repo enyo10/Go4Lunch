@@ -5,14 +5,17 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -28,21 +31,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import javax.annotation.Nullable;
-
-import ch.enyo.openclassrooms.go4lunch.BuildConfig;
 import ch.enyo.openclassrooms.go4lunch.R;
-import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
@@ -57,40 +50,44 @@ import io.reactivex.observers.DisposableObserver;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapViewFragment extends BaseFragment implements OnMapReadyCallback, LocationListener{
+public class MapViewFragment extends BaseFragment implements OnMapReadyCallback, LocationListener {
 
     private static final String TAG = MapViewFragment.class.getSimpleName();
 
     // Constant
-    private static final int REQUEST_LOCATION_PERMISSION=11;
+    private static final int REQUEST_LOCATION_PERMISSION = 11;
     private static final String TRACKING_LOCATION_KEY = "tracking_location";
-    public static final float DEFAULT_ZOOM = 16f;
+    private static final float DEFAULT_ZOOM = 16f;
     private GoogleMap mMap;
     private Marker mMarker;
-    // Location classes
-    LocationCallback mLocationCallback;
-    Location mLastKnownLocation;
-    private final LatLng mDefaultLocation = new LatLng(17,43);
+
+    // Location Objects.
+    private LocationCallback mLocationCallback;
+    private Location mLastKnownLocation;
+
+    private final LatLng mDefaultLocation = new LatLng(17, 43);
     private boolean mTrackingLocation;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private List<Result>mPlaceList;
-    private List<User>mUserList;
+    private List<Result> mPlaceList;
+    private List<User> mUserList;
 
     MapView mMapView;
     Disposable mDisposable;
-    private boolean mLocationPermissionGranted=false;
-   // @BindView(R.id.position_icon)
+    private boolean mLocationPermissionGranted = false;
+    // @BindView(R.id.position_icon)
     Button mGpsButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPlaceList= new ArrayList<>();
+        mPlaceList = new ArrayList<>();
 
         // Initialize the FusedLocationClient.
-        if(getActivity()!=null)
-        mFusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(getActivity());
+        if (getActivity() != null)
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+        // Retrieve the last know location.
+       getLocationPermission();
 
         // Restore the state if the activity is recreated.
         if (savedInstanceState != null) {
@@ -105,8 +102,9 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 // If tracking is turned on, reverse geocode into an address
                 if (mTrackingLocation) {
                     locationResult.getLastLocation();
-                   /* Log.i(TAG, " latitude "+ locationResult.getLastLocation().getLatitude());
-                    Log.i(TAG, " longitude "+ locationResult.getLastLocation().getLongitude());*/
+                    Log.i(TAG, " latitude with location callback"+ locationResult.getLastLocation().getLatitude());
+                    Log.i(TAG, " longitude with location callback"+ locationResult.getLastLocation().getLongitude());
+                    mLastKnownLocation = locationResult.getLastLocation();
 
                 }
             }
@@ -120,35 +118,13 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     public void onMapReady(GoogleMap gMap) {
 
         mMap = gMap;
-
         getLocationPermission();
         updateUI();
-
-        // Do other setup activities here too, as described elsewhere in this tutorial.
-
-        // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
-
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
-
-       /* Log.d(TAG, "On MapReady latitude. "+DataSingleton.getInstance().getLatitude());
-        Log.d(TAG, " On MapReady longitude "+DataSingleton.getInstance().getLongitude());
-
-        // Add a marker in Sydney and move the camera
-        LatLng latLng = new LatLng(DataSingleton.getInstance().getLatitude(),DataSingleton.getInstance().getLongitude());
-        mGoogleMap.addMarker(new MarkerOptions().position(latLng).title("Marker in Sydney"));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(DataSingleton.getInstance().getLatitude(),
-                        DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);*/
-
     }
-
-
-
 
     @Override
     public BaseFragment newInstance() {
@@ -208,38 +184,38 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                       .title(placename + " :" + vinicity)
                       .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
 
-
-
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
         }
-
-        
     }
-
-
-
-
 
     /**
          * This method to update the restaurant list.
-         * @param list
+         * @param list, the list to be set.
          */
-    public void updatePlaceList(List<Result>list){
+    private void updatePlaceList(List<Result>list){
         mPlaceList.clear();
         mPlaceList.addAll(list);
 
     }
 
+    private void executeRequestWithRetrofit(){
 
+     //   Map<String,String> parametersMap=DataSingleton.getInstance().getParametersMap();
 
-    public void executeRequestWithRetrofit(){
+       // Log.i(TAG, "parameter map value "+parametersMap.toString());
+        double lng;
+        double lat;
+        LatLng latLng;
+        if (mLastKnownLocation!=null){
 
-        Map<String,String> parametersMap=DataSingleton.getInstance().getParametersMap();
+             lng= mLastKnownLocation.getLongitude();
+             lat= mLastKnownLocation.getLatitude();
+             latLng=new LatLng(lat,lng);
+            Log.e(TAG,"latlng "+latLng.toString());
+        }
 
-        Log.i(TAG, "parameter map value "+parametersMap.toString());
-
-       this.mDisposable= GoogleApiPlaceStreams.fetchPlaceNearBySearchStream(parametersMap)
+       this.mDisposable= GoogleApiPlaceStreams.fetchPlaceNearBySearchStream("47.1431,7.2821")
                .subscribeWith(new DisposableObserver<PlaceNearBySearch>() {
                    @Override
                    public void onNext(PlaceNearBySearch placeNearBySearch) {
@@ -249,7 +225,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
                        try {
                            mMap.clear();
-
                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                    new LatLng(DataSingleton.getInstance().getLatitude(),
                                            DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
@@ -274,7 +249,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
                            }
 
-
                        }catch (Exception e){
                            Log.d(TAG, "onNext: error");
                        }
@@ -289,54 +263,12 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                    @Override
                    public void onComplete() {
                        Log.i(TAG, "Restaurant near by search completed.");
-
                    }
                });
 
     }
 
 
-/*
-    private void addPointToViewPort(LatLng newPoint) {
-        mBounds.include(newPoint);
-        //mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds.build(),
-           //     findViewById(R.id.checkout_button).getHeight()));
-    }*/
-
-  /*  private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
-        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }*/
-
-
-  /*  public static Bitmap createCustomMarker(Context context, @DrawableRes int resource, RequestManager glide) {
-
-        View marker = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.marker_custom_layout, null);
-
-        ImageView markerImage =  marker.findViewById(R.id.marker_image);
-      //  glide.load(resource).circleCrop().into(markerImage);
-        glide.load(resource).apply(RequestOptions.circleCropTransform()).into(markerImage);
-        //markerImage.setImageResource(resource);
-        //TextView txt_name = (TextView)marker.findViewById(R.id.name);
-        // txt_name.setText(_name);
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        marker.setLayoutParams(new ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT));
-        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-       // marker.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(marker.getMeasuredWidth(), marker.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        marker.draw(canvas);
-
-        return bitmap;
-    }
-*/
 
 
    private void destroyMap(){
@@ -405,6 +337,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
+
+
         } else {
             ActivityCompat.requestPermissions(getActivity(),
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -425,8 +359,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_LOCATION_PERMISSION:
+        if (requestCode==REQUEST_LOCATION_PERMISSION) {
+           // case REQUEST_LOCATION_PERMISSION:
                 // If the permission is granted, get the location,
                 // otherwise, show a Toast
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -447,10 +381,12 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
      * This method to start location tracking. Check for permission, if not granted yet, request it..
      */
     private void startTrackingLocation(){
+        if(getContext()!=null)
 
         if (ActivityCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
+            if(getActivity()!=null)
             ActivityCompat.requestPermissions(getActivity(), new String[]
                             {Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_LOCATION_PERMISSION);
@@ -501,7 +437,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         }
     }
 
-
     private LocationRequest getLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setInterval(10000);
@@ -545,15 +480,13 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                     if (task.isSuccessful()) {
                         // Set the map's camera position to the current location of the device.
                         mLastKnownLocation = task.getResult();
-
                         if (mLastKnownLocation != null) {
 
                             // Store device coordinates
-                            Double latitude = mLastKnownLocation.getLatitude();
-                            Double longitude = mLastKnownLocation.getLongitude();
+                            double latitude = mLastKnownLocation.getLatitude();
+                            double longitude = mLastKnownLocation.getLongitude();
                             DataSingleton.getInstance().setLatitude(latitude);
                             DataSingleton.getInstance().setLongitude(longitude);
-
                             //Move camera toward device position
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(latitude, longitude), DEFAULT_ZOOM));
@@ -584,7 +517,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     //                                          UI
     //---------------------------------------------------------------------------------------------
 
-    public void updateUI(){
+    private void updateUI(){
         if (mMap == null) {
             return;
         }

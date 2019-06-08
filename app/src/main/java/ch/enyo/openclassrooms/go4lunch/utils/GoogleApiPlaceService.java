@@ -17,7 +17,7 @@ import retrofit2.http.QueryMap;
 public interface GoogleApiPlaceService {
     String mString="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500&type=" +
             "restaurant&keyword=cruise&key=AIzaSyD9pp59K2tcqgbzpAXeyjXQ_7DVcOaHQl0";
-    String apiKey = BuildConfig.ApiKey;
+
 
     @GET("nearbysearch/json")
     Observable<PlaceNearBySearch> getPlaceNearBySearch(@QueryMap Map<String, String> filters);

@@ -114,11 +114,11 @@ public class DataSingleton implements Serializable {
     }
 
 
-    public Map<String, String> getParametersMap() {
+   /* public Map<String, String> getParametersMap() {
         // this.mParameterMap.put("location",getLocationString());
         Log.i(TAG, " Parameter map -> " + mParameterMap.toString());
         return mParameterMap;
-    }
+    }*/
 
     /**
      * This method format longitude and latitude to a String.

@@ -1,21 +1,29 @@
 package ch.enyo.openclassrooms.go4lunch.utils;
 
 
+import android.util.Log;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import ch.enyo.openclassrooms.go4lunch.BuildConfig;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.Result;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class GoogleApiPlaceStreams {
-//    private static final String TAG =GoogleApiPlaceStreams.class.getSimpleName();
+    private static final String TAG =GoogleApiPlaceStreams.class.getSimpleName();
+
+    private static Map<String,String>mParametersMap=new HashMap<>();
+
+
+
 
    // String mString="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500&type=" +
    //         "restaurant&keyword=cruise&key=AIzaSyD9pp59K2tcqgbzpAXeyjXQ_7DVcOaHQl0";
@@ -23,13 +31,18 @@ public class GoogleApiPlaceStreams {
 
     /**
      * This method to get a Stream of list of restaurants.
-     * @param filter, a map filter of parameter.
+     * @param location, the location.
      * @return a stream of restaurant.
      */
 
-    public static Observable<PlaceNearBySearch>fetchPlaceNearBySearchStream(Map<String,String>filter){
+    public static Observable<PlaceNearBySearch>fetchPlaceNearBySearchStream(String location){
+        Log.i(TAG, "Api_key :"+BuildConfig.ApiKey);
+        mParametersMap.put("key", "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8");
+        mParametersMap.put("type", "restaurant");
+        mParametersMap.put("radius", "5000");
+        mParametersMap.put("location",location);
         GoogleApiPlaceService googleApiPlaceService=GoogleApiPlaceService.retrofit.create(GoogleApiPlaceService.class);
-        return googleApiPlaceService.getPlaceNearBySearch(filter)
+        return googleApiPlaceService.getPlaceNearBySearch(mParametersMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .timeout(15,TimeUnit.SECONDS);
@@ -43,7 +56,9 @@ public class GoogleApiPlaceStreams {
                 .timeout(15, TimeUnit.SECONDS);
     }
 */
-    public static Observable<PlaceDetails>fetchPlaceDetailsStream(String key,String place_id){
+    public static Observable<PlaceDetails>fetchPlaceDetailsStream(String place_id){
+      //  String key=BuildConfig.ApiKey;
+        String key="AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
         GoogleApiPlaceService googleApiPlaceService = GoogleApiPlaceService.retrofit.create(GoogleApiPlaceService.class);
         return googleApiPlaceService.getPlaceDetails(key,place_id)
                 .subscribeOn(Schedulers.io())
@@ -55,49 +70,8 @@ public class GoogleApiPlaceStreams {
 
 
 
-
-    /*public static Observable<List<String>> streamFetchListRestaurantId(Map<String,String>filter){
-        Log.d(TAG, "streamFetchListRestaurantId: ");
-
-
-
-        return getNearBySearchStream(filter)
-                .concatMap((Function<PlaceNearBySearch, Observable<List<String>>>) placeNearBySearch -> {
-
-                    //List of restaurants Id found
-                    List<String> listPlaceIdNearBySearch = new ArrayList<>();
-
-                    Observable<List<String>> listPlacesId = Observable.fromArray(listPlaceIdNearBySearch);
-
-                    if (placeNearBySearch.getResults().size() != 0) {
-                        for (Result result : placeNearBySearch.getResults()) {
-                            Log.d(TAG, "streamFetchListRestaurantId: placeId = " + result.getPlaceId());
-                            listPlaceIdNearBySearch.add(result.getPlaceId());
-                        }
-                    } else
-                        Log.d(TAG, "streamFetchListRestaurantId: placeNearBySearch.getResults().size() = null");
-                    //Observable from the restaurant Id list found
-                    return listPlacesId;
-                });
-    }*/
-
-
-
-   /* public static Observable<List<PlaceDetails>> streamFetchListPlaceDetail(Map<String,String>filter) {
-        return getNearBySearchStream(filter)
-                .map(PlaceNearBySearch::getResults)
-                .concatMap((Function<List<Result>, Observable<List<PlaceDetails>>>) results -> {
-                            return Observable.fromIterable(results)
-                                    .concatMap((Function<Result, Observable<PlaceDetails>>) result -> getPlaceDetailsStream(result.getId()))
-                                    .toList()
-                                    //Include data from firebase
-                                    .toObservable();
-                        });
-    }
-*/
-
-    public static Observable<List<PlaceDetails>>streamFPlaceDetailsList(Map<String,String>filter){
-        return fetchPlaceNearBySearchStream(filter)
+    public static Observable<List<PlaceDetails>>streamFPlaceDetailsList(String location){
+        return fetchPlaceNearBySearchStream(location)
                 .map(new Function<PlaceNearBySearch, List<Result>>(){
                     @Override
                     public List<Result> apply(PlaceNearBySearch placeNearBySearch) throws Exception {
@@ -109,7 +83,7 @@ public class GoogleApiPlaceStreams {
                         return Observable.fromIterable(results).concatMap(new Function<Result, Observable<PlaceDetails>>() {
                             @Override
                             public Observable<PlaceDetails> apply(Result result){
-                                return fetchPlaceDetailsStream(filter.get("key"),result.getPlaceId());
+                                return fetchPlaceDetailsStream(result.getPlaceId());
                             }
                         }).toList()
                                 .toObservable();
