@@ -127,10 +127,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
             restaurantSelected=true;
             Log.i(TAG, "Restaurant with id : "+placeId+"  selected");
             Log.i(TAG," Restaurant selected :"+restaurantSelected );
-
         }
-
-
 
     }
     // --------------------
@@ -154,11 +151,6 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         if(this.getCurrentUser()!=null){
         UserHelper.updateRestaurantSelection(this.getCurrentUser().getUid(),placeId).addOnFailureListener(this.onFailureListener());
         }
-
     }
-
-
-
-
 
 }

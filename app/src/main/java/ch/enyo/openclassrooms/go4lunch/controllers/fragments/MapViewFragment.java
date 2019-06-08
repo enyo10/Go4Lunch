@@ -63,11 +63,11 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     // Location Objects.
     private LocationCallback mLocationCallback;
-    private Location mLastKnownLocation;
+  //  private Location mLastKnownLocation;
 
     private final LatLng mDefaultLocation = new LatLng(17, 43);
     private boolean mTrackingLocation;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
+ //   private FusedLocationProviderClient mFusedLocationProviderClient;
     private List<Result> mPlaceList;
     private List<User> mUserList;
 
@@ -116,13 +116,14 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     @Override
     public void onMapReady(GoogleMap gMap) {
+        getDeviceLocation();
 
         mMap = gMap;
         getLocationPermission();
         updateUI();
         updateLocationUI();
         // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
+
 
     }
 
@@ -151,7 +152,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         if(mapFragment!=null)
             mapFragment.getMapAsync(this);
 
-         executeRequestWithRetrofit();
+        // executeRequestWithRetrofit();
         Log.i(TAG, " Configure view method.");
 
     }
@@ -200,22 +201,11 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     }
 
     private void executeRequestWithRetrofit(){
+        double lat=mLastKnownLocation.getLatitude();
+        double lng=mLastKnownLocation.getLongitude();
+        String latlng=lat+","+lng;
 
-     //   Map<String,String> parametersMap=DataSingleton.getInstance().getParametersMap();
-
-       // Log.i(TAG, "parameter map value "+parametersMap.toString());
-        double lng;
-        double lat;
-        LatLng latLng;
-        if (mLastKnownLocation!=null){
-
-             lng= mLastKnownLocation.getLongitude();
-             lat= mLastKnownLocation.getLatitude();
-             latLng=new LatLng(lat,lng);
-            Log.e(TAG,"latlng "+latLng.toString());
-        }
-
-       this.mDisposable= GoogleApiPlaceStreams.fetchPlaceNearBySearchStream("47.1431,7.2821")
+       this.mDisposable= GoogleApiPlaceStreams.fetchPlaceNearBySearchStream(latlng)
                .subscribeWith(new DisposableObserver<PlaceNearBySearch>() {
                    @Override
                    public void onNext(PlaceNearBySearch placeNearBySearch) {

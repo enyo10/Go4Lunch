@@ -36,8 +36,6 @@ import ch.enyo.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.utils.LocationTrack;
-import io.reactivex.disposables.Disposable;
-
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
