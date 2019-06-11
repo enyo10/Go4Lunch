@@ -3,12 +3,23 @@ package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.core.app.ActivityCompat;
@@ -17,6 +28,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.material.navigation.NavigationView;
@@ -30,10 +42,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
-
-import android.widget.Toast;
-
-
 import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,6 +54,7 @@ import ch.enyo.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
 import ch.enyo.openclassrooms.go4lunch.utils.LocationTrack;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static java.security.AccessController.getContext;
 
 public class WelcomeActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -56,13 +65,21 @@ public class WelcomeActivity extends BaseActivity
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
 
+
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
     private ArrayList<String> permissions = new ArrayList<>();
-    //  Disposable mDisposable;
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
-    private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 102;
+    private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
+ //   private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 102;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+    private Boolean requestingLocationUpdates=false;
+    private Location mLastKnownLocation;
+
 
     LocationTrack locationTrack;
 
@@ -93,6 +110,7 @@ public class WelcomeActivity extends BaseActivity
         toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
 
+
         setSupportActionBar(toolbar);
         mActionBar = getSupportActionBar();
         configurePermission();
@@ -112,7 +130,53 @@ public class WelcomeActivity extends BaseActivity
         configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
         // initFragments();
         getDeviceLocation();
+        createLocationRequest();
+        configureLocationSettings();
 
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    // Update UI with location data
+                    // ...
+                    Log.i(TAG, " With location callback in On created  "+location );
+
+                }
+            }
+        };
+
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
+                requestingLocationUpdates);
+        // ...
+        super.onSaveInstanceState(outState);
+    }
+
+    private void updateValuesFromBundle(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            return;
+        }
+
+        // Update the value of requestingLocationUpdates from the Bundle.
+        if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
+            requestingLocationUpdates = savedInstanceState.getBoolean(
+                    REQUESTING_LOCATION_UPDATES_KEY);
+        }
+
+        // ...
+
+        // Update UI to match restored state
+      //  updateUI();
+    }
+    private void updateUI(){
 
     }
 
@@ -242,20 +306,20 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-    /**
+   /* *//**
      * This method to load the fragment in to the frame.
      * @param fragment,
      *                the fragment to load.
      * @param toolbarTextId,
      *                    the text to set to toolbar.
-     */
+     *//*
     private void loadFragment(Fragment fragment, int toolbarTextId){
 
         toolbar.setTitle(toolbarTextId);
         mFragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
         activeFragment = fragment;
 
-    }
+    }*/
 
 
 
@@ -293,9 +357,9 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-    //*******************************************************************
-    //        Here we handle the localisation process.
-    //*******************************************************************
+    //------------------------------------------------------------------------------------------------
+    //        PERMISSION AND LOCATION AND UPDATE.
+    //------------------------------------------------------------------------------------------------
 
     private void configurePermission(){
         permissions.add(ACCESS_FINE_LOCATION);
@@ -327,12 +391,88 @@ public class WelcomeActivity extends BaseActivity
         mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                Log.i(TAG," location  " +location);
+                mLastKnownLocation=location;
+                Log.i(TAG," location  " +mLastKnownLocation);
 
             }
         });
     }
 
+    protected void createLocationRequest() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest= locationRequest;
+    }
+
+
+    protected void configureLocationSettings(){
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                // All location settings are satisfied. The client can initialize
+                // location requests here.
+                // ...
+
+                Log.i(TAG, "Location settings are successful ");
+            }
+        });
+
+        task.addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof ResolvableApiException) {
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+                    try {
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(WelcomeActivity.this,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        // Ignore the error.
+                    }
+                }
+            }
+        });
+    }
+
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (getContext() != null)
+                ActivityCompat.requestPermissions(this, new String[]
+                                {Manifest.permission.ACCESS_FINE_LOCATION},
+                        ALL_PERMISSIONS_RESULT);
+        } else {
+            requestingLocationUpdates=true;
+            Log.d(TAG, "getLocation: permissions granted");
+            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback,
+                    null /* Looper */);
+        }
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+
+    }
+
+    private void stopLocationUpdates() {
+        mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+        requestingLocationUpdates=false;
+    }
 
   /*  private void configurePermission() {
 
@@ -436,6 +576,14 @@ public class WelcomeActivity extends BaseActivity
                 .setNegativeButton("Cancel", null)
                 .create()
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (requestingLocationUpdates) {
+            startLocationUpdates();
+        }
     }
 
 
