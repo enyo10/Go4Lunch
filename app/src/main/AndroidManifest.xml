@@ -8,16 +8,13 @@
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-
     <application
-
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,13 +22,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <meta-data
+            android:name="com.google.android.actions"
+            android:resource="@xml/searchable" />
 
         <activity
             android:name=".controllers.activities.PlaceDetailsActivity"
             android:theme="@style/AppTheme.NoTitle" />
-
         <!--
-
              The API key for Google Maps-based APIs is defined as a string resource.
 
              (See the file "res/values/google_maps_api.xml").
@@ -43,42 +41,32 @@
              sign the APK for publishing.
 
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
-
         -->
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
 
         <activity
             android:name=".auth.ProfileActivity"
             android:label="@string/toolbar_title_login_activity"
             android:parentActivityName=".controllers.activities.WelcomeActivity" />
-
         <activity
             android:name=".controllers.activities.WelcomeActivity"
             android:label="@string/title_activity_welcome"
             android:parentActivityName=".controllers.activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".controllers.activities.MainActivity"
             android:theme="@style/AppTheme.NoTitle">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
-
             </intent-filter>
-
         </activity>
-
     </application>
-
 
 </manifest>
