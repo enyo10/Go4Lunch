@@ -32,6 +32,9 @@ android {
     buildTypes {
 
         debug {
+            // Jacoco
+            testCoverageEnabled true
+            //Place api key
             buildConfigField 'String', "ApiKey",Go4Lunch_Places_ApiKey
             resValue 'string', "api_key", Go4Lunch_Places_ApiKey
         }
@@ -39,7 +42,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-
+            // Jacoco
+            testCoverageEnabled true
+            //Places api key.
             buildConfigField 'String', "ApiKey", Go4Lunch_Places_ApiKey
             resValue 'string', "api_key", Go4Lunch_Places_ApiKey
         }
