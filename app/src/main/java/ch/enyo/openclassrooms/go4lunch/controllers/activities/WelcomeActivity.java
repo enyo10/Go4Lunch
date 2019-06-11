@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -26,7 +27,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.ActionBar;
@@ -41,7 +41,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
-//import android.support.v7.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -137,24 +136,43 @@ public class WelcomeActivity extends BaseActivity
         getDeviceLocation();
         createLocationRequest();
         configureLocationSettings();
+        initLocationCallback();
+        initQuery();
 
 
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
-                    // Update UI with location data
-                    // ...
-                    Log.i(TAG, " With location callback in On created  "+location );
 
-                }
-            }
-        };
 
     }
+
+   private void initQuery(){
+
+       // Get the intent, verify the action and get the query
+       Intent intent = getIntent();
+       if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+           String query = intent.getStringExtra(SearchManager.QUERY);
+         //  doMySearch(query);
+           Log.d(TAG,"Query " +query);
+       }
+
+   }
+
+   private void initLocationCallback(){
+       mLocationCallback = new LocationCallback() {
+           @Override
+           public void onLocationResult(LocationResult locationResult) {
+               if (locationResult == null) {
+                   return;
+               }
+               for (Location location : locationResult.getLocations()) {
+                   // Update UI with location data
+                   // ...
+                   Log.i(TAG, " With location callback in On created  "+location );
+
+               }
+           }
+       };
+
+   }
 
 
     @Override
@@ -254,9 +272,6 @@ public class WelcomeActivity extends BaseActivity
         });
         return super.onCreateOptionsMenu(menu);
     }
-
-
-
 
     //----------------------------------------------------------------------------------------------
     //---------------    ACTIONS
@@ -617,7 +632,8 @@ public class WelcomeActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        locationTrack.stopListener();
+        //locationTrack.stopListener();
+        stopLocationUpdates();
     }
 
 

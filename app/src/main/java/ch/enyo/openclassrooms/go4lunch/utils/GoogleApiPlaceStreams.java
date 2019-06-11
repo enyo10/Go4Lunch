@@ -36,7 +36,7 @@ public class GoogleApiPlaceStreams {
      */
 
     public static Observable<PlaceNearBySearch>fetchPlaceNearBySearchStream(String location){
-        Log.i(TAG, "Api_key :"+BuildConfig.ApiKey);
+       // Log.i(TAG, "Api_key :"+BuildConfig.ApiKey);
         mParametersMap.put("key", "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8");
         mParametersMap.put("type", "restaurant");
         mParametersMap.put("radius", "5000");
@@ -64,11 +64,7 @@ public class GoogleApiPlaceStreams {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .timeout(15,TimeUnit.SECONDS);
-
     }
-
-
-
 
     public static Observable<List<PlaceDetails>>streamFPlaceDetailsList(String location){
         return fetchPlaceNearBySearchStream(location)
@@ -90,11 +86,5 @@ public class GoogleApiPlaceStreams {
                     }
                 });
 
-
     }
-
-
-
-
-
 }
