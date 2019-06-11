@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -31,11 +30,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.annotations.Nullable;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import ch.enyo.openclassrooms.go4lunch.R;
+import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
@@ -60,34 +63,34 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private static final float DEFAULT_ZOOM = 16f;
     private GoogleMap mMap;
     private Marker mMarker;
+    private Location mLastKnownLocation;
 
     // Location Objects.
     private LocationCallback mLocationCallback;
-  //  private Location mLastKnownLocation;
 
     private final LatLng mDefaultLocation = new LatLng(17, 43);
     private boolean mTrackingLocation;
- //   private FusedLocationProviderClient mFusedLocationProviderClient;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
     private List<Result> mPlaceList;
     private List<User> mUserList;
 
     MapView mMapView;
-    Disposable mDisposable;
+    private Disposable mDisposable;
     private boolean mLocationPermissionGranted = false;
-    // @BindView(R.id.position_icon)
-    Button mGpsButton;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlaceList = new ArrayList<>();
+        mUserList=new ArrayList<>();
 
         // Initialize the FusedLocationClient.
         if (getActivity() != null)
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         // Retrieve the last know location.
-       getLocationPermission();
+        getLocationPermission();
 
         // Restore the state if the activity is recreated.
         if (savedInstanceState != null) {
@@ -102,9 +105,10 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 // If tracking is turned on, reverse geocode into an address
                 if (mTrackingLocation) {
                     locationResult.getLastLocation();
-                    Log.i(TAG, " latitude with location callback"+ locationResult.getLastLocation().getLatitude());
-                    Log.i(TAG, " longitude with location callback"+ locationResult.getLastLocation().getLongitude());
-                    mLastKnownLocation = locationResult.getLastLocation();
+                //   Log.i(TAG, " latitude with location callback"+ locationResult.getLastLocation().getLatitude());
+                  //  Log.i(TAG, " longitude with location callback"+ locationResult.getLastLocation().getLongitude());
+                  //  mLastKnownLocation = locationResult.getLastLocation();
+                  //  mSendMessage.sendData(mLastKnownLocation);
 
                 }
             }
@@ -123,8 +127,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         updateUI();
         updateLocationUI();
         // Get the current location of the device and set the position of the map.
-
-
     }
 
     @Override
@@ -168,6 +170,9 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
      *          the placeNearbyResult containing the restaurant to be add.
      */
     private void addMarkerOnMap(List<Result> placeNearbyResult) {
+        List<String>placeIdList = getPlaceIdList();
+
+        if(placeNearbyResult.size()!=0)
 
         for (int i = 0; i < placeNearbyResult.size(); i++) {
             Double lat = placeNearbyResult.get(i).getGeometry().getLocation().getLat();
@@ -180,91 +185,162 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             markerOptions.position(latLng);
             markerOptions.title(placename + " : " + vinicity);
 
-            mMarker =  mMap.addMarker(new MarkerOptions()
-                      .position(latLng)
-                      .title(placename + " :" + vinicity)
-                      .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
+            if(placeIdList.size()!=0 && placeIdList.contains(placeNearbyResult.get(i).getPlaceId())) {
+                Log.i(TAG, " place match .." + placeNearbyResult.get(i).getPlaceId());
+
+                mMarker = mMap.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .title(placename + " :" + vinicity)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_green)));
+            }
+            else {
+                Log.i(TAG, " place no match .." + placeNearbyResult.get(i).getPlaceId());
+                Log.i(TAG, " selected list to string "+placeIdList.toString());
+                mMarker = mMap.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .title(placename + " :" + vinicity)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
+            }
 
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
         }
     }
 
+
+    private List<String>getPlaceIdList() {
+        List<String> restaurantIdList = new ArrayList<>();
+        getAllUsersFromFireBase();
+
+        if (mUserList != null) {
+            for (User user : mUserList) {
+                if (user.getRestaurantId() != null)
+                    restaurantIdList.add(user.getRestaurantId());
+
+                Log.i(TAG, " Selected Restaurant id " +user.getRestaurantId());
+            }
+        }
+            return restaurantIdList;
+
+        }
+
+
+
     /**
-         * This method to update the restaurant list.
-         * @param list, the list to be set.
-         */
+     * This method to update the restaurant list.
+     * @param list, the list to be set.
+     */
     private void updatePlaceList(List<Result>list){
         mPlaceList.clear();
         mPlaceList.addAll(list);
 
     }
 
+    //----------------------------------------------------------------------------------------------
+    //                 HTTP RX JAVA
+    //____________________________________________________________________________________________-_
+
     private void executeRequestWithRetrofit(){
         double lat=mLastKnownLocation.getLatitude();
         double lng=mLastKnownLocation.getLongitude();
         String latlng=lat+","+lng;
 
-       this.mDisposable= GoogleApiPlaceStreams.fetchPlaceNearBySearchStream(latlng)
-               .subscribeWith(new DisposableObserver<PlaceNearBySearch>() {
-                   @Override
-                   public void onNext(PlaceNearBySearch placeNearBySearch) {
-                       Log.i(TAG, " restaurant by near size "+placeNearBySearch.getResults().size());
-                       // Update the restaurantList.
-                       updatePlaceList(placeNearBySearch.getResults());
+        this.mDisposable= GoogleApiPlaceStreams.fetchPlaceNearBySearchStream(latlng)
+                .subscribeWith(new DisposableObserver<PlaceNearBySearch>() {
+                    @Override
+                    public void onNext(PlaceNearBySearch placeNearBySearch) {
+                        Log.i(TAG, " restaurant by near size "+placeNearBySearch.getResults().size());
+                        // Update the restaurantList.
+                        updatePlaceList(placeNearBySearch.getResults());
 
-                       try {
-                           mMap.clear();
-                           mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                   new LatLng(DataSingleton.getInstance().getLatitude(),
-                                           DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
-                           mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        try {
+                          /*  mMap.clear();
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(DataSingleton.getInstance().getLatitude(),
+                                            DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
+                            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-                           for(int i=0;i<placeNearBySearch.getResults().size();i++){
-                               Double lat =placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLat();
-                               Double lng=placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLng();
-                               String placename =placeNearBySearch.getResults().get(i).getName();
-                               String vinicity =placeNearBySearch.getResults().get(i).getVicinity();
+                            for(int i=0;i<placeNearBySearch.getResults().size();i++){
+                                Double lat =placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLat();
+                                Double lng=placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLng();
+                                String placename =placeNearBySearch.getResults().get(i).getName();
+                                String vinicity =placeNearBySearch.getResults().get(i).getVicinity();
 
-                               MarkerOptions markerOptions=new MarkerOptions();
-                               LatLng latLng =new LatLng(lat,lng);
-                               markerOptions.position(latLng);
-                               markerOptions.title(placename +" : "+vinicity);
+                                MarkerOptions markerOptions=new MarkerOptions();
+                                LatLng latLng =new LatLng(lat,lng);
+                                markerOptions.position(latLng);
+                                markerOptions.title(placename +" : "+vinicity);
 
-                               mMap.addMarker(new MarkerOptions()
-                                       .position(latLng)
-                                       .title(placename+ " :" +vinicity)
-                                       .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
-                               mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                               mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-                           }
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(latLng)
+                                        .title(placename+ " :" +vinicity)
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
+                                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+                          addMarkerOnMap();
+                            }*/
+                            addMarkerOnMap(placeNearBySearch.getResults());
 
-                       }catch (Exception e){
-                           Log.d(TAG, "onNext: error");
-                       }
-                   }
+                        }catch (Exception e){
+                            Log.d(TAG, "onNext: error");
+                        }
+                    }
 
-                   @Override
-                   public void onError(Throwable e) {
-                       Log.i("TAG","aie, error in place nearby search: "  +Log.getStackTraceString(e));
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.i("TAG","aie, error in place nearby search: "  +Log.getStackTraceString(e));
 
-                   }
+                    }
 
-                   @Override
-                   public void onComplete() {
-                       Log.i(TAG, "Restaurant near by search completed.");
-                   }
-               });
+                    @Override
+                    public void onComplete() {
+                        Log.i(TAG, "Restaurant near by search completed.");
+                    }
+                });
 
+    }
+
+    //---------------------------------------------------------------------------------------------//
+    //                                       HTTP FIRE BASE                                         //
+    //---------------------------------------------------------------------------------------------//
+
+    private void getAllUsersFromFireBase(){
+        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    // Handle error
+                    //...
+                    Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+
+                // Convert query snapshot to a list of users.
+
+                    mUserList.clear();
+
+                mUserList = snapshot.toObjects(User.class);
+                for (User u:mUserList) {
+                    Log.i(TAG, " user :"+u.getUsername());
+
+                }
+
+                // Update UI
+                // ...
+            }
+        });
     }
 
 
 
 
-   private void destroyMap(){
-       if(mMapView!=null)
-           mMapView.onDestroy();
-   }
+
+    private void destroyMap(){
+        if(mMapView!=null)
+            mMapView.onDestroy();
+    }
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
@@ -323,17 +399,17 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
          * onRequestPermissionsResult.
          */
         if(getActivity()!=null)
-        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
+            if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionGranted = true;
 
 
-        } else {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION_PERMISSION);
-        }
+            } else {
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_LOCATION_PERMISSION);
+            }
     }
 
     /**
@@ -350,19 +426,19 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode==REQUEST_LOCATION_PERMISSION) {
-           // case REQUEST_LOCATION_PERMISSION:
-                // If the permission is granted, get the location,
-                // otherwise, show a Toast
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted=true;
-                    //Update Ui
-                    updateUI();
+            // case REQUEST_LOCATION_PERMISSION:
+            // If the permission is granted, get the location,
+            // otherwise, show a Toast
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionGranted=true;
+                //Update Ui
+                updateUI();
 
-                } else {
-                    Toast.makeText(getContext(), R.string.location_permission_denied,
-                            Toast.LENGTH_SHORT).show();
-                }
-               // break;
+            } else {
+                Toast.makeText(getContext(), R.string.location_permission_denied,
+                        Toast.LENGTH_SHORT).show();
+            }
+            // break;
         }
         updateLocationUI();
     }
@@ -373,21 +449,20 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private void startTrackingLocation(){
         if(getContext()!=null)
 
-        if (ActivityCompat.checkSelfPermission(getContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            if(getActivity()!=null)
-            ActivityCompat.requestPermissions(getActivity(), new String[]
-                            {Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION_PERMISSION);
-        } else {
-            Log.d(TAG, "getLocation: permissions granted");
+            if (ActivityCompat.checkSelfPermission(getContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                if(getActivity()!=null)
+                    ActivityCompat.requestPermissions(getActivity(), new String[]
+                                    {Manifest.permission.ACCESS_FINE_LOCATION},
+                            REQUEST_LOCATION_PERMISSION);
+            } else {
+                Log.d(TAG, "getLocation: permissions granted");
 
            /* mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
                     if(location!=null){
-
                         // Start the reverse geocode AsyncTask
                         new FetchAddressTask(MainActivity.this,
                                 MainActivity.this).execute(location);
@@ -399,20 +474,19 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                     } else {
                         mLocationTextView.setText(R.string.no_location);
                     }
-
                 }
             });
 */          mTrackingLocation = true;
-            mFusedLocationProviderClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null /* Looper */);
-            // Set a loading text while you wait for the address to be
-            // returned
+                mFusedLocationProviderClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null /* Looper */);
+                // Set a loading text while you wait for the address to be
+                // returned
            /* mLocationTextView.setText(getString(R.string.address_text,
                     getString(R.string.loading),
                     System.currentTimeMillis()));
             mLocationButton.setText(R.string.stop_tracking_location);
             mRotateAnim.start();*/
 
-        }
+            }
 
 
     }
@@ -462,7 +536,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     /**
      * This method to get the device localisation.
      */
-    private void getDeviceLocation() {
+    protected void getDeviceLocation() {
         try {
             if (mLocationPermissionGranted && getActivity() != null) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
@@ -471,12 +545,14 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                         // Set the map's camera position to the current location of the device.
                         mLastKnownLocation = task.getResult();
                         if (mLastKnownLocation != null) {
+                            DataSingleton.getInstance().setLocation(mLastKnownLocation);
 
                             // Store device coordinates
                             double latitude = mLastKnownLocation.getLatitude();
                             double longitude = mLastKnownLocation.getLongitude();
-                            DataSingleton.getInstance().setLatitude(latitude);
-                            DataSingleton.getInstance().setLongitude(longitude);
+                           // mMapViewFragmentListener.sendLocation(mLastKnownLocation);
+
+
                             //Move camera toward device position
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(latitude, longitude), DEFAULT_ZOOM));
@@ -507,18 +583,18 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     //                                          UI
     //---------------------------------------------------------------------------------------------
 
-    private void updateUI(){
+    protected void updateUI(){
         if (mMap == null) {
             return;
         }
         try {
             if (mLocationPermissionGranted) {
-             //   mGpsButton.setVisibility(View.VISIBLE);
+                //   mGpsButton.setVisibility(View.VISIBLE);
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 getDeviceLocation();
             } else {
-            //    mGpsButton.setVisibility(View.GONE);
+                //    mGpsButton.setVisibility(View.GONE);
                 mMap.setMyLocationEnabled(false);
                 Toast.makeText(this.getActivity(), "ERROR", Toast.LENGTH_SHORT).show();
                 mLastKnownLocation = null;

@@ -8,6 +8,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,12 +23,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     //--------------------
     // LIFE CYCLE
     // --------------------
+    protected FusedLocationProviderClient mFusedLocationProviderClient;;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getActivityLayout());
         ButterKnife.bind(this);
+        mFusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
         configureView();
         FirebaseApp.initializeApp(this);
         Icepick.restoreInstanceState (this,savedInstanceState);

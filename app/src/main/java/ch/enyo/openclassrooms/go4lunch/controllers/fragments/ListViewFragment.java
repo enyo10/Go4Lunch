@@ -1,6 +1,9 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.fragments;
 
+import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -11,10 +14,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import ch.enyo.openclassrooms.go4lunch.R;
@@ -37,6 +41,7 @@ public class ListViewFragment extends BaseFragment {
 
     private PlaceDetailsViewAdapter mAdapter;
     private List<PlaceDetails> mPlaceDetailsList;
+    private Location mLocation;
 
     @BindView(R.id.fragment_list_view_recycleView)
     RecyclerView mRecyclerView;
@@ -49,6 +54,10 @@ public class ListViewFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mLocation=DataSingleton.getInstance().getLocation();
+
+        Log.i(TAG, " Location in OnCreate -- "+mLocation.getLongitude());
+        executeHttpRequestWithRetrofit();
 
     }
 
@@ -61,6 +70,8 @@ public class ListViewFragment extends BaseFragment {
     }
 
 
+
+
     @Override
     protected int getFragmentLayout() {
         return R.layout.fragment_list_view;
@@ -71,7 +82,15 @@ public class ListViewFragment extends BaseFragment {
 
     }
 
-    //----------------------------------------------------------------------------------------------
+    public Location getLocation() {
+        return mLocation;
+    }
+
+    public void setLocation(Location location) {
+        mLocation = location;
+    }
+
+//----------------------------------------------------------------------------------------------
     //                      CONFIGURE VIEWS
     //----------------------------------------------------------------------------------------------
 
@@ -83,7 +102,7 @@ public class ListViewFragment extends BaseFragment {
 
     }
 
-    protected void configureRecyclerView(){
+    private  void configureRecyclerView(){
 
         this.mPlaceDetailsList =new ArrayList<>();
         this.mAdapter = new PlaceDetailsViewAdapter(mPlaceDetailsList, Glide.with(this));
@@ -91,14 +110,13 @@ public class ListViewFragment extends BaseFragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         this.mRecyclerView.setLayoutManager(layoutManager);
 
-
         Log.i(TAG, " Recycler view configured ");
     }
 
     /**
      * Configure the swipeRefreshLayout. It execute a request and refresh the page.
      */
-    protected void configureSwipeRefreshLayout(){
+    private void configureSwipeRefreshLayout(){
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -107,8 +125,6 @@ public class ListViewFragment extends BaseFragment {
             }
         });
     }
-
-
 
     //-----------------------------------------------------------------------------------------
     //                                  CONFIGURE ACTIONS
@@ -142,24 +158,28 @@ public class ListViewFragment extends BaseFragment {
     //                           REQUESTS
     //----------------------------------------------------------------------------------------------
 
-    protected void executeHttpRequestWithRetrofit(){
-      //  Map<String,String> map=DataSingleton.getInstance().getParametersMap();
+    private void executeHttpRequestWithRetrofit(){
 
-      //  Log.i(TAG, "parameter map value "+map.toString());
+        String latlng;
+        Location location = getLocation();
+       String l= location.toString();
+        Log.i(TAG," current location "+location.getLongitude());
 
-        mDisposable = GoogleApiPlaceStreams.streamFPlaceDetailsList("47.1431,7.2821")
+      //  latlng = DataSingleton.getInstance().getLatitude()+","+DataSingleton.getInstance().getLongitude();
+        latlng=location.getLatitude()+","+location.getLongitude();
+
+        Log.i(TAG," location "+latlng);
+
+        mDisposable = GoogleApiPlaceStreams.streamFPlaceDetailsList(latlng)
                 .subscribeWith(new DisposableObserver<List<PlaceDetails>>() {
-
                     @Override
                     public void onNext(List<PlaceDetails> placeDetailsList) {
                         Log.i(TAG," Place details list downloading...");
                         Log.i(TAG," Details list size "+placeDetailsList.size());
 
                         updateUIWithResult(placeDetailsList);
-
                         Log.i(TAG, " Place details list update and size : "+mPlaceDetailsList.size());
                     }
-
                     @Override
                     public void onError(Throwable e) {
                         Log.i("TAG","aie, error in place details search: "  +Log.getStackTraceString(e));
@@ -168,7 +188,6 @@ public class ListViewFragment extends BaseFragment {
 
                     @Override
                     public void onComplete() {
-
                         Log.i(TAG," Place details downloaded ");
 
                     }
@@ -209,6 +228,11 @@ public class ListViewFragment extends BaseFragment {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();

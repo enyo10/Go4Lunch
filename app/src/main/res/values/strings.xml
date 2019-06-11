@@ -95,6 +95,7 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="likeSubmit">Liked envoyé</string>
+    <string name="search_restaurant">Chercher un restaurant</string>
 
 
 </resources>

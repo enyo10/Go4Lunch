@@ -12,13 +12,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.annotations.Nullable;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
@@ -39,8 +36,7 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
     private static final String TAG=WorkmatesFragment.class.getSimpleName();
 
     @BindView(R.id.recycler_view_id)RecyclerView mRecyclerView;
-    @BindView(R.id.workmates_fragment_message)
-    TextView mTextView;
+    @BindView(R.id.workmates_fragment_message) TextView mTextView;
 
     private WorkmatesViewAdapter mWorkmatesViewAdapter;
 
@@ -69,7 +65,7 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
 
     @Override
     protected void configureView() {
-       getAllUsers();
+      // getAllUsers();
         this.configureRecyclerView();
 
     }
@@ -135,27 +131,6 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
     }
 
 
-   /* private void getUsersList(){
-
-        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()){
-                    for(QueryDocumentSnapshot documentSnapshot:task.getResult()){
-                        User user=documentSnapshot.toObject(User.class);
-                        //mUsers.add(user);
-                        Log.i(TAG, " User  " +user.getUid());
-                        Log.i(TAG, "User name "+ user.getUsername());
-
-                    }
-                }else {
-                    Log.w(TAG, "Error getting documents.");
-                }
-
-            }
-        });
-    }
-*/
 
     // 6 - Create options for RecyclerView from a Query
     private FirestoreRecyclerOptions<User> generateOptionsForAdapter(Query query){
@@ -171,8 +146,6 @@ public class WorkmatesFragment extends BaseFragment implements WorkmatesViewAdap
         Log.i(TAG, "  number of users  -->"+ mWorkmatesViewAdapter.getItemCount());
         // Show TextView in case RecyclerView is empty
         this.mTextView.setVisibility(this.mWorkmatesViewAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
-
-
 
     }
 }

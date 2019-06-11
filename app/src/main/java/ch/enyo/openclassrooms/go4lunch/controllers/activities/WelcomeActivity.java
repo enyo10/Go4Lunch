@@ -1,24 +1,33 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+
 import android.util.Log;
+
 import com.google.android.material.navigation.NavigationView;
+
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -34,7 +43,6 @@ import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.ListViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
-import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.utils.LocationTrack;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -51,21 +59,24 @@ public class WelcomeActivity extends BaseActivity
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
     private ArrayList<String> permissions = new ArrayList<>();
-  //  Disposable mDisposable;
+    //  Disposable mDisposable;
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
-  //  private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION=102;
+    private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 102;
 
     LocationTrack locationTrack;
 
-    @BindView(R.id.activity_welcome_bottom_navigation) BottomNavigationView mBottomNavigationView;
-    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.activity_welcome_bottom_navigation)
+    BottomNavigationView mBottomNavigationView;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     private ActionBar mActionBar;
 
-    final MapViewFragment mMapViewFragment=new MapViewFragment();
-    final ListViewFragment mListViewFragment=new ListViewFragment();
-    final WorkmatesFragment mWorkmatesFragment=new WorkmatesFragment();
+
+    MapViewFragment mMapViewFragment = new MapViewFragment();
+    // ListViewFragment mListViewFragment=new ListViewFragment();
+    // WorkmatesFragment mWorkmatesFragment=new WorkmatesFragment();
 
     final FragmentManager mFragmentManager = getSupportFragmentManager();
     Fragment activeFragment;
@@ -79,11 +90,11 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void configureView() {
-       toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-        mActionBar= getSupportActionBar();
+        mActionBar = getSupportActionBar();
         configurePermission();
         configureBottomNavigationView();
 
@@ -98,10 +109,14 @@ public class WelcomeActivity extends BaseActivity
 
         // load the store fragment by default
         toolbar.setTitle(R.string.title_activity_maps);
-       // loadFragment(new MapViewFragment());
-        initFragments();
+        configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
+        // initFragments();
+        getDeviceLocation();
+
 
     }
+
+
 
 
     //----------------------------------------------------------------------------------------------
@@ -119,15 +134,20 @@ public class WelcomeActivity extends BaseActivity
                 switch (menuItem.getItemId()) {
 
                     case R.id.bottom_navigation_map:
-                        loadFragment(mMapViewFragment,R.string.title_activity_welcome);
+                       // loadFragment(mMapViewFragment,R.string.title_activity_welcome);
+                        configureContentFrameFragment(mMapViewFragment,R.string.title_activity_welcome);
+
                         return true;
 
                     case R.id.bottom_navigation_restaurants:
-                        loadFragment(mListViewFragment,R.string.title_activity_welcome);
+                       // mListViewFragment.setLocation(DataSingleton.getInstance().getLocation());
+                       // loadFragment(new ListViewFragment(),R.string.title_activity_welcome);
+                        configureContentFrameFragment(new ListViewFragment(),R.string.title_activity_welcome);
+
                         return true;
 
                     case R.id.bottom_navigation_workmates:
-                        loadFragment(mWorkmatesFragment,R.string.title_workmates);
+                        configureContentFrameFragment(new WorkmatesFragment(),R.string.title_workmates);
                         return true;
 
                 }
@@ -196,8 +216,6 @@ public class WelcomeActivity extends BaseActivity
         } else if (id == R.id.your_lunch) {
            // Go to your lunch.
        }
-
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -208,12 +226,21 @@ public class WelcomeActivity extends BaseActivity
     //----------------------------------------------------------------------------------------------
 
     private void initFragments(){
-        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mWorkmatesFragment, "3").hide(mWorkmatesFragment).commit();
-        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
+     //  mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mWorkmatesFragment, "3").hide(mWorkmatesFragment).commit();
+       // mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame,mMapViewFragment, "1").commit();
         activeFragment = mMapViewFragment;
 
     }
+
+    // Launch fragments
+    private void configureContentFrameFragment(Fragment fragment,int title) {
+        toolbar.setTitle(title);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.activity_welcome_frame, fragment).commit();
+    }
+
 
     /**
      * This method to load the fragment in to the frame.
@@ -229,6 +256,8 @@ public class WelcomeActivity extends BaseActivity
         activeFragment = fragment;
 
     }
+
+
 
 
     //--------------------------------------------------------------------------------------------------
@@ -268,9 +297,7 @@ public class WelcomeActivity extends BaseActivity
     //        Here we handle the localisation process.
     //*******************************************************************
 
-
-    private void configurePermission() {
-
+    private void configurePermission(){
         permissions.add(ACCESS_FINE_LOCATION);
         permissions.add(ACCESS_COARSE_LOCATION);
         permissionsToRequest = findUnAskedPermissions(permissions);
@@ -284,6 +311,43 @@ public class WelcomeActivity extends BaseActivity
 
         }
 
+    }
+
+    private void getDeviceLocation(){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                Log.i(TAG," location  " +location);
+
+            }
+        });
+    }
+
+
+  /*  private void configurePermission() {
+
+        permissions.add(ACCESS_FINE_LOCATION);
+        permissions.add(ACCESS_COARSE_LOCATION);
+        permissionsToRequest = findUnAskedPermissions(permissions);
+        //get the permissions we have asked for before but are not granted..
+        //we will store this in a global list to access later.
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (permissionsToRequest.size() > 0)
+                requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
+        }
+
         // Initialise location tracker.
         locationTrack = new LocationTrack(WelcomeActivity.this);
 
@@ -292,8 +356,8 @@ public class WelcomeActivity extends BaseActivity
 
             double longitude = locationTrack.getLongitude();
             double latitude = locationTrack.getLatitude();
-             dataSingleton.setLongitude(longitude);
-             dataSingleton.setLatitude(latitude);
+            // dataSingleton.setLongitude(longitude);
+           //  dataSingleton.setLatitude(latitude);
             Log.i(TAG, "Longitude by tracker : " + longitude + "\nLatitude:" + latitude);
 
             Toast.makeText(getApplicationContext(), "Longitude:" + longitude + "\nLatitude:" + latitude, Toast.LENGTH_SHORT).show();
@@ -303,7 +367,7 @@ public class WelcomeActivity extends BaseActivity
         }
 
     }
-
+*/
 
     private ArrayList<String> findUnAskedPermissions(ArrayList<String> wanted) {
         ArrayList<String> result = new ArrayList<>();
@@ -364,30 +428,7 @@ public class WelcomeActivity extends BaseActivity
         }
     }
 
-   /* public void executeRequestWithRetrofit(){
-       // Map<String,String> parametersMap= DataSingleton.getInstance().getParametersMap();
-       // Log.i(TAG," parameters "+parametersMap.toString());
 
-        mDisposable = GoogleApiPlaceStreams.fetchPlaceNearBySearchStream("47.1431,7.2821")
-                .subscribeWith(new DisposableObserver<PlaceNearBySearch>() {
-                    @Override
-                    public void onNext(PlaceNearBySearch placeNearBySearch) {
-                        DataSingleton.getInstance().setNearbySearchResultList(placeNearBySearch.getResults());
-                        Log.i(TAG, " restaurant by near size "+placeNearBySearch.getResults().size());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.i("TAG","aie, error in place nearby search: "  +Log.getStackTraceString(e));
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.i(TAG, "Restaurant near by search completed.");
-                    }
-                });
-    }
-*/
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(WelcomeActivity.this)
                 .setMessage(message)
@@ -403,5 +444,6 @@ public class WelcomeActivity extends BaseActivity
         super.onDestroy();
         locationTrack.stopListener();
     }
+
 
 }

@@ -48,8 +48,8 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
     RatingBar mRatingBar;
 
     // VAR
-    private double lat = DataSingleton.getInstance().getLatitude();
-    private double lng = DataSingleton.getInstance().getLongitude();
+    private double lat = DataSingleton.getInstance().getLocation().getLatitude();
+    private double lng = DataSingleton.getInstance().getLocation().getLongitude();
 
 
     public PlaceDetailsViewHolder(@NonNull View itemView) {
