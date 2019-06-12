@@ -139,7 +139,8 @@ public class WelcomeActivity extends BaseActivity
         initLocationCallback();
         initQuery();
 
-
+        if(getCurrentUser()!=null)
+        Log.d(TAG, " Current User -- "+ getCurrentUser().getUid());
 
 
     }

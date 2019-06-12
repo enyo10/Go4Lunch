@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.auth.FirebaseUser;
+
 import butterknife.ButterKnife;
 
 
@@ -52,6 +54,13 @@ public abstract class BaseFragment extends Fragment {
     public void startActivity(Class activity) {
         Intent intent = new Intent(getContext(), activity);
         startActivity(intent);
+    }
+
+    public FirebaseUser getCurrentUser(){
+        BaseActivity activity =(BaseActivity)getActivity();
+        if(activity!=null)
+        return activity. getCurrentUser();
+        return null;
     }
 
 
