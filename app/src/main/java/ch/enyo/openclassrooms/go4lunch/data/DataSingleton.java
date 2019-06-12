@@ -25,7 +25,6 @@ public class DataSingleton implements Serializable {
     private Double mLongitude;
     private PlaceDetails mPlaceDetail;
     private Location mLocation;
-    private Map<String, String> mParameterMap;
     private String location = "";
     private String url;
 
@@ -41,15 +40,6 @@ public class DataSingleton implements Serializable {
         mPlaceDetailsList = new ArrayList<>();
         mNearbySearchResultList = new ArrayList<>();
 
-        //String a = "location=-33.8670522,151.1957362&radius=1500&type=restaurant&keyword=cruise&key=AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
-
-        // Use to make the filter by retrofit call.
-       /* mParameterMap = new HashMap<>();
-        mParameterMap.put("key", "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8");
-        mParameterMap.put("type", "restaurant");
-        mParameterMap.put("radius", "5000");
-        mParameterMap.put("location", "47.1431,7.2821");
-        url="https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&maxheight=100&photoreference=";*/
     }
 
 
@@ -113,12 +103,6 @@ public class DataSingleton implements Serializable {
 
     }
 
-
-   /* public Map<String, String> getParametersMap() {
-        // this.mParameterMap.put("location",getLocationString());
-        Log.i(TAG, " Parameter map -> " + mParameterMap.toString());
-        return mParameterMap;
-    }*/
 
     /**
      * This method format longitude and latitude to a String.

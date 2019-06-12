@@ -54,10 +54,11 @@ public class ListViewFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.mPlaceDetailsList =new ArrayList<>();
         mLocation=DataSingleton.getInstance().getLocation();
 
         Log.i(TAG, " Location in OnCreate -- "+mLocation.getLongitude());
-        executeHttpRequestWithRetrofit();
+       // executeHttpRequestWithRetrofit();
 
     }
 
@@ -68,9 +69,6 @@ public class ListViewFragment extends BaseFragment {
 
         return listViewFragment;
     }
-
-
-
 
     @Override
     protected int getFragmentLayout() {
@@ -104,7 +102,6 @@ public class ListViewFragment extends BaseFragment {
 
     private  void configureRecyclerView(){
 
-        this.mPlaceDetailsList =new ArrayList<>();
         this.mAdapter = new PlaceDetailsViewAdapter(mPlaceDetailsList, Glide.with(this));
         this.mRecyclerView.setAdapter(mAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -192,11 +189,7 @@ public class ListViewFragment extends BaseFragment {
 
                     }
                 });
-
     }
-
-
-
 
     //----------------------------------------------------------------------------------------------
     //                                   HELP METHODS

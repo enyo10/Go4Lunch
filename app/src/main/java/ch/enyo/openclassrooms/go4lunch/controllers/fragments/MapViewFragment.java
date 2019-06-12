@@ -40,6 +40,7 @@ import java.util.List;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
+import ch.enyo.openclassrooms.go4lunch.controllers.activities.WelcomeActivity;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
@@ -73,6 +74,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private List<Result> mPlaceList;
     private List<User> mUserList;
+    private List<String>mSelectedPlaceId;
 
     MapView mMapView;
     private Disposable mDisposable;
@@ -84,6 +86,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         mPlaceList = new ArrayList<>();
         mUserList=new ArrayList<>();
+        mSelectedPlaceId=new ArrayList<>();
 
         // Initialize the FusedLocationClient.
         if (getActivity() != null)
@@ -105,10 +108,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 // If tracking is turned on, reverse geocode into an address
                 if (mTrackingLocation) {
                     locationResult.getLastLocation();
-                //   Log.i(TAG, " latitude with location callback"+ locationResult.getLastLocation().getLatitude());
-                  //  Log.i(TAG, " longitude with location callback"+ locationResult.getLastLocation().getLongitude());
-                  //  mLastKnownLocation = locationResult.getLastLocation();
-                  //  mSendMessage.sendData(mLastKnownLocation);
 
                 }
             }
@@ -170,7 +169,9 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
      *          the placeNearbyResult containing the restaurant to be add.
      */
     private void addMarkerOnMap(List<Result> placeNearbyResult) {
-        List<String>placeIdList = getPlaceIdList();
+        Log.d(TAG, "in addMarker on map method");
+
+        getAllUsersFromFireBase();
 
         if(placeNearbyResult.size()!=0)
 
@@ -185,8 +186,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             markerOptions.position(latLng);
             markerOptions.title(placename + " : " + vinicity);
 
-            if(placeIdList.size()!=0 && placeIdList.contains(placeNearbyResult.get(i).getPlaceId())) {
-                Log.i(TAG, " place match .." + placeNearbyResult.get(i).getPlaceId());
+           if(mSelectedPlaceId.size()!=0 && mSelectedPlaceId.contains(placeNearbyResult.get(i).getPlaceId())) {
+             //   Log.i(TAG, " place match .." + placeNearbyResult.get(i).getPlaceId());
 
                 mMarker = mMap.addMarker(new MarkerOptions()
                         .position(latLng)
@@ -194,8 +195,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_green)));
             }
             else {
-                Log.i(TAG, " place no match .." + placeNearbyResult.get(i).getPlaceId());
-                Log.i(TAG, " selected list to string "+placeIdList.toString());
+              //  Log.i(TAG, " place no match .." + placeNearbyResult.get(i).getPlaceId());
+               // Log.i(TAG, " selected list to string "+placeIdList.toString());
                 mMarker = mMap.addMarker(new MarkerOptions()
                         .position(latLng)
                         .title(placename + " :" + vinicity)
@@ -206,24 +207,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
         }
     }
-
-
-    private List<String>getPlaceIdList() {
-        List<String> restaurantIdList = new ArrayList<>();
-        getAllUsersFromFireBase();
-
-        if (mUserList != null) {
-            for (User user : mUserList) {
-                if (user.getRestaurantId() != null)
-                    restaurantIdList.add(user.getRestaurantId());
-
-                Log.i(TAG, " Selected Restaurant id " +user.getRestaurantId());
-            }
-        }
-            return restaurantIdList;
-
-        }
-
 
 
     /**
@@ -254,32 +237,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                         updatePlaceList(placeNearBySearch.getResults());
 
                         try {
-                          /*  mMap.clear();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(DataSingleton.getInstance().getLatitude(),
-                                            DataSingleton.getInstance().getLongitude()), DEFAULT_ZOOM));
-                            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-                            for(int i=0;i<placeNearBySearch.getResults().size();i++){
-                                Double lat =placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLat();
-                                Double lng=placeNearBySearch.getResults().get(i).getGeometry().getLocation().getLng();
-                                String placename =placeNearBySearch.getResults().get(i).getName();
-                                String vinicity =placeNearBySearch.getResults().get(i).getVicinity();
-
-                                MarkerOptions markerOptions=new MarkerOptions();
-                                LatLng latLng =new LatLng(lat,lng);
-                                markerOptions.position(latLng);
-                                markerOptions.title(placename +" : "+vinicity);
-
-                                mMap.addMarker(new MarkerOptions()
-                                        .position(latLng)
-                                        .title(placename+ " :" +vinicity)
-                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
-                                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-                          addMarkerOnMap();
-                            }*/
                             addMarkerOnMap(placeNearBySearch.getResults());
+
 
                         }catch (Exception e){
                             Log.d(TAG, "onNext: error");
@@ -305,27 +264,28 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     //---------------------------------------------------------------------------------------------//
 
     private void getAllUsersFromFireBase(){
+
         UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onEvent(@Nullable QuerySnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
+            public void onEvent(@Nullable QuerySnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
                     // Handle error
-                    //...
                     Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
                     e.printStackTrace();
                     return;
                 }
-
                 // Convert query snapshot to a list of users.
 
-                    mUserList.clear();
-
                 mUserList = snapshot.toObjects(User.class);
-                for (User u:mUserList) {
-                    Log.i(TAG, " user :"+u.getUsername());
+                for (int k=0;k<mUserList.size();k++) {
+
+                    String id =mUserList.get(k).getRestaurantId();
+                    if(id!=null)
+                        mSelectedPlaceId.add(id);
 
                 }
+                Log.d(TAG," User list size "+mUserList.size());
+                Log.d(TAG, "Selected id list "+mSelectedPlaceId.size());
 
                 // Update UI
                 // ...
@@ -335,58 +295,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
 
 
-
-
-    private void destroyMap(){
-        if(mMapView!=null)
-            mMapView.onDestroy();
-    }
-
-    private void disposeWhenDestroy() {
-        if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
-    }
-
-
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        disposeWhenDestroy();
-        destroyMap();
-
-        Log.d(TAG, "onDestroy");
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mMapView.onLowMemory();
-
-        Log.d(TAG, "onLowMemory");
-    }
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-        Log.i(TAG, " Location changed "+location.getLongitude());
-
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
 
     //---------------------------------------------------------------------------------------------//
     //                         LOCATION PERMISSION & LOCATION TRACKING.                                        //
@@ -438,7 +346,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 Toast.makeText(getContext(), R.string.location_permission_denied,
                         Toast.LENGTH_SHORT).show();
             }
-            // break;
+
         }
         updateLocationUI();
     }
@@ -459,24 +367,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             } else {
                 Log.d(TAG, "getLocation: permissions granted");
 
-           /* mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if(location!=null){
-                        // Start the reverse geocode AsyncTask
-                        new FetchAddressTask(MainActivity.this,
-                                MainActivity.this).execute(location);
-                        *//*mLastLocation=location;
-                        mLocationTextView.setText(getString(R.string.location_text,
-                                mLastLocation.getLatitude()
-                                ,mLastLocation.getLongitude()
-                                ,mLastLocation.getTime()));*//*
-                    } else {
-                        mLocationTextView.setText(R.string.no_location);
-                    }
-                }
-            });
-*/          mTrackingLocation = true;
+           mTrackingLocation = true;
                 mFusedLocationProviderClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null /* Looper */);
                 // Set a loading text while you wait for the address to be
                 // returned
@@ -536,7 +427,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     /**
      * This method to get the device localisation.
      */
-    protected void getDeviceLocation() {
+    private void getDeviceLocation() {
         try {
             if (mLocationPermissionGranted && getActivity() != null) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
@@ -550,8 +441,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                             // Store device coordinates
                             double latitude = mLastKnownLocation.getLatitude();
                             double longitude = mLastKnownLocation.getLongitude();
-                           // mMapViewFragmentListener.sendLocation(mLastKnownLocation);
-
 
                             //Move camera toward device position
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
@@ -583,18 +472,18 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     //                                          UI
     //---------------------------------------------------------------------------------------------
 
-    protected void updateUI(){
+    private void updateUI(){
         if (mMap == null) {
             return;
         }
         try {
             if (mLocationPermissionGranted) {
-                //   mGpsButton.setVisibility(View.VISIBLE);
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 getDeviceLocation();
-            } else {
-                //    mGpsButton.setVisibility(View.GONE);
+            }
+            else {
+
                 mMap.setMyLocationEnabled(false);
                 Toast.makeText(this.getActivity(), "ERROR", Toast.LENGTH_SHORT).show();
                 mLastKnownLocation = null;
@@ -624,4 +513,58 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         }
         super.onResume();
     }
+
+
+
+    private void destroyMap(){
+        if(mMapView!=null)
+            mMapView.onDestroy();
+    }
+
+    private void disposeWhenDestroy() {
+        if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
+    }
+
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disposeWhenDestroy();
+        destroyMap();
+
+        Log.d(TAG, "onDestroy");
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+
+        Log.d(TAG, "onLowMemory");
+    }
+
+    @Override
+
+    public void onLocationChanged(Location location) {
+
+        Log.i(TAG, " Location changed "+location.getLongitude());
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
 }
