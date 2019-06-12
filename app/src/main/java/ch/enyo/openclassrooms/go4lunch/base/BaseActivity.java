@@ -23,7 +23,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     //--------------------
     // LIFE CYCLE
     // --------------------
-    protected FusedLocationProviderClient mFusedLocationProviderClient;;
+    protected FusedLocationProviderClient mFusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

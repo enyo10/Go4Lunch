@@ -142,7 +142,6 @@ public class WelcomeActivity extends BaseActivity
         if(getCurrentUser()!=null)
         Log.d(TAG, " Current User -- "+ getCurrentUser().getUid());
 
-
     }
 
    private void initQuery(){
@@ -203,8 +202,6 @@ public class WelcomeActivity extends BaseActivity
     private void updateUI(){
 
     }
-
-
 
 
     //----------------------------------------------------------------------------------------------
@@ -303,6 +300,9 @@ public class WelcomeActivity extends BaseActivity
         } else if (id == R.id.action_logout) {
             this.signOutFromFirebase();
 
+        }
+        else if(id==R.id.action_search){
+            onSearchRequested();
         }
 
         return super.onOptionsItemSelected(item);

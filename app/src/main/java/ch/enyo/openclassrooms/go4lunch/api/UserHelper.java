@@ -37,6 +37,9 @@ public class UserHelper {
         return UserHelper.getUsersCollection()
                 .orderBy("uid").limit(20);
     }
+  /*  public static Query getAllUsersWithoutCurrentUser(){
+        return UserHelper.getUsersCollection().ord;
+    }*/
 
     // --- UPDATE ---
 
