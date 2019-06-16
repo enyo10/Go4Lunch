@@ -36,7 +36,7 @@ public class GoogleApiPlaceStreams {
      */
 
     public static Observable<PlaceNearBySearch>fetchPlaceNearBySearchStream(String location){
-       // Log.i(TAG, "Api_key :"+BuildConfig.ApiKey);
+         Log.i(TAG, "Api_key :"+BuildConfig.ApiKey);
         mParametersMap.put("key", "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8");
         mParametersMap.put("type", "restaurant");
         mParametersMap.put("radius", "5000");
@@ -48,17 +48,11 @@ public class GoogleApiPlaceStreams {
                 .timeout(15,TimeUnit.SECONDS);
     }
 
-    /*public static Observable<PlaceNearBySearch>getNearBySearchStream(Map<String,String>filter){
-        GoogleApiPlaceService googleApiPlaceService = GoogleApiPlaceService.retrofit.create(GoogleApiPlaceService.class);
-        return googleApiPlaceService.getPlaceNearBySearch(filter)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .timeout(15, TimeUnit.SECONDS);
-    }
-*/
+
     public static Observable<PlaceDetails>fetchPlaceDetailsStream(String place_id){
-      //  String key=BuildConfig.ApiKey;
-        String key="AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
+        String key=BuildConfig.ApiKey;
+       // Log.i(TAG, "key ---- "+key);
+      //  String key="AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
         GoogleApiPlaceService googleApiPlaceService = GoogleApiPlaceService.retrofit.create(GoogleApiPlaceService.class);
         return googleApiPlaceService.getPlaceDetails(key,place_id)
                 .subscribeOn(Schedulers.io())

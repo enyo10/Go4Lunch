@@ -32,6 +32,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import android.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -145,9 +146,9 @@ public class WelcomeActivity extends BaseActivity
         //  configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
 
 
-        // initQuery();
+       //  initQuery();
         //   initPlaceAutoComplete();
-        initPlaces();
+//        initPlaces();
 
         if (getCurrentUser() != null)
             Log.d(TAG, " Current User -- " + getCurrentUser().getUid());
@@ -164,6 +165,8 @@ public class WelcomeActivity extends BaseActivity
             //  doMySearch(query);
             Log.d(TAG, "Query " + query);
         }
+
+
 
     }
 
@@ -294,18 +297,17 @@ public class WelcomeActivity extends BaseActivity
         getMenuInflater().inflate(R.menu.welcome, menu);
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-     //   SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         // Tells your app's SearchView to use this activity's searchable configuration
         // Assumes current activity is the searchable activity
-//        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
- //       searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         // return true;
 
-/*
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+       /* searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                Log.d(TAG, " query "+query);
                 searchView.clearFocus();
                 return true;
             }
@@ -314,8 +316,8 @@ public class WelcomeActivity extends BaseActivity
             public boolean onQueryTextChange(String newText) {
                 return false;
             }
-        });
-*/
+        });*/
+
          return super.onCreateOptionsMenu(menu);
     }
     //----------------------------------------------------------------------------------------------
@@ -348,9 +350,9 @@ public class WelcomeActivity extends BaseActivity
             this.signOutFromFirebase();
 
         }
-     /*   else if(id==R.id.action_search){
+        else if(id==R.id.action_search){
             onSearchRequested();
-        }*/
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -390,16 +392,8 @@ public class WelcomeActivity extends BaseActivity
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame,mMapViewFragment, "1").commit();
         activeFragment = mMapViewFragment;
 
-
     }
 
-    // Launch fragments
-   /* private void configureContentFrameFragment(Fragment fragment,int title) {
-        toolbar.setTitle(title);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.activity_welcome_frame, fragment).commit();
-    }*/
 
     /**
      * This method to load the fragment in to the frame.

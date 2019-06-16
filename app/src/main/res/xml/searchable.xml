@@ -3,9 +3,12 @@
     android:label="@string/app_name"
     android:hint="@string/search_hint"
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
-    android:searchSuggestAuthority="com.example.google.places.search_suggestion_provider">
+    >
 </searchable>
 <!--<actions>
+ android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
+    android:searchSuggestAuthority="com.example.google.places.search_suggestion_provider"
+
     &lt;!&ndash;    Example Action &ndash;&gt;
     &lt;!&ndash;    <action intentName="Intent name (actions.intent.*)"> &ndash;&gt;
     &lt;!&ndash;        <action-display &ndash;&gt;
