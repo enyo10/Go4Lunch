@@ -14,6 +14,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -21,11 +22,16 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -41,21 +47,23 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import ch.enyo.openclassrooms.go4lunch.BuildConfig;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.auth.ProfileActivity;
 import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.ListViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
-import ch.enyo.openclassrooms.go4lunch.utils.LocationTrack;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static java.security.AccessController.getContext;
@@ -78,26 +86,24 @@ public class WelcomeActivity extends BaseActivity
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
     private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
- //   private final static int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 102;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
-    private Boolean requestingLocationUpdates=false;
+    private Boolean requestingLocationUpdates = false;
     private Location mLastKnownLocation;
+    private LatLng mDeviceDefaultPosition=new LatLng(47.143,7.28);
 
-
-    LocationTrack locationTrack;
 
     @BindView(R.id.activity_welcome_bottom_navigation)
     BottomNavigationView mBottomNavigationView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    private ActionBar mActionBar;
+    protected ActionBar mActionBar;
 
 
-    MapViewFragment mMapViewFragment = new MapViewFragment();
-    // ListViewFragment mListViewFragment=new ListViewFragment();
-    // WorkmatesFragment mWorkmatesFragment=new WorkmatesFragment();
+    MapViewFragment mMapViewFragment;
+    ListViewFragment mListViewFragment;
+    WorkmatesFragment mWorkmatesFragment;
 
     final FragmentManager mFragmentManager = getSupportFragmentManager();
     Fragment activeFragment;
@@ -114,10 +120,14 @@ public class WelcomeActivity extends BaseActivity
         toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
 
-
         setSupportActionBar(toolbar);
         mActionBar = getSupportActionBar();
         configurePermission();
+
+        configureLocationSettings();
+        createLocationRequest();
+       // initLocationCallback();
+        getDeviceLocation();
         configureBottomNavigationView();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -131,48 +141,49 @@ public class WelcomeActivity extends BaseActivity
 
         // load the store fragment by default
         toolbar.setTitle(R.string.title_activity_maps);
-        configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
-        // initFragments();
-        getDeviceLocation();
-        createLocationRequest();
-        configureLocationSettings();
-        initLocationCallback();
-        initQuery();
+         initFragments();
+        //  configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
 
-        if(getCurrentUser()!=null)
-        Log.d(TAG, " Current User -- "+ getCurrentUser().getUid());
+
+        // initQuery();
+        //   initPlaceAutoComplete();
+        initPlaces();
+
+        if (getCurrentUser() != null)
+            Log.d(TAG, " Current User -- " + getCurrentUser().getUid());
 
     }
 
-   private void initQuery(){
 
-       // Get the intent, verify the action and get the query
-       Intent intent = getIntent();
-       if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-           String query = intent.getStringExtra(SearchManager.QUERY);
-         //  doMySearch(query);
-           Log.d(TAG,"Query " +query);
-       }
+    private void initQuery() {
 
-   }
+        // Get the intent, verify the action and get the query
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //  doMySearch(query);
+            Log.d(TAG, "Query " + query);
+        }
 
-   private void initLocationCallback(){
-       mLocationCallback = new LocationCallback() {
-           @Override
-           public void onLocationResult(LocationResult locationResult) {
-               if (locationResult == null) {
-                   return;
-               }
-               for (Location location : locationResult.getLocations()) {
-                   // Update UI with location data
-                   // ...
-                   Log.i(TAG, " With location callback in On created  "+location );
+    }
 
-               }
-           }
-       };
+    private void initLocationCallback() {
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    // Update UI with location data
+                    // ...
+                    Log.i(TAG, " With location callback in On created  " + location);
 
-   }
+                }
+            }
+        };
+
+    }
 
 
     @Override
@@ -197,9 +208,42 @@ public class WelcomeActivity extends BaseActivity
         // ...
 
         // Update UI to match restored state
-      //  updateUI();
+        //  updateUI();
     }
-    private void updateUI(){
+
+    private void updateUI() {
+
+    }
+
+    private void initPlaces(){
+        // Initialize Places.
+        Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
+        // Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+              //  txtView.setText(place.getName()+","+place.getId());
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: " + status);
+            }
+        });
+
+
 
     }
 
@@ -219,20 +263,21 @@ public class WelcomeActivity extends BaseActivity
                 switch (menuItem.getItemId()) {
 
                     case R.id.bottom_navigation_map:
-                       // loadFragment(mMapViewFragment,R.string.title_activity_welcome);
-                        configureContentFrameFragment(mMapViewFragment,R.string.title_activity_welcome);
+                         loadFragment(mMapViewFragment,R.string.title_activity_welcome);
+                        //configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
 
                         return true;
 
                     case R.id.bottom_navigation_restaurants:
-                       // mListViewFragment.setLocation(DataSingleton.getInstance().getLocation());
-                       // loadFragment(new ListViewFragment(),R.string.title_activity_welcome);
-                        configureContentFrameFragment(new ListViewFragment(),R.string.title_activity_welcome);
+
+                        loadFragment(mListViewFragment,R.string.title_activity_welcome);
+                       // configureContentFrameFragment(new ListViewFragment(), R.string.title_activity_welcome);
 
                         return true;
 
                     case R.id.bottom_navigation_workmates:
-                        configureContentFrameFragment(new WorkmatesFragment(),R.string.title_workmates);
+                       // configureContentFrameFragment(new WorkmatesFragment(), R.string.title_workmates);
+                        loadFragment(mWorkmatesFragment,R.string.title_activity_welcome);
                         return true;
 
                 }
@@ -249,13 +294,15 @@ public class WelcomeActivity extends BaseActivity
         getMenuInflater().inflate(R.menu.welcome, menu);
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+     //   SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        // Tells your app's SearchView to use this activity's searchable configuration
         // Assumes current activity is the searchable activity
-       /* searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+//        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+ //       searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
-        return true;*/
+        // return true;
 
+/*
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -268,9 +315,9 @@ public class WelcomeActivity extends BaseActivity
                 return false;
             }
         });
-        return super.onCreateOptionsMenu(menu);
+*/
+         return super.onCreateOptionsMenu(menu);
     }
-
     //----------------------------------------------------------------------------------------------
     //---------------    ACTIONS
     //----------------------------------------------------------------------------------------------
@@ -301,9 +348,9 @@ public class WelcomeActivity extends BaseActivity
             this.signOutFromFirebase();
 
         }
-        else if(id==R.id.action_search){
+     /*   else if(id==R.id.action_search){
             onSearchRequested();
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
@@ -333,38 +380,41 @@ public class WelcomeActivity extends BaseActivity
     //----------------------------------------------------------------------------------------------
 
     private void initFragments(){
-     //  mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mWorkmatesFragment, "3").hide(mWorkmatesFragment).commit();
-       // mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
+        Log.d(TAG, " In init Fragment");
+        mMapViewFragment = new MapViewFragment();
+        mListViewFragment=new ListViewFragment();
+        mWorkmatesFragment=new WorkmatesFragment();
+
+        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mWorkmatesFragment, "3").hide(mWorkmatesFragment).commit();
+        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame,mMapViewFragment, "1").commit();
         activeFragment = mMapViewFragment;
+
 
     }
 
     // Launch fragments
-    private void configureContentFrameFragment(Fragment fragment,int title) {
+   /* private void configureContentFrameFragment(Fragment fragment,int title) {
         toolbar.setTitle(title);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.activity_welcome_frame, fragment).commit();
-    }
+    }*/
 
-
-   /* *//**
+    /**
      * This method to load the fragment in to the frame.
      * @param fragment,
      *                the fragment to load.
      * @param toolbarTextId,
      *                    the text to set to toolbar.
-     *//*
+     */
     private void loadFragment(Fragment fragment, int toolbarTextId){
 
         toolbar.setTitle(toolbarTextId);
         mFragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
         activeFragment = fragment;
 
-    }*/
-
-
+    }
 
 
     //--------------------------------------------------------------------------------------------------
@@ -420,7 +470,7 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
-    private void getDeviceLocation(){
+    public Location getDeviceLocation(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -429,16 +479,30 @@ public class WelcomeActivity extends BaseActivity
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            return;
+            return null;
         }
         mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
                 mLastKnownLocation=location;
                 Log.i(TAG," location  " +mLastKnownLocation);
+                mListViewFragment.setLocation(location);
+
 
             }
         });
+        return mLastKnownLocation;
+    }
+
+
+    public LatLng getDevicePosition(){
+        getDeviceLocation();
+        if(mLastKnownLocation==null)
+            return mDeviceDefaultPosition;
+        else
+        return new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
+
+
     }
 
     protected void createLocationRequest() {
@@ -462,6 +526,10 @@ public class WelcomeActivity extends BaseActivity
                 // All location settings are satisfied. The client can initialize
                 // location requests here.
                 // ...
+
+
+           //     startLocationUpdates();
+
 
                 Log.i(TAG, "Location settings are successful ");
             }
@@ -508,7 +576,7 @@ public class WelcomeActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
-        stopLocationUpdates();
+       // stopLocationUpdates();
 
     }
 
@@ -624,6 +692,7 @@ public class WelcomeActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "in on Resume requestedLocationUpdate "+requestingLocationUpdates);
         if (requestingLocationUpdates) {
             startLocationUpdates();
         }
@@ -633,8 +702,7 @@ public class WelcomeActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //locationTrack.stopListener();
-        stopLocationUpdates();
+//        stopLocationUpdates();
     }
 
 

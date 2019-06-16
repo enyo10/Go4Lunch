@@ -8,10 +8,10 @@
     <!--Recycler view fragment -->
     <include layout="@layout/recycler_view_layout" />
 
-    <TextView
+  <!--  <TextView
         android:id="@+id/workmates_fragment_message"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="@string/hello_blank_fragment" />
-
+-->
 </FrameLayout>

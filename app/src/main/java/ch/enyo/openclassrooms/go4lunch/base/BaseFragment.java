@@ -1,8 +1,13 @@
 package ch.enyo.openclassrooms.go4lunch.base;
 
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -10,6 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 
 import butterknife.ButterKnife;
@@ -31,6 +40,13 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+         // Initialize the FusedLocationClient.
+      /*  if (getActivity() != null)
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+*/
+
+        // Initialize the FusedLocationClient.
+
 
     }
 
@@ -50,6 +66,7 @@ public abstract class BaseFragment extends Fragment {
 
 
 
+
     //Generic activity launcher method
     public void startActivity(Class activity) {
         Intent intent = new Intent(getContext(), activity);
@@ -62,6 +79,7 @@ public abstract class BaseFragment extends Fragment {
         return activity. getCurrentUser();
         return null;
     }
+
 
 
     //----------------------------//

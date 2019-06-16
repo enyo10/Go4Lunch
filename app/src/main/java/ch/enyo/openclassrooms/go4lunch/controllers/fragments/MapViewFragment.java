@@ -69,7 +69,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     // Location Objects.
     private LocationCallback mLocationCallback;
 
-    private final LatLng mDefaultLocation = new LatLng(17, 43);
+    private final LatLng mDefaultLocation = new LatLng(47.14, 7.28);
+
     private boolean mTrackingLocation;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private List<Result> mPlaceList;
@@ -87,6 +88,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         mPlaceList = new ArrayList<>();
         mUserList=new ArrayList<>();
         mSelectedPlaceId=new ArrayList<>();
+
 
         // Initialize the FusedLocationClient.
         if (getActivity() != null)
@@ -480,7 +482,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                getDeviceLocation();
+              //  getDeviceLocation();
             }
             else {
 

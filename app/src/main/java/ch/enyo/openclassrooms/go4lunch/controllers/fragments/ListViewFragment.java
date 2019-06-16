@@ -1,6 +1,6 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.fragments;
 
-import android.content.Context;
+
 import android.location.Location;
 import android.os.Bundle;
 
@@ -14,8 +14,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +23,7 @@ import butterknife.BindView;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.activities.PlaceDetailsActivity;
+import ch.enyo.openclassrooms.go4lunch.controllers.activities.WelcomeActivity;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
@@ -42,6 +42,7 @@ public class ListViewFragment extends BaseFragment {
     private PlaceDetailsViewAdapter mAdapter;
     private List<PlaceDetails> mPlaceDetailsList;
     private Location mLocation;
+    private LatLng mDevicePosition;
 
     @BindView(R.id.fragment_list_view_recycleView)
     RecyclerView mRecyclerView;
@@ -55,10 +56,19 @@ public class ListViewFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mPlaceDetailsList =new ArrayList<>();
-        mLocation=DataSingleton.getInstance().getLocation();
+        getLatLng();
 
-        Log.i(TAG, " Location in OnCreate -- "+mLocation.getLongitude());
-       // executeHttpRequestWithRetrofit();
+      //  Log.i(TAG, " Location in OnCreate -- latitude "+mLastKnownLocation.getLongitude());
+//        executeHttpRequestWithRetrofit();
+
+    }
+
+    private void getLatLng(){
+        WelcomeActivity welcomeActivity=(WelcomeActivity)getActivity();
+        if(welcomeActivity!=null)
+            mLocation= welcomeActivity.getDeviceLocation();
+
+        Log.d(TAG, " location ");
 
     }
 
@@ -80,12 +90,15 @@ public class ListViewFragment extends BaseFragment {
 
     }
 
+
     public Location getLocation() {
         return mLocation;
     }
 
     public void setLocation(Location location) {
+
         mLocation = location;
+        executeHttpRequestWithRetrofit();
     }
 
 //----------------------------------------------------------------------------------------------
@@ -156,18 +169,17 @@ public class ListViewFragment extends BaseFragment {
     //----------------------------------------------------------------------------------------------
 
     private void executeHttpRequestWithRetrofit(){
+        LatLng latlng;
+        if(mLocation==null){
+        latlng =new LatLng(43,17);
+        }else
+            latlng=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
 
-        String latlng;
-        Location location = getLocation();
-       String l= location.toString();
-        Log.i(TAG," current location "+location.getLongitude());
+        String latlng1=latlng.latitude+","+latlng.longitude;
 
-      //  latlng = DataSingleton.getInstance().getLatitude()+","+DataSingleton.getInstance().getLongitude();
-        latlng=location.getLatitude()+","+location.getLongitude();
+        Log.i(TAG," location "+latlng.toString());
 
-        Log.i(TAG," location "+latlng);
-
-        mDisposable = GoogleApiPlaceStreams.streamFPlaceDetailsList(latlng)
+        mDisposable = GoogleApiPlaceStreams.streamFPlaceDetailsList(latlng1)
                 .subscribeWith(new DisposableObserver<List<PlaceDetails>>() {
                     @Override
                     public void onNext(List<PlaceDetails> placeDetailsList) {
@@ -223,6 +235,7 @@ public class ListViewFragment extends BaseFragment {
 
     @Override
     public void onResume() {
+        executeHttpRequestWithRetrofit();
         super.onResume();
 
     }
