@@ -24,6 +24,7 @@ import butterknife.BindView;
 import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
+import ch.enyo.openclassrooms.go4lunch.controllers.activities.WelcomeActivity;
 import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyo.openclassrooms.go4lunch.views.WorkmatesViewsAdapter;
 
@@ -31,7 +32,7 @@ import ch.enyo.openclassrooms.go4lunch.views.WorkmatesViewsAdapter;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WorkmatesFragment extends BaseFragment{
+public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.SearchInterface {
     private static final String TAG=WorkmatesFragment.class.getSimpleName();
 
     @BindView(R.id.recycler_view_id)RecyclerView mRecyclerView;
@@ -150,4 +151,8 @@ public class WorkmatesFragment extends BaseFragment{
     }
 
 
+    @Override
+    public void doMySearch(String query) {
+        Log.d(TAG, "In Workmates Fragment "+query);
+    }
 }

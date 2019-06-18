@@ -13,6 +13,7 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationCallback;
@@ -22,17 +23,28 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import android.widget.SearchView;
+//import android.widget.SearchView;
+//import androidx.appcompat.widget.SearchView;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -55,6 +67,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,10 +87,15 @@ public class WelcomeActivity extends BaseActivity
 
     private static final String TAG = WelcomeActivity.class.getSimpleName();
 
+    public interface SearchInterface{
+        public void doMySearch(String query);
+    }
+
     //  - Identify each Http Request
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
 
+    int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
@@ -108,6 +126,7 @@ public class WelcomeActivity extends BaseActivity
 
     final FragmentManager mFragmentManager = getSupportFragmentManager();
     Fragment activeFragment;
+    PlacesClient mPlacesClient;
 
     //
 
@@ -124,6 +143,7 @@ public class WelcomeActivity extends BaseActivity
         setSupportActionBar(toolbar);
         mActionBar = getSupportActionBar();
         configurePermission();
+        intAppClient();
 
         configureLocationSettings();
         createLocationRequest();
@@ -144,7 +164,7 @@ public class WelcomeActivity extends BaseActivity
         toolbar.setTitle(R.string.title_activity_maps);
          initFragments();
         //  configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
-
+        handleIntent(getIntent());
 
        //  initQuery();
         //   initPlaceAutoComplete();
@@ -155,20 +175,58 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
-
-    private void initQuery() {
-
-        // Get the intent, verify the action and get the query
-        Intent intent = getIntent();
+    private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            //  doMySearch(query);
-            Log.d(TAG, "Query " + query);
+
+            SearchInterface searchInterface= (SearchInterface) activeFragment;
+            searchInterface.doMySearch(query);
+           // placePrediction(query);
+            //Log.d(TAG, "search query "+query);
         }
+    }
 
+    private void intAppClient(){
+        Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
+        // Create a new Places client instance.
+         mPlacesClient = Places.createClient(this);
+    }
 
+    public void placePrediction(String query){
+        // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
+        // and once again when the user makes a selection (for example when calling fetchPlace()).
+        AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+
+        // Create a RectangularBounds object.
+        RectangularBounds bounds = RectangularBounds.newInstance(
+                new LatLng(37.410490, -122.084363),
+                new LatLng(37.421754, -122.084959));
+        // Use the builder to create a FindAutocompletePredictionsRequest.
+        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                // Call either setLocationBias() OR setLocationRestriction().
+                .setLocationBias(bounds)
+                //.setLocationRestriction(bounds)
+                .setCountry("au")
+                .setTypeFilter(TypeFilter.ADDRESS)
+                .setSessionToken(token)
+                .setQuery(query)
+                .build();
+
+        mPlacesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+            for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
+                Log.i(TAG, prediction.getPlaceId());
+                Log.i(TAG, prediction.getPrimaryText(null).toString());
+            }
+        }).addOnFailureListener((exception) -> {
+            if (exception instanceof ApiException) {
+                ApiException apiException = (ApiException) exception;
+                Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+            }
+        });
 
     }
+
+
 
     private void initLocationCallback() {
         mLocationCallback = new LocationCallback() {
@@ -186,6 +244,12 @@ public class WelcomeActivity extends BaseActivity
             }
         };
 
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
     }
 
 
@@ -214,9 +278,7 @@ public class WelcomeActivity extends BaseActivity
         //  updateUI();
     }
 
-    private void updateUI() {
-
-    }
+/*
 
     private void initPlaces(){
         // Initialize Places.
@@ -249,6 +311,7 @@ public class WelcomeActivity extends BaseActivity
 
 
     }
+*/
 
 
     //----------------------------------------------------------------------------------------------
@@ -296,12 +359,12 @@ public class WelcomeActivity extends BaseActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.welcome, menu);
         // Get the SearchView and set the searchable configuration
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+       // SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+       // SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         // Tells your app's SearchView to use this activity's searchable configuration
         // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+      //  searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+     //   searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         // return true;
 
        /* searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -348,13 +411,49 @@ public class WelcomeActivity extends BaseActivity
 
         } else if (id == R.id.action_logout) {
             this.signOutFromFirebase();
+            return true;
 
         }
         else if(id==R.id.action_search){
+            if(activeFragment instanceof WorkmatesFragment)
             onSearchRequested();
+            else onPlaceAutoCompleteRequested();
+
+            return true;
+
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void onPlaceAutoCompleteRequested(){
+        // Set the fields to specify which types of place data to
+        // return after the user has made a selection.
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+
+        // Start the autocomplete intent.
+        Intent intent = new Autocomplete.IntentBuilder(
+                AutocompleteActivityMode.OVERLAY, fields)
+                .build(this);
+        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+       // super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                // TODO: Handle the error.
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Log.i(TAG, status.getStatusMessage());
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

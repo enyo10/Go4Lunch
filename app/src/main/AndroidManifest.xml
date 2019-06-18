@@ -53,11 +53,13 @@
             android:name=".auth.ProfileActivity"
             android:label="@string/toolbar_title_login_activity"
             android:parentActivityName=".controllers.activities.WelcomeActivity" />
+
         <activity
             android:name=".controllers.activities.WelcomeActivity"
             android:label="@string/title_activity_welcome"
             android:parentActivityName=".controllers.activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>

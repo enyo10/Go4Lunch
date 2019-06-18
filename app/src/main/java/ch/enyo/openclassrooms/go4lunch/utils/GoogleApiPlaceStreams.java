@@ -36,8 +36,8 @@ public class GoogleApiPlaceStreams {
      */
 
     public static Observable<PlaceNearBySearch>fetchPlaceNearBySearchStream(String location){
-         Log.i(TAG, "Api_key :"+BuildConfig.ApiKey);
-        mParametersMap.put("key", "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8");
+        // Log.i(TAG, "Api_key :"+BuildConfig.ApiKey); "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8"
+        mParametersMap.put("key",BuildConfig.ApiKey);
         mParametersMap.put("type", "restaurant");
         mParametersMap.put("radius", "5000");
         mParametersMap.put("location",location);

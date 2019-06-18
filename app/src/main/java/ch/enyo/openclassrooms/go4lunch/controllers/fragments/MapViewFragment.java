@@ -54,7 +54,7 @@ import io.reactivex.observers.DisposableObserver;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapViewFragment extends BaseFragment implements OnMapReadyCallback, LocationListener {
+public class MapViewFragment extends BaseFragment implements OnMapReadyCallback, LocationListener,WelcomeActivity.SearchInterface {
 
     private static final String TAG = MapViewFragment.class.getSimpleName();
 
@@ -569,4 +569,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     }
 
+    @Override
+    public void doMySearch(String query) {
+        Log.d(TAG,"In Map View fragment"+ query);
+    }
 }

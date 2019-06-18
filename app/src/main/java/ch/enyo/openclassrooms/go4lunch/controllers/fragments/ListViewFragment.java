@@ -35,7 +35,7 @@ import io.reactivex.observers.DisposableObserver;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListViewFragment extends BaseFragment {
+public class ListViewFragment extends BaseFragment implements WelcomeActivity.SearchInterface {
 
     private static final String TAG = ListViewFragment.class.getSimpleName();
 
@@ -250,5 +250,10 @@ public class ListViewFragment extends BaseFragment {
     public void onDestroy() {
         super.onDestroy();
         disposeWhenDestroy();
+    }
+
+    @Override
+    public void doMySearch(String query) {
+        Log.i(TAG,"In ListView Fragment ");
     }
 }
