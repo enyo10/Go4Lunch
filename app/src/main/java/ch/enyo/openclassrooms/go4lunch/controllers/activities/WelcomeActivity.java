@@ -23,7 +23,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -37,8 +36,6 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -358,28 +355,7 @@ public class WelcomeActivity extends BaseActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.welcome, menu);
-        // Get the SearchView and set the searchable configuration
-       // SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-       // SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        // Tells your app's SearchView to use this activity's searchable configuration
-        // Assumes current activity is the searchable activity
-      //  searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-     //   searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-        // return true;
 
-       /* searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Log.d(TAG, " query "+query);
-                searchView.clearFocus();
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });*/
 
          return super.onCreateOptionsMenu(menu);
     }
@@ -797,6 +773,9 @@ public class WelcomeActivity extends BaseActivity
         super.onDestroy();
 //        stopLocationUpdates();
     }
+
+
+
 
 
 }

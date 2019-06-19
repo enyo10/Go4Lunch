@@ -3,6 +3,10 @@ package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -38,11 +43,13 @@ import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.utils.DataFormatter;
+import ch.enyo.openclassrooms.go4lunch.utils.NotificationAlarmReceiver;
 import ch.enyo.openclassrooms.go4lunch.views.PlaceDetailsViewAdapter;
 import ch.enyo.openclassrooms.go4lunch.views.WorkmatesViewsAdapter;
 
 public class PlaceDetailsActivity extends BaseActivity implements DataFormatter {
     private static final String TAG = PlaceDetailsActivity.class.getSimpleName();
+    public static final String RESTAURANT_NAME="RestaurantName";
 
     // The views.
     @BindView(R.id.restaurant_image)ImageView mInfoImage;
@@ -62,10 +69,16 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private String webAddress;
     private double rating;
     private String placeId;
-    private boolean restaurantSelected=false;
+    private boolean restaurantSelected;
 
     private WorkmatesViewsAdapter mWorkmatesViewsAdapter;
     private List<User> mUserList;
+    private PlaceDetails mPlaceDetails;
+
+    private AlarmManager mAlarmManager;
+    private PendingIntent mPendingIntent;
+    private User mUser;
+
 
     @Override
     public int getActivityLayout() {
@@ -76,17 +89,18 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     public void configureView() {
         mUserList=new ArrayList<>();
         DataSingleton dataSingleton= DataSingleton.getInstance();
-        PlaceDetails placeDetails= dataSingleton.getPlaceDetail();
+        mPlaceDetails = dataSingleton.getPlaceDetail();
         ButterKnife.bind(this);
         glide = Glide.with(this);
         String  url="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference=";
         String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
 
 
-        showPlaceDetails(placeDetails,url,apiKey);
+        showPlaceDetails(mPlaceDetails,url,apiKey);
         configeRecyclerView();
         configureSwipeRefreshLayout();
-        getAllUsersFromFireBase();
+        getAllActiveUsersFromFireBase();
+        configureAlarmManager();
 
     }
 
@@ -132,19 +146,14 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     private void updateUserList(List<User>users){
 /*
-        Collections.sort(articles,Collections.<NYTimesArticle>reverseOrder());
-        this.mSwipeRefreshLayout.setRefreshing(false);
-        this.mNYTimesArticles.clear();
-        this.mNYTimesArticles.addAll(articles);
-        this.mAdapter.notifyDataSetChanged();
+        Collections.sort(users,Collections.<User>reverseOrder());
         */
        this.mSwipeRefreshLayout.setRefreshing(false);
        this.mUserList.clear();
        this.mUserList.addAll(users);
        this.mWorkmatesViewsAdapter.notifyDataSetChanged();
-
-
     }
+
     //----------------------------------------------------------------------------------------------
     //                                 ACTION
     //----------------------------------------------------------------------------------------------
@@ -156,7 +165,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getAllUsersFromFireBase();
+                getAllActiveUsersFromFireBase();
             }
         });
     }
@@ -173,26 +182,40 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     }
 
+    /**
+     * This method check if the current user has selected a restaurant.
+     * @return boolean,
+     */
+    private boolean isRestaurantSelected(){
+
+        String restaurantId =mUser.getRestaurantId();
+         return (restaurantId!=null && !restaurantId.isEmpty());
+    }
+
     @OnClick(R.id.floatingActionButton)
     public void selectRestaurant(){
+        restaurantSelected=isRestaurantSelected();
+
         if(restaurantSelected){
-            addSelectedRestaurantIdToFireBase("");
+            addSelectedRestaurantIdToFireBase(null);
             restaurantSelected=false;
+            stopAlarm();
             Log.i(TAG, "Restaurant with id : "+placeId+"  removed");
-            Log.i(TAG, " Restaurant selected : "+restaurantSelected);
+
         }
         else{
             addSelectedRestaurantIdToFireBase(placeId);
             restaurantSelected=true;
+            scheduleAlarm();
             Log.i(TAG, "Restaurant with id : "+placeId+"  selected");
-            Log.i(TAG," Restaurant selected :"+restaurantSelected );
         }
+       // getAllActiveUsersFromFireBase();
 
     }
     // --------------------
     // REST REQUESTS
     // --------------------
-    private void getAllUsersFromFireBase(){
+    private void getAllActiveUsersFromFireBase(){
 
         UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -206,14 +229,17 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
                 // Convert query snapshot to a list of users.
                List<User> list = snapshot.toObjects(User.class);
                 List<User>activeUserList=new ArrayList<>();
+                if(getCurrentUser()!=null)
                 for (int k=0;k<list.size();k++) {
-                    if(list.get(k).getRestaurantId()!=null)
+                    if(getCurrentUser().getUid().equals(list.get(k).getUid())){
+                        mUser=list.get(k);
+                    }
+                    else if(list.get(k).getRestaurantId()!=null)
                         activeUserList.add(list.get(k));
 
                 }
                 updateUserList(activeUserList);
-
-
+                Log.d(TAG," actual User "+mUser);
                 // Update UI
                 // ...
             }
@@ -248,5 +274,64 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
         Log.i(TAG, " Recycler view configured ");
     }
+
+    //----------------------------------------------------------------------------------------------
+    //              ALARM MANAGEMENT
+    //----------------------------------------------------------------------------------------------
+
+    /**
+     * Configure the alarm manager.
+     */
+    private void configureAlarmManager(){
+        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, NotificationAlarmReceiver.class);
+       String address= formatAddress(mPlaceDetails.getResult().getFormattedAddress());
+        intent.putExtra(RESTAURANT_NAME,address);
+        mPendingIntent = PendingIntent.getBroadcast(this, 0,intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+    }
+
+    /**
+     * This method to schedule the alarm that will fire the notification.
+     */
+    public void scheduleAlarm() {
+        // set alarm to wakeup the device at 12 o'clock.
+        /* Calendar calendar =Calendar.getInstance ();
+        calendar.setTimeInMillis (System.currentTimeMillis ());
+        calendar.set(Calendar.HOUR_OF_DAY,12);
+        AlarmManager alarmManager=(AlarmManager) getSystemService (Context.ALARM_SERVICE);
+        Intent i = new Intent(this, AlarmReceiver.class);
+        PendingIntent   alarm_Intent = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        alarmManager.setInexactRepeating (AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis (),AlarmManager.INTERVAL_DAY,alarm_Intent);
+
+       */
+
+            // SetRepeating() lets you specify a precise custom interval--in this case, 2 minutes.
+            long time = new GregorianCalendar().getTimeInMillis() + 2 * 60 * 1000;
+
+            mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, time,
+                    1000 * 60 * 2, mPendingIntent);
+            this.callToast("Alarm started ...");
+
+    }
+
+    /**
+     * Cancel the alarm.
+     */
+    private void stopAlarm(){
+       // mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager.cancel(mPendingIntent);
+    }
+
+    // This method to display a toast message.
+    private void callToast(String message){
+        Toast toast = Toast.makeText(getApplicationContext(),
+                message,
+                Toast.LENGTH_SHORT);
+
+        toast.show();
+    }
+
 
 }

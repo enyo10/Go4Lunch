@@ -8,8 +8,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
-
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.annotations.Nullable;
@@ -42,6 +40,7 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.S
 
     private WorkmatesViewsAdapter mAdapter;
     private List<User>mUserList;
+
 
 
 
@@ -155,4 +154,7 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.S
     public void doMySearch(String query) {
         Log.d(TAG, "In Workmates Fragment "+query);
     }
+
+
+
 }
