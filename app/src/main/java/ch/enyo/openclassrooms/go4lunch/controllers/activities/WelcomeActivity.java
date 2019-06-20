@@ -3,16 +3,13 @@ package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
-
 import androidx.annotation.NonNull;
-
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
@@ -38,9 +35,6 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-//import android.widget.SearchView;
-//import androidx.appcompat.widget.SearchView;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -59,6 +53,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -85,7 +80,7 @@ public class WelcomeActivity extends BaseActivity
     private static final String TAG = WelcomeActivity.class.getSimpleName();
 
     public interface SearchInterface{
-        public void doMySearch(String query);
+         void doMySearch(String query);
     }
 
     //  - Identify each Http Request
@@ -101,6 +96,7 @@ public class WelcomeActivity extends BaseActivity
     private ArrayList<String> permissions = new ArrayList<>();
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
     private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
@@ -539,40 +535,48 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
-    public Location getDeviceLocation(){
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return null;
+    public void getDeviceLocation(){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]
+                    {Manifest.permission.ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION},ALL_PERMISSIONS_RESULT);
+
+        }else {
+            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    mLastKnownLocation = location;
+                    Log.i(TAG, " location  " + mLastKnownLocation);
+                    mListViewFragment.setLocation(location);
+
+
+                }
+            });
         }
-        mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                mLastKnownLocation=location;
-                Log.i(TAG," location  " +mLastKnownLocation);
-                mListViewFragment.setLocation(location);
+    }
 
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]
+                            {Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION);
+        } else {
+            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    mLastKnownLocation=location;
+                    mListViewFragment.setLocation(location);
 
-            }
-        });
-        return mLastKnownLocation;
+                }
+            });
+        }
     }
 
 
-    public LatLng getDevicePosition(){
-        getDeviceLocation();
-        if(mLastKnownLocation==null)
-            return mDeviceDefaultPosition;
-        else
-        return new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
 
-
-    }
 
     protected void createLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
@@ -715,13 +719,27 @@ public class WelcomeActivity extends BaseActivity
         return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
     }
 
+   /* @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode ==REQUEST_LOCATION_PERMISSION) {
+                // If the permission is granted, get the location,
+                // otherwise, show a Toast
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    getLocation();
+                } else {
+                    Toast.makeText(this,
+                            R.string.location_permission_denied,
+                            Toast.LENGTH_SHORT).show();
+                }
+        }
+    }*/
 
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        switch (requestCode) {
-            case ALL_PERMISSIONS_RESULT:
+        if(requestCode==ALL_PERMISSIONS_RESULT){
                 for (String perms : permissionsToRequest) {
                     if (!hasPermission(perms)) {
                         permissionsRejected.add(perms);
@@ -740,11 +758,14 @@ public class WelcomeActivity extends BaseActivity
                                            // }
                                         }
                                     });
-                            return;
                         }
                     }
                 }
-                break;
+                else{
+                    Log.d(TAG," Permission granted");
+                    getDeviceLocation();
+
+                }
         }
     }
 

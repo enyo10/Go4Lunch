@@ -93,7 +93,7 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
             }
             // Number of workmates
             if (nbOfWorkmate > 0) {
-                mNbOfWorkmates.setText(String.valueOf("(" + nbOfWorkmate + ")"));
+                mNbOfWorkmates.setText("(" + nbOfWorkmate + ")");
                 this.mNbOfWorkmates.setVisibility(View.VISIBLE);
                 this.mWorkmateImageView.setVisibility(View.VISIBLE);
             } else {

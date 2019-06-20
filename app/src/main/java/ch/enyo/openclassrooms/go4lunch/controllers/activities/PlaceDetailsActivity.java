@@ -4,9 +4,12 @@ package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -94,6 +97,8 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         glide = Glide.with(this);
         String  url="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference=";
         String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
+       // For notification.
+        createNotificationChannel();
 
 
         showPlaceDetails(mPlaceDetails,url,apiKey);
@@ -317,11 +322,35 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     }
 
     /**
+     * This method create a notification channel.
+     */
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is  not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //CharSequence name = getString(R.string.channel_name);
+            //String description = getString(R.string.channel_description);
+            CharSequence name = "Channel";
+            String description = "Channel Description";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("Chanel_id", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+
+    /**
      * Cancel the alarm.
      */
     private void stopAlarm(){
        // mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mAlarmManager.cancel(mPendingIntent);
+        this.callToast("Alarm stop ...");
+
     }
 
     // This method to display a toast message.

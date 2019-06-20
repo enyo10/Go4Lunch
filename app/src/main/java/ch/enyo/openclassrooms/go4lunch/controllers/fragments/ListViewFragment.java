@@ -42,7 +42,6 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
     private PlaceDetailsViewAdapter mAdapter;
     private List<PlaceDetails> mPlaceDetailsList;
     private Location mLocation;
-    private LatLng mDevicePosition;
 
     @BindView(R.id.fragment_list_view_recycleView)
     RecyclerView mRecyclerView;
@@ -56,21 +55,10 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mPlaceDetailsList =new ArrayList<>();
-        getLatLng();
-
-      //  Log.i(TAG, " Location in OnCreate -- latitude "+mLastKnownLocation.getLongitude());
-//        executeHttpRequestWithRetrofit();
 
     }
 
-    private void getLatLng(){
-        WelcomeActivity welcomeActivity=(WelcomeActivity)getActivity();
-        if(welcomeActivity!=null)
-            mLocation= welcomeActivity.getDeviceLocation();
 
-        Log.d(TAG, " location ");
-
-    }
 
     @Override
     public BaseFragment newInstance() {
@@ -109,7 +97,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
     protected void configureView() {
         configureRecyclerView();
         configureSwipeRefreshLayout();
-        executeHttpRequestWithRetrofit();
+
 
     }
 
@@ -130,6 +118,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                if(mLocation!=null)
                 executeHttpRequestWithRetrofit();
 
             }
@@ -169,11 +158,8 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
     //----------------------------------------------------------------------------------------------
 
     private void executeHttpRequestWithRetrofit(){
-        LatLng latlng;
-        if(mLocation==null){
-        latlng =new LatLng(43,17);
-        }else
-            latlng=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+
+        LatLng latlng=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
 
         String latlng1=latlng.latitude+","+latlng.longitude;
 
@@ -233,12 +219,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
 
     }
 
-    @Override
-    public void onResume() {
-        executeHttpRequestWithRetrofit();
-        super.onResume();
 
-    }
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();

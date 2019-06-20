@@ -12,6 +12,7 @@ import ch.enyo.openclassrooms.go4lunch.R;
 import ch.enyo.openclassrooms.go4lunch.controllers.activities.PlaceDetailsActivity;
 
 public class NotificationAlarmReceiver extends BroadcastReceiver {
+    private static final String TAG=NotificationAlarmReceiver.class.getSimpleName();
 
     private Context mContext;
     @Override
@@ -24,6 +25,7 @@ public class NotificationAlarmReceiver extends BroadcastReceiver {
     }
 
     public void sendNotification(String message){
+        Log.d(TAG,"Notification Send");
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, "Chanel_id")
                 .setSmallIcon(R.drawable.ic_alarm)

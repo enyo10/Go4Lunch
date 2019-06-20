@@ -88,6 +88,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         mPlaceList = new ArrayList<>();
         mUserList=new ArrayList<>();
         mSelectedPlaceId=new ArrayList<>();
+        getAllUsersFromFireBase();
 
 
         // Initialize the FusedLocationClient.
@@ -173,7 +174,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private void addMarkerOnMap(List<Result> placeNearbyResult) {
         Log.d(TAG, "in addMarker on map method");
 
-        getAllUsersFromFireBase();
+         getAllUsersFromFireBase();
 
         if(placeNearbyResult.size()!=0)
 
@@ -188,7 +189,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             markerOptions.position(latLng);
             markerOptions.title(placename + " : " + vinicity);
 
-           if(mSelectedPlaceId.size()!=0 && mSelectedPlaceId.contains(placeNearbyResult.get(i).getPlaceId())) {
+           if( mSelectedPlaceId.contains(placeNearbyResult.get(i).getPlaceId())) {
              //   Log.i(TAG, " place match .." + placeNearbyResult.get(i).getPlaceId());
 
                 mMarker = mMap.addMarker(new MarkerOptions()
@@ -197,7 +198,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_green)));
             }
             else {
-              //  Log.i(TAG, " place no match .." + placeNearbyResult.get(i).getPlaceId());
+                Log.i(TAG, " place no match .."+ mSelectedPlaceId +"    "+ placeNearbyResult.get(i).getPlaceId());
                // Log.i(TAG, " selected list to string "+placeIdList.toString());
                 mMarker = mMap.addMarker(new MarkerOptions()
                         .position(latLng)
@@ -278,16 +279,20 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 }
                 // Convert query snapshot to a list of users.
 
-                mUserList = snapshot.toObjects(User.class);
-                for (int k=0;k<mUserList.size();k++) {
+                List<User> userList = snapshot.toObjects(User.class);
+                List<String>selectedRestaurantId=new ArrayList<>();
+                for (int k=0;k<userList.size();k++) {
 
-                    String id =mUserList.get(k).getRestaurantId();
+                    String id =userList.get(k).getRestaurantId();
                     if(id!=null)
-                        mSelectedPlaceId.add(id);
+                        selectedRestaurantId.add(id);
 
                 }
-                Log.d(TAG," User list size "+mUserList.size());
-                Log.d(TAG, "Selected id list "+mSelectedPlaceId.size());
+                mUserList=userList;
+                // Selected Restaurant id list.
+                mSelectedPlaceId=selectedRestaurantId;
+                Log.d(TAG," User list size : "+mUserList.size());
+                Log.d(TAG, "Selected id list size : "+mSelectedPlaceId.size());
 
                 // Update UI
                 // ...

@@ -15,7 +15,7 @@ public class GPSUpdateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Location location = (Location)intent.getParcelableExtra(LocationManager.KEY_LOCATION_CHANGED);
+        Location location = intent.getParcelableExtra(LocationManager.KEY_LOCATION_CHANGED);
 
         Log.d(TAG,"Latitude " + location.getLatitude() + " et longitude " + location.getLongitude());
     }
