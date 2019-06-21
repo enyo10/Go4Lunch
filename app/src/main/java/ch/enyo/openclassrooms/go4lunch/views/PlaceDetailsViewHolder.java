@@ -3,6 +3,8 @@ package ch.enyo.openclassrooms.go4lunch.views;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -10,11 +12,20 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.database.annotations.Nullable;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.enyo.openclassrooms.go4lunch.R;
+import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.utils.DataFormatter;
 
@@ -50,18 +61,23 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
     // VAR
     private double lat = DataSingleton.getInstance().getLocation().getLatitude();
     private double lng = DataSingleton.getInstance().getLocation().getLongitude();
+    private List<User>mSubscribers=new ArrayList<>();
+    private PlaceDetails mPlaceDetails;
 
 
     public PlaceDetailsViewHolder(@NonNull View itemView) {
         super(itemView);
         ButterKnife.bind(this,itemView);
+
     }
 
     public void updateWithPlaceDetails(PlaceDetails placeDetails, RequestManager glide){
         String url= "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&maxheight=100&photoreference=";
         String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
         String urlbis= "https://maps.googleapis.com/maps/api/place/photo?key=AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8&photoreference=";
-        int nbOfWorkmate=1;
+        int nbOfWorkmate=mSubscribers.size();
+        mPlaceDetails=placeDetails;
+        getSubscribers(placeDetails);
 
         if ( placeDetails.getResult() != null)
         {
@@ -135,4 +151,35 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
 
 
     }*/
+
+    public void getSubscribers(PlaceDetails placeDetails) {
+
+        String placeId=placeDetails.getResult().getPlaceId();
+
+        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    // Handle error
+                    Log.i(TAG, " Error by retrieve user from fire base-->: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+                // Convert query snapshot to a list of users.
+                List<User> list = snapshot.toObjects(User.class);
+                List<User> activeUserList = new ArrayList<>();
+                for(int i=0;i<list.size();i++){
+                    if(placeId.equals(list.get(i).getRestaurantId())){
+                        activeUserList.add(list.get(i));
+                    }
+
+                }
+                mSubscribers = activeUserList;
+
+
+                // Update UI
+                // ...
+            }
+        });
+    }
 }
