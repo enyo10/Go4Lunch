@@ -23,14 +23,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     //--------------------
     // LIFE CYCLE
     // --------------------
-    protected FusedLocationProviderClient mFusedLocationProviderClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getActivityLayout());
         ButterKnife.bind(this);
-        mFusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
         configureView();
         FirebaseApp.initializeApp(this);
         Icepick.restoreInstanceState (this,savedInstanceState);

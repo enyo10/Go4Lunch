@@ -19,6 +19,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -62,7 +63,7 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
     private double lat = DataSingleton.getInstance().getLocation().getLatitude();
     private double lng = DataSingleton.getInstance().getLocation().getLongitude();
     private List<User>mSubscribers=new ArrayList<>();
-    private PlaceDetails mPlaceDetails;
+
 
 
     public PlaceDetailsViewHolder(@NonNull View itemView) {
@@ -76,7 +77,7 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
         String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
         String urlbis= "https://maps.googleapis.com/maps/api/place/photo?key=AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8&photoreference=";
         int nbOfWorkmate=mSubscribers.size();
-        mPlaceDetails=placeDetails;
+
         getSubscribers(placeDetails);
 
         if ( placeDetails.getResult() != null)
@@ -109,7 +110,7 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
             }
             // Number of workmates
             if (nbOfWorkmate > 0) {
-                mNbOfWorkmates.setText("(" + nbOfWorkmate + ")");
+                mNbOfWorkmates.setText(String.format(Locale.US, "(%d)", nbOfWorkmate));
                 this.mNbOfWorkmates.setVisibility(View.VISIBLE);
                 this.mWorkmateImageView.setVisibility(View.VISIBLE);
             } else {
@@ -128,31 +129,9 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
     }
 
 
-  /*  public void updateWithPlaceDetails(PlaceDetails placeDetails, RequestManager glide){
-        PlaceDetailsResult result= placeDetails.getResult();
-        mNameTextView.setText(placeDetails.getResult().getName());
-        mAddressTextView.setText(result.getVicinity());
-        String url= DataSingleton.getInstance().getUrl();
-        String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
-        glide.load(url+result.getPhotos().get(0).getPhotoReference()+ apiKey).apply(RequestOptions.centerCropTransform()).into(mImageView);
-
-        Log.i(TAG," ref "+url+result.getPhotos().get(0).getPhotoReference()+ apiKey);
 
 
-       *//* if(result.getPhotos().size()!=0)
-            glide.load(result.getPhotos().get(0)).into(mImageView);
-        *//*
-
-
-        Log.i(TAG, " Reference ."+result.getReference());
-        Log.i(TAG, " url ."+result.getUrl());
-        Log.i(TAG, " first photo ."+result.getPhotos().get(0).getPhotoReference());
-
-
-
-    }*/
-
-    public void getSubscribers(PlaceDetails placeDetails) {
+    private void getSubscribers(PlaceDetails placeDetails) {
 
         String placeId=placeDetails.getResult().getPlaceId();
 

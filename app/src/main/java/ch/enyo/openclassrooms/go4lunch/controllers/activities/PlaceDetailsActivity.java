@@ -91,8 +91,9 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     @Override
     public void configureView() {
         mUserList=new ArrayList<>();
-        DataSingleton dataSingleton= DataSingleton.getInstance();
-        mPlaceDetails = dataSingleton.getPlaceDetail();
+        mPlaceDetails = DataSingleton.getInstance().getPlaceDetails();
+
+        Log.d(TAG, " place Details "+mPlaceDetails);
         ButterKnife.bind(this);
         glide = Glide.with(this);
         String  url="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference=";
@@ -100,7 +101,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
        // For notification.
         createNotificationChannel();
 
-
+        if(mPlaceDetails!=null)
         showPlaceDetails(mPlaceDetails,url,apiKey);
         configeRecyclerView();
         configureSwipeRefreshLayout();
@@ -290,7 +291,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private void configureAlarmManager(){
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, NotificationAlarmReceiver.class);
-       String address= formatAddress(mPlaceDetails.getResult().getFormattedAddress());
+        String address= formatAddress(mPlaceDetails.getResult().getFormattedAddress());
         intent.putExtra(RESTAURANT_NAME,address);
         mPendingIntent = PendingIntent.getBroadcast(this, 0,intent, PendingIntent.FLAG_UPDATE_CURRENT);
 

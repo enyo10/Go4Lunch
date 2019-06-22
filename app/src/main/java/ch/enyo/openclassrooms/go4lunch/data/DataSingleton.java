@@ -21,9 +21,10 @@ public class DataSingleton implements Serializable {
 
     private List<PlaceDetails> mPlaceDetailsList;
     private List<Result> mNearbySearchResultList;
+    private Map<String, PlaceDetails>mStringPlaceDetailsMap;
     private Double mLatitude;
     private Double mLongitude;
-    private PlaceDetails mPlaceDetail;
+    private PlaceDetails mPlaceDetails;
     private Location mLocation;
     private String location = "";
     private String url;
@@ -39,6 +40,8 @@ public class DataSingleton implements Serializable {
         }
         mPlaceDetailsList = new ArrayList<>();
         mNearbySearchResultList = new ArrayList<>();
+        mPlaceDetails=null;
+        mLocation=null;
 
     }
 
@@ -51,6 +54,14 @@ public class DataSingleton implements Serializable {
         }
 
         return mSoleInstance;
+    }
+
+    public Map<String, PlaceDetails> getPlaceDetailsHashMap() {
+        return mStringPlaceDetailsMap;
+    }
+
+    public void setPlaceDetailsMap(Map<String, PlaceDetails> resultHashMap) {
+        mStringPlaceDetailsMap = resultHashMap;
     }
 
     //Make singleton from serialize and deserialize operation.
@@ -66,29 +77,16 @@ public class DataSingleton implements Serializable {
     public void setPlaceDetailsList(List<PlaceDetails> placeDetailsList) {
         mPlaceDetailsList = placeDetailsList;
     }
+    private void setResultHashMap(){
 
-    public Double getLatitude() {
-        return mLatitude;
     }
 
-    public void setLatitude(Double latitude) {
-        mLatitude = latitude;
+    public PlaceDetails getPlaceDetails() {
+        return mPlaceDetails;
     }
 
-    public Double getLongitude() {
-        return mLongitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.mLongitude = longitude;
-    }
-
-    public PlaceDetails getPlaceDetail() {
-        return mPlaceDetail;
-    }
-
-    public void setPlaceDetail(PlaceDetails placeDetail) {
-        mPlaceDetail = placeDetail;
+    public void setPlaceDetails(PlaceDetails placeDetails) {
+        this.mPlaceDetails = placeDetails;
     }
 
     public Location getLocation() {
@@ -100,20 +98,6 @@ public class DataSingleton implements Serializable {
         Log.i(TAG, " Location is set "+location.getLongitude());
         this.mLocation = location;
 
-
-    }
-
-
-    /**
-     * This method format longitude and latitude to a String.
-     *
-     * @return location, a string format of longitude and latitude.
-     */
-    private String getLocationString() {
-
-        if (this.getLongitude() != null && this.getLatitude() != null)
-            location = getLongitude() + "," + getLatitude();
-        return location;
 
     }
 

@@ -35,7 +35,7 @@ import io.reactivex.observers.DisposableObserver;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListViewFragment extends BaseFragment implements WelcomeActivity.SearchInterface {
+public class ListViewFragment extends BaseFragment implements WelcomeActivity.DataInterface {
 
     private static final String TAG = ListViewFragment.class.getSimpleName();
 
@@ -79,15 +79,20 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
     }
 
 
-    public Location getLocation() {
-        return mLocation;
+    @Override
+    public void update(List<PlaceDetails>placeDetailsList) {
+        Log.d(TAG, "in ListView Fragment: place details size "+ placeDetailsList.size());
+        updateUIWithResult(placeDetailsList);
+       // executeHttpRequestWithRetrofit();
+
     }
 
-    public void setLocation(Location location) {
 
-        mLocation = location;
-        executeHttpRequestWithRetrofit();
+    @Override
+    public void doMySearch(String query) {
+        Log.i(TAG,"In ListView Fragment ");
     }
+
 
 //----------------------------------------------------------------------------------------------
     //                      CONFIGURE VIEWS
@@ -137,7 +142,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 
                      PlaceDetails placeDetails =  mAdapter.getItem(position);
-                     DataSingleton.getInstance().setPlaceDetail(placeDetails);
+                     DataSingleton.getInstance().setPlaceDetails(placeDetails);
 
                         Log.i(TAG,"  selected photo reference : "+placeDetails.getImageUrl());
                         Log.i(TAG," selected status: "+ placeDetails.getStatus());
@@ -172,6 +177,13 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
                         Log.i(TAG," Place details list downloading...");
                         Log.i(TAG," Details list size "+placeDetailsList.size());
 
+
+                        /*Double lat = placeNearbyResult.get(i).getGeometry().getLocation().getLat();
+                        Double lng = placeNearbyResult.get(i).getGeometry().getLocation().getLng();
+                        String placename = placeNearbyResult.get(i).getName();
+                        String vinicity = placeNearbyResult.get(i).getVicinity();
+*/
+
                         updateUIWithResult(placeDetailsList);
                         Log.i(TAG, " Place details list update and size : "+mPlaceDetailsList.size());
                     }
@@ -196,15 +208,15 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
     private void updateUIWithResult(List<PlaceDetails>list){
         this.mSwipeRefreshLayout.setRefreshing(false);
         this.mPlaceDetailsList.clear();
-        setImageUrls(list);
+        //setImageUrls(list);
         this.mPlaceDetailsList.addAll(list);
         this.mAdapter.notifyDataSetChanged();
     }
     /**
      * This method is a helper that help to add an image url to the place details.
-     * @param list, a list of place details that will be modify.
+  //   * @param list, a list of place details that will be modify.
      */
-    private void setImageUrls(List<PlaceDetails>list){
+   /* private void setImageUrls(List<PlaceDetails>list){
         String url= DataSingleton.getInstance().getUrl();
         String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
         for(int i=0;i<list.size();i++){
@@ -219,7 +231,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
 
     }
 
-
+*/
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
@@ -233,8 +245,5 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Se
         disposeWhenDestroy();
     }
 
-    @Override
-    public void doMySearch(String query) {
-        Log.i(TAG,"In ListView Fragment ");
-    }
+
 }

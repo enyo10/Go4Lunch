@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.location.Location;
 import android.util.Log;
 import android.view.View;
 
@@ -24,13 +25,14 @@ import ch.enyo.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyo.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.activities.WelcomeActivity;
 import ch.enyo.openclassrooms.go4lunch.models.firebase.User;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyo.openclassrooms.go4lunch.views.WorkmatesViewsAdapter;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.SearchInterface {
+public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.DataInterface {
     private static final String TAG=WorkmatesFragment.class.getSimpleName();
 
     @BindView(R.id.recycler_view_id)RecyclerView mRecyclerView;
@@ -40,8 +42,6 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.S
 
     private WorkmatesViewsAdapter mAdapter;
     private List<User>mUserList;
-
-
 
 
     @Override
@@ -155,6 +155,11 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.S
         Log.d(TAG, "In Workmates Fragment "+query);
     }
 
+    @Override
+    public void update(List<PlaceDetails>placeDetailsList) {
+
+
+    }
 
 
 }

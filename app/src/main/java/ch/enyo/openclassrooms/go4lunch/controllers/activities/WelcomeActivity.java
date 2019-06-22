@@ -1,46 +1,33 @@
 package ch.enyo.openclassrooms.go4lunch.controllers.activities;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
+
 import androidx.annotation.NonNull;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
+
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.model.TypeFilter;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -51,12 +38,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,17 +59,21 @@ import ch.enyo.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.ListViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
 import ch.enyo.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static java.security.AccessController.getContext;
+import ch.enyo.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyo.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
+import ch.enyo.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 
 public class WelcomeActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = WelcomeActivity.class.getSimpleName();
 
-    public interface SearchInterface{
-         void doMySearch(String query);
+    public interface DataInterface {
+        void doMySearch(String query);
+
+        void update(List<PlaceDetails> placeDetailsList);
     }
 
     //  - Identify each Http Request
@@ -89,20 +82,16 @@ public class WelcomeActivity extends BaseActivity
 
     int AUTOCOMPLETE_REQUEST_CODE = 1;
 
-    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-
-    private ArrayList<String> permissionsToRequest;
-    private ArrayList<String> permissionsRejected = new ArrayList<>();
-    private ArrayList<String> permissions = new ArrayList<>();
-
-    private final static int ALL_PERMISSIONS_RESULT = 101;
+    // private final static int ALL_PERMISSIONS_RESULT = 101;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
+    protected FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
-    private Boolean requestingLocationUpdates = false;
+    private Boolean requestingLocationUpdates;
     private Location mLastKnownLocation;
-    private LatLng mDeviceDefaultPosition=new LatLng(47.143,7.28);
+    private boolean mTrackingLocation;
+    private List<PlaceDetails> mPlaceDetailsList;
 
 
     @BindView(R.id.activity_welcome_bottom_navigation)
@@ -121,7 +110,7 @@ public class WelcomeActivity extends BaseActivity
     Fragment activeFragment;
     PlacesClient mPlacesClient;
 
-    //
+    private Disposable mDisposable;
 
     @Override
     public int getActivityLayout() {
@@ -130,18 +119,20 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void configureView() {
+        // Initialize the FusedLocationClient.
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        this.mPlaceDetailsList =new ArrayList<>();
         toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
         mActionBar = getSupportActionBar();
-        configurePermission();
         intAppClient();
 
-        configureLocationSettings();
-        createLocationRequest();
+        //   createLocationRequest();
        // initLocationCallback();
         getDeviceLocation();
+
         configureBottomNavigationView();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -155,16 +146,9 @@ public class WelcomeActivity extends BaseActivity
 
         // load the store fragment by default
         toolbar.setTitle(R.string.title_activity_maps);
-         initFragments();
-        //  configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
+        initFragments();
         handleIntent(getIntent());
 
-       //  initQuery();
-        //   initPlaceAutoComplete();
-//        initPlaces();
-
-        if (getCurrentUser() != null)
-            Log.d(TAG, " Current User -- " + getCurrentUser().getUid());
 
     }
 
@@ -172,72 +156,19 @@ public class WelcomeActivity extends BaseActivity
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
-            SearchInterface searchInterface= (SearchInterface) activeFragment;
+            DataInterface searchInterface = (DataInterface) activeFragment;
             searchInterface.doMySearch(query);
-           // placePrediction(query);
+            // placePrediction(query);
             //Log.d(TAG, "search query "+query);
         }
     }
 
-    private void intAppClient(){
+    private void intAppClient() {
         Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
         // Create a new Places client instance.
-         mPlacesClient = Places.createClient(this);
+        mPlacesClient = Places.createClient(this);
     }
 
-    public void placePrediction(String query){
-        // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
-        // and once again when the user makes a selection (for example when calling fetchPlace()).
-        AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
-
-        // Create a RectangularBounds object.
-        RectangularBounds bounds = RectangularBounds.newInstance(
-                new LatLng(37.410490, -122.084363),
-                new LatLng(37.421754, -122.084959));
-        // Use the builder to create a FindAutocompletePredictionsRequest.
-        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
-                // Call either setLocationBias() OR setLocationRestriction().
-                .setLocationBias(bounds)
-                //.setLocationRestriction(bounds)
-                .setCountry("au")
-                .setTypeFilter(TypeFilter.ADDRESS)
-                .setSessionToken(token)
-                .setQuery(query)
-                .build();
-
-        mPlacesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
-            for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
-                Log.i(TAG, prediction.getPlaceId());
-                Log.i(TAG, prediction.getPrimaryText(null).toString());
-            }
-        }).addOnFailureListener((exception) -> {
-            if (exception instanceof ApiException) {
-                ApiException apiException = (ApiException) exception;
-                Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-            }
-        });
-
-    }
-
-
-
-    private void initLocationCallback() {
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
-                    // Update UI with location data
-                    // ...
-                    Log.i(TAG, " With location callback in On created  " + location);
-
-                }
-            }
-        };
-
-    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -248,63 +179,11 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
-                requestingLocationUpdates);
+       /* outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
+                requestingLocationUpdates);*/
         // ...
         super.onSaveInstanceState(outState);
     }
-
-    private void updateValuesFromBundle(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            return;
-        }
-
-        // Update the value of requestingLocationUpdates from the Bundle.
-        if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
-            requestingLocationUpdates = savedInstanceState.getBoolean(
-                    REQUESTING_LOCATION_UPDATES_KEY);
-        }
-
-        // ...
-
-        // Update UI to match restored state
-        //  updateUI();
-    }
-
-/*
-
-    private void initPlaces(){
-        // Initialize Places.
-        Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
-        // Create a new Places client instance.
-        PlacesClient placesClient = Places.createClient(this);
-        // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
-
-        // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
-
-        // Set up a PlaceSelectionListener to handle the response.
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
-              //  txtView.setText(place.getName()+","+place.getId());
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
-            }
-
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i(TAG, "An error occurred: " + status);
-            }
-        });
-
-
-
-    }
-*/
 
 
     //----------------------------------------------------------------------------------------------
@@ -322,21 +201,21 @@ public class WelcomeActivity extends BaseActivity
                 switch (menuItem.getItemId()) {
 
                     case R.id.bottom_navigation_map:
-                         loadFragment(mMapViewFragment,R.string.title_activity_welcome);
+                        loadFragment(mMapViewFragment, R.string.title_activity_welcome);
                         //configureContentFrameFragment(mMapViewFragment, R.string.title_activity_welcome);
 
                         return true;
 
                     case R.id.bottom_navigation_restaurants:
 
-                        loadFragment(mListViewFragment,R.string.title_activity_welcome);
-                       // configureContentFrameFragment(new ListViewFragment(), R.string.title_activity_welcome);
+                        loadFragment(mListViewFragment, R.string.title_activity_welcome);
+                        // configureContentFrameFragment(new ListViewFragment(), R.string.title_activity_welcome);
 
                         return true;
 
                     case R.id.bottom_navigation_workmates:
-                       // configureContentFrameFragment(new WorkmatesFragment(), R.string.title_workmates);
-                        loadFragment(mWorkmatesFragment,R.string.title_activity_welcome);
+                        // configureContentFrameFragment(new WorkmatesFragment(), R.string.title_workmates);
+                        loadFragment(mWorkmatesFragment, R.string.title_activity_welcome);
                         return true;
 
                 }
@@ -353,7 +232,7 @@ public class WelcomeActivity extends BaseActivity
         getMenuInflater().inflate(R.menu.welcome, menu);
 
 
-         return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
     }
     //----------------------------------------------------------------------------------------------
     //---------------    ACTIONS
@@ -385,10 +264,9 @@ public class WelcomeActivity extends BaseActivity
             this.signOutFromFirebase();
             return true;
 
-        }
-        else if(id==R.id.action_search){
-            if(activeFragment instanceof WorkmatesFragment)
-            onSearchRequested();
+        } else if (id == R.id.action_search) {
+            if (activeFragment instanceof WorkmatesFragment)
+                onSearchRequested();
             else onPlaceAutoCompleteRequested();
 
             return true;
@@ -398,7 +276,32 @@ public class WelcomeActivity extends BaseActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void onPlaceAutoCompleteRequested(){
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.setting) {
+            // start profile Activity
+            startActivity(ProfileActivity.class);
+        } else if (id == R.id.logout) {
+            this.signOutFromFirebase();
+
+        } else if (id == R.id.your_lunch) {
+            // Go to your lunch.
+        }
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
+    //-------------------------------------------------------------------------------------------------------------
+    //                    AUTOCOMPLETE MANAGEMENT
+    //-------------------------------------------------------------------------------------------------------------
+
+    private void onPlaceAutoCompleteRequested() {
         // Set the fields to specify which types of place data to
         // return after the user has made a selection.
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
@@ -413,7 +316,7 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-       // super.onActivityResult(requestCode, resultCode, data);
+        // super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
@@ -424,56 +327,44 @@ public class WelcomeActivity extends BaseActivity
                 Log.i(TAG, status.getStatusMessage());
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
+                Log.d(TAG, " The user canceled the Operation");
             }
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-       if (id == R.id.setting) {
-            // start profile Activity
-           startActivity(ProfileActivity.class);
-        } else if (id == R.id.logout) {
-           this.signOutFromFirebase();
-
-        } else if (id == R.id.your_lunch) {
-           // Go to your lunch.
-       }
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
 
 //--------------------------------------------------------------------------------------------------
     //               HELPER.
     //----------------------------------------------------------------------------------------------
 
-    private void initFragments(){
+    /**
+     * This method to initialise the fragment and set one as active.
+     */
+    private void initFragments() {
         Log.d(TAG, " In init Fragment");
         mMapViewFragment = new MapViewFragment();
-        mListViewFragment=new ListViewFragment();
-        mWorkmatesFragment=new WorkmatesFragment();
+        mListViewFragment = new ListViewFragment();
+        mWorkmatesFragment = new WorkmatesFragment();
 
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mWorkmatesFragment, "3").hide(mWorkmatesFragment).commit();
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
-        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame,mMapViewFragment, "1").commit();
-        activeFragment = mMapViewFragment;
+        mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mMapViewFragment, "1").commit();
+        // activeFragment = mMapViewFragment;
 
     }
 
 
     /**
      * This method to load the fragment in to the frame.
-     * @param fragment,
-     *                the fragment to load.
-     * @param toolbarTextId,
-     *                    the text to set to toolbar.
+     *
+     * @param fragment,      the fragment to load.
+     * @param toolbarTextId, the text to set to toolbar.
      */
-    private void loadFragment(Fragment fragment, int toolbarTextId){
+    private void loadFragment(Fragment fragment, int toolbarTextId) {
+
+        DataInterface dataInterface = (DataInterface) fragment;
+        dataInterface.update(mPlaceDetailsList);
+        Log.d(TAG," place details list size in load fragment "+mPlaceDetailsList.size());
 
         toolbar.setTitle(toolbarTextId);
         mFragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
@@ -519,44 +410,92 @@ public class WelcomeActivity extends BaseActivity
     //        PERMISSION AND LOCATION AND UPDATE.
     //------------------------------------------------------------------------------------------------
 
-    private void configurePermission(){
-        permissions.add(ACCESS_FINE_LOCATION);
-        permissions.add(ACCESS_COARSE_LOCATION);
-        permissionsToRequest = findUnAskedPermissions(permissions);
-        //get the permissions we have asked for before but are not granted..
-        //we will store this in a global list to access later.
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            if (permissionsToRequest.size() > 0)
-                requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
-
-        }
-
-    }
-
-    public void getDeviceLocation(){
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+    private void getDeviceLocation() {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]
-                    {Manifest.permission.ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION},ALL_PERMISSIONS_RESULT);
+                            {Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION);
 
-        }else {
+            Log.d(TAG,"Location permission do not grandted");
+        } else {
             mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
-                    mLastKnownLocation = location;
-                    Log.i(TAG, " location  " + mLastKnownLocation);
-                    mListViewFragment.setLocation(location);
 
+                    if (location != null) {
+                        if(mLastKnownLocation!=null){
+                            mLastKnownLocation = location;
+                            activeFragment = mMapViewFragment;
+                            executeHttpRequestWithRetrofit();
+                        }
+                        else {
+                            mLastKnownLocation=location;
+                        }
+                        DataSingleton.getInstance().setLocation(mLastKnownLocation);
 
+                        Log.i(TAG,"Location found "+location);
+
+                    } else {
+                        Log.d(TAG, " Location not found ");
+                    }
                 }
             });
         }
     }
 
-    private void getLocation() {
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION_PERMISSION:
+                // If the permission is granted, get the location,
+                // otherwise, show a Toast
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    getDeviceLocation();
+                    // startTrackingLocation();
+                } else {
+                    Toast.makeText(this,
+                            R.string.location_permission_denied,
+                            Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+
+
+    protected LocationRequest getLocationRequest() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest = locationRequest;
+        return mLocationRequest;
+    }
+
+
+    private void initLocationCallback() {
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    // Update UI with location data
+                    // ...
+                    Log.i(TAG, " With location callback in On created  " + location);
+
+                }
+            }
+        };
+
+    }
+
+
+    private void startTrackingLocation() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -564,239 +503,97 @@ public class WelcomeActivity extends BaseActivity
                             {Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_LOCATION_PERMISSION);
         } else {
-            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    mLastKnownLocation=location;
-                    mListViewFragment.setLocation(location);
+            mTrackingLocation = true;
+            mFusedLocationProviderClient.requestLocationUpdates
+                    (getLocationRequest(),
+                            mLocationCallback,
+                            null /* Looper */);
 
-                }
-            });
+            // Set a loading text while you wait for the address to be
+            // returned
+
+
         }
     }
 
 
+    //----------------------------------------------------------------------------------------------
+    //                           REQUESTS
+    //----------------------------------------------------------------------------------------------
 
+    private void executeHttpRequestWithRetrofit(){
 
-    protected void createLocationRequest() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest= locationRequest;
-    }
+        LatLng latlng=new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
 
+        String latlng1=latlng.latitude+","+latlng.longitude;
 
-    protected void configureLocationSettings(){
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-        SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+        Log.i(TAG," location "+latlng.toString());
 
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // All location settings are satisfied. The client can initialize
-                // location requests here.
-                // ...
+        mDisposable = GoogleApiPlaceStreams.streamFPlaceDetailsList(latlng1)
+                .subscribeWith(new DisposableObserver<List<PlaceDetails>>() {
+                    @Override
+                    public void onNext(List<PlaceDetails> placeDetailsList) {
+                        Log.i(TAG," Place details list downloading...");
+                        Log.i(TAG," Details list size "+placeDetailsList.size());
 
-
-           //     startLocationUpdates();
-
-
-                Log.i(TAG, "Location settings are successful ");
-            }
-        });
-
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
-                    try {
-                        // Show the dialog by calling startResolutionForResult(),
-                        // and check the result in onActivityResult().
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(WelcomeActivity.this,
-                                REQUEST_CHECK_SETTINGS);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
+                        updateUIWithResult(placeDetailsList);
+                        Log.i(TAG, " Place details list update and size : "+mPlaceDetailsList.size());
                     }
-                }
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.i("TAG","aie, error in place details search: "  +Log.getStackTraceString(e));
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.i(TAG," Place details downloaded ");
+
+                    }
+                });
     }
 
-    private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            if (getContext() != null)
-                ActivityCompat.requestPermissions(this, new String[]
-                                {Manifest.permission.ACCESS_FINE_LOCATION},
-                        ALL_PERMISSIONS_RESULT);
-        } else {
-            requestingLocationUpdates=true;
-            Log.d(TAG, "getLocation: permissions granted");
-            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest,
-                    mLocationCallback,
-                    null /* Looper */);
+    //----------------------------------------------------------------------------------------------
+    //                                   HELP METHODS
+    //----------------------------------------------------------------------------------------------
+
+    private void updateUIWithResult(List<PlaceDetails>list){
+        this.mPlaceDetailsList.clear();
+        this.mPlaceDetailsList.addAll(list);
+        DataInterface dataInterface= (DataInterface)activeFragment;
+        dataInterface.update(list);
+
+    }
+
+    /**
+     * Stops tracking the device. Removes the location
+     * updates, stops the animation, and resets the UI.
+     */
+    private void stopTrackingLocation() {
+        if (mTrackingLocation) {
+            mTrackingLocation = false;
+
         }
     }
 
 
     @Override
     protected void onPause() {
+        if (mTrackingLocation) {
+            stopTrackingLocation();
+            mTrackingLocation = true;
+        }
         super.onPause();
-       // stopLocationUpdates();
-
-    }
-
-    private void stopLocationUpdates() {
-        mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-        requestingLocationUpdates=false;
-    }
-
-  /*  private void configurePermission() {
-
-        permissions.add(ACCESS_FINE_LOCATION);
-        permissions.add(ACCESS_COARSE_LOCATION);
-        permissionsToRequest = findUnAskedPermissions(permissions);
-        //get the permissions we have asked for before but are not granted..
-        //we will store this in a global list to access later.
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            if (permissionsToRequest.size() > 0)
-                requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
-        }
-
-        // Initialise location tracker.
-        locationTrack = new LocationTrack(WelcomeActivity.this);
-
-        if (locationTrack.canGetLocation()) {
-            DataSingleton dataSingleton = DataSingleton.getInstance();
-
-            double longitude = locationTrack.getLongitude();
-            double latitude = locationTrack.getLatitude();
-            // dataSingleton.setLongitude(longitude);
-           //  dataSingleton.setLatitude(latitude);
-            Log.i(TAG, "Longitude by tracker : " + longitude + "\nLatitude:" + latitude);
-
-            Toast.makeText(getApplicationContext(), "Longitude:" + longitude + "\nLatitude:" + latitude, Toast.LENGTH_SHORT).show();
-        } else {
-
-            locationTrack.showSettingsAlert();
-        }
-
-    }
-*/
-
-    private ArrayList<String> findUnAskedPermissions(ArrayList<String> wanted) {
-        ArrayList<String> result = new ArrayList<>();
-
-        for (String perm : wanted) {
-            if (!hasPermission(perm)) {
-                result.add(perm);
-            }
-        }
-
-        return result;
-    }
-
-
-    private boolean hasPermission(String permission) {
-        if (canMakeSmores()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                return (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
-            }
-        }
-        return true;
-    }
-
-    private boolean canMakeSmores() {
-        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
-    }
-
-   /* @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode ==REQUEST_LOCATION_PERMISSION) {
-                // If the permission is granted, get the location,
-                // otherwise, show a Toast
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getLocation();
-                } else {
-                    Toast.makeText(this,
-                            R.string.location_permission_denied,
-                            Toast.LENGTH_SHORT).show();
-                }
-        }
-    }*/
-
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        if(requestCode==ALL_PERMISSIONS_RESULT){
-                for (String perms : permissionsToRequest) {
-                    if (!hasPermission(perms)) {
-                        permissionsRejected.add(perms);
-                    }
-                }
-                if (permissionsRejected.size() > 0) {
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0))) {
-                            showMessageOKCancel("These permissions are mandatory for the application. Please allow access.",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                         //   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT);
-                                           // }
-                                        }
-                                    });
-                        }
-                    }
-                }
-                else{
-                    Log.d(TAG," Permission granted");
-                    getDeviceLocation();
-
-                }
-        }
-    }
-
-
-    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(WelcomeActivity.this)
-                .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
-                .create()
-                .show();
     }
 
     @Override
     protected void onResume() {
+      /*  if (mTrackingLocation) {
+            startTrackingLocation();
+        }*/
+      getDeviceLocation();
         super.onResume();
-        Log.d(TAG, "in on Resume requestedLocationUpdate "+requestingLocationUpdates);
-        if (requestingLocationUpdates) {
-            startLocationUpdates();
-        }
     }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-//        stopLocationUpdates();
-    }
-
-
-
 
 
 }
