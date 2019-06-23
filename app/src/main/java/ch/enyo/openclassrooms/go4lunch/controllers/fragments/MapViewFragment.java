@@ -138,7 +138,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     @Override
     public boolean onMarkerClick(Marker marker) {
         Log.d(TAG, " on marker clicked "+marker.getPosition().toString() + " "+marker.getId());
-        PlaceDetails placeDetails = DataSingleton.getInstance().getPlaceDetailsHashMap().get(marker.getId());
+       // PlaceDetails placeDetails = DataSingleton.getInstance().getPlaceDetailsHashMap().get(marker.getId());
+        PlaceDetails placeDetails=mPlaceDetailsMap.get(marker.getPosition().toString());
         Log.d(TAG, "marker size " +mPlaceDetailsMap.keySet());
         if(placeDetails!=null){
         Log.d(TAG, " place details " +placeDetails.getResult().getId());
@@ -182,7 +183,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                             {Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
-            Log.d(TAG,"Location permission do not grandted");
+            Log.d(TAG,"Location permission do not granted");
             return;
         }
         mMap.setMyLocationEnabled(true);
@@ -192,29 +193,29 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
   /*  *//**
      * this method to add the marker on the map.
-     * @param placeNearbyResult,
-     *          the placeNearbyResult containing the restaurant to be add.
+     * @param placesDetailsList,
+     *          the placesDetailsList containing the restaurant to be add.
      *//*
-       private void addMarkerOnMap(List<Result> placeNearbyResult) {
+       private void addMarkerOnMap(List<Result> placesDetailsList) {
         Log.d(TAG, "in addMarker on map method");
         Map<String,Result>resultMap=new HashMap<>();
 
         getAllUsersFromFireBase();
 
-        if(placeNearbyResult.size()!=0)
+        if(placesDetailsList.size()!=0)
 
-            for (int i = 0; i < placeNearbyResult.size(); i++) {
-                Double lat = placeNearbyResult.get(i).getGeometry().getLocation().getLat();
-                Double lng = placeNearbyResult.get(i).getGeometry().getLocation().getLng();
-                String placename = placeNearbyResult.get(i).getName();
-                String vinicity = placeNearbyResult.get(i).getVicinity();
+            for (int i = 0; i < placesDetailsList.size(); i++) {
+                Double lat = placesDetailsList.get(i).getGeometry().getLocation().getLat();
+                Double lng = placesDetailsList.get(i).getGeometry().getLocation().getLng();
+                String placename = placesDetailsList.get(i).getName();
+                String vinicity = placesDetailsList.get(i).getVicinity();
 
                 MarkerOptions markerOptions = new MarkerOptions();
                 LatLng latLng = new LatLng(lat, lng);
                 markerOptions.position(latLng);
                 markerOptions.title(placename + " : " + vinicity);
 
-                if( mSelectedPlaceId.contains(placeNearbyResult.get(i).getPlaceId())) {
+                if( mSelectedPlaceId.contains(placesDetailsList.get(i).getPlaceId())) {
 
 
                     mMarker = mMap.addMarker(new MarkerOptions()
@@ -229,7 +230,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
                 }
                 Log.d(TAG, " marker id "+ mMarker.getId());
-                resultMap.put(mMarker.getId(),placeNearbyResult.get(i));
+                resultMap.put(mMarker.getId(),placesDetailsList.get(i));
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
@@ -241,28 +242,26 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     }
 */
-    private void addMarkerOnMap1(List<PlaceDetails> placeNearbyResult) {
+    private void addMarkerOnMap1(List<PlaceDetails> placesDetailsList) {
         Log.d(TAG, "in addMarker on map method");
         Map<String,PlaceDetails>resultMap=new HashMap<>();
 
         getAllUsersFromFireBase();
 
-        if(placeNearbyResult.size()!=0)
+        if(placesDetailsList.size()!=0)
 
-            for (int i = 0; i < placeNearbyResult.size(); i++) {
-                Double lat = placeNearbyResult.get(i).getResult().getGeometry().getLocation().getLat();
-                Double lng = placeNearbyResult.get(i).getResult().getGeometry().getLocation().getLng();
-                String placename = placeNearbyResult.get(i).getResult().getName();
-                String vinicity = placeNearbyResult.get(i).getResult().getVicinity();
+            for (int i = 0; i < placesDetailsList.size(); i++) {
+                Double lat = placesDetailsList.get(i).getResult().getGeometry().getLocation().getLat();
+                Double lng = placesDetailsList.get(i).getResult().getGeometry().getLocation().getLng();
+                String placename = placesDetailsList.get(i).getResult().getName();
+                String vinicity = placesDetailsList.get(i).getResult().getVicinity();
 
                 MarkerOptions markerOptions = new MarkerOptions();
                 LatLng latLng = new LatLng(lat, lng);
                 markerOptions.position(latLng);
                 markerOptions.title(placename + " : " + vinicity);
 
-                if( mSelectedPlaceId.contains(placeNearbyResult.get(i).getResult().getPlaceId())) {
-
-
+                if( mSelectedPlaceId.contains(placesDetailsList.get(i).getResult().getPlaceId())) {
                     mMarker = mMap.addMarker(new MarkerOptions()
                             .position(latLng)
                             .title(placename + " :" + vinicity)
@@ -275,15 +274,14 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
                 }
 
-                resultMap.put(mMarker.getId(),placeNearbyResult.get(i));
+                resultMap.put(mMarker.getPosition().toString(),placesDetailsList.get(i));
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-
             }
-       // mPlaceDetailsMap = resultMap;
+         mPlaceDetailsMap = resultMap;
         setMyLocationOnMap();
-        DataSingleton.getInstance().setPlaceDetailsMap(resultMap);
+       // DataSingleton.getInstance().setPlaceDetailsMap(resultMap);
 
 
     }

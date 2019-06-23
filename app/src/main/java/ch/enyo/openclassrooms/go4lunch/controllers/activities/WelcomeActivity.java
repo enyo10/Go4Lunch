@@ -207,7 +207,7 @@ public class WelcomeActivity extends BaseActivity
                         return true;
 
                     case R.id.bottom_navigation_restaurants:
-
+                        mListViewFragment.update(mPlaceDetailsList);
                         loadFragment(mListViewFragment, R.string.title_activity_welcome);
                         // configureContentFrameFragment(new ListViewFragment(), R.string.title_activity_welcome);
 
@@ -317,12 +317,13 @@ public class WelcomeActivity extends BaseActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         // super.onActivityResult(requestCode, resultCode, data);
+        if(data!=null)
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                // TODO: Handle the error.
+                //  Handle the error.
                 Status status = Autocomplete.getStatusFromIntent(data);
                 Log.i(TAG, status.getStatusMessage());
             } else if (resultCode == RESULT_CANCELED) {
@@ -363,7 +364,7 @@ public class WelcomeActivity extends BaseActivity
     private void loadFragment(Fragment fragment, int toolbarTextId) {
 
         DataInterface dataInterface = (DataInterface) fragment;
-        dataInterface.update(mPlaceDetailsList);
+     //   dataInterface.update(mPlaceDetailsList);
         Log.d(TAG," place details list size in load fragment "+mPlaceDetailsList.size());
 
         toolbar.setTitle(toolbarTextId);
