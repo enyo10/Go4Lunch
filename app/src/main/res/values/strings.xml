@@ -26,6 +26,8 @@
     <string name="restaurant_type_address" translatable="false">%1$s - %2$s</string>
     <string name="restaurant_image">Restaurant Image</string>
     <string name="restaurant_name">Restaurant name</string>
+    <string name="workmate_has_not_decided"> n\'a pas encore choisi</string>
+    <string name="workmate_has_decides"> mange chez </string>
 
     <string name="no_restaurants_available_check_the_map_view">Aucun restaurant proche &#8230; chercher sur la carte</string>
 
@@ -59,8 +61,12 @@
 
 
     <!-- FACEBOOK PURPOSE -->
-    <string name="facebook_application_id" translatable="false">398159407688031</string>
-    <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb398159407688031</string>
+
+   <!-- <string name="facebook_application_id" translatable="false">398159407688031</string>-->
+    <string name="facebook_application_id" translatable="false">307223896657222</string>
+    <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources"> fb307223896657222 </string>
+
+    <!--<string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb398159407688031</string>-->
     <string name="title_activity_maps">Carte</string>
 
     <string name="navigation_drawer_open">Ouvrir la  navigation drawer</string>

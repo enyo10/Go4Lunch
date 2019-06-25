@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="ch.enyo.openclassrooms.go4lunch">
+    package="ch.enyoholali.openclassrooms.go4lunch">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -21,10 +21,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
+        android:usesCleartextTraffic="true">
 
-        >
-        <activity android:name=".chat.ChatActivity"
-            android:parentActivityName=".controllers.activities.WelcomeActivity">
+        <activity android:name="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WebContentActivity"
+            android:parentActivityName="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WelcomeActivity">
+
+        </activity>
+        <activity
+            android:name="ch.enyoholali.openclassrooms.go4lunch.chat.ChatActivity"
+            android:parentActivityName="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WelcomeActivity">
 
         </activity>
         <!--
@@ -33,7 +38,7 @@
             android:resource="@xml/searchable" />
         -->
         <activity
-            android:name=".controllers.activities.PlaceDetailsActivity"
+            android:name="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.PlaceDetailsActivity"
             android:theme="@style/AppTheme.NoTitle" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -56,14 +61,14 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".auth.ProfileActivity"
+            android:name="ch.enyoholali.openclassrooms.go4lunch.auth.ProfileActivity"
             android:label="@string/toolbar_title_login_activity"
-            android:parentActivityName=".controllers.activities.WelcomeActivity" />
+            android:parentActivityName="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WelcomeActivity" />
         <activity
-            android:name=".controllers.activities.WelcomeActivity"
+            android:name="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WelcomeActivity"
             android:label="@string/title_activity_welcome"
             android:launchMode="singleTop"
-            android:parentActivityName=".controllers.activities.MainActivity"
+            android:parentActivityName="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -74,7 +79,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".controllers.activities.MainActivity"
+            android:name="ch.enyoholali.openclassrooms.go4lunch.controllers.activities.MainActivity"
             android:theme="@style/AppTheme.NoTitle">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -82,7 +87,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> <!-- Register the Alarm Receiver -->
-        <receiver android:name=".utils.NotificationAlarmReceiver" />
+        <receiver android:name="ch.enyoholali.openclassrooms.go4lunch.utils.NotificationAlarmReceiver" />
+
     </application>
 
 </manifest>

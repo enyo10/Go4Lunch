@@ -12,7 +12,7 @@ def GOOGLE_MAPS_API_KEY = properties.getProperty("GoogleMapsApiKey")
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "ch.enyo.openclassrooms.go4lunch"
+        applicationId "ch.enyoholali.openclassrooms.go4lunch"
         minSdkVersion 21
         targetSdkVersion 28
         multiDexEnabled true
