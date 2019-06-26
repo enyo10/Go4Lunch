@@ -12,7 +12,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
+//import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
@@ -28,8 +28,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.ActionBar;
-
-import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.material.navigation.NavigationView;
@@ -45,6 +43,7 @@ import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,12 +53,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.enyoholali.openclassrooms.go4lunch.BuildConfig;
 import ch.enyoholali.openclassrooms.go4lunch.R;
+import ch.enyoholali.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyoholali.openclassrooms.go4lunch.auth.ProfileActivity;
 import ch.enyoholali.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.ListViewFragment;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.MapViewFragment;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyoholali.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 import io.reactivex.disposables.Disposable;
@@ -69,48 +70,33 @@ public class WelcomeActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = WelcomeActivity.class.getSimpleName();
-
-    public interface DataInterface {
-        void doMySearch(String query);
-
-        void update(List<PlaceDetails> placeDetailsList);
-    }
-
     //  - Identify each Http Request
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
-
-    int AUTOCOMPLETE_REQUEST_CODE = 1;
-
     // private final static int ALL_PERMISSIONS_RESULT = 101;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
-    private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
+  //  private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
+    final FragmentManager mFragmentManager = getSupportFragmentManager();
     protected FusedLocationProviderClient mFusedLocationProviderClient;
-    private LocationRequest mLocationRequest;
-    private LocationCallback mLocationCallback;
-    private Boolean requestingLocationUpdates;
-    private Location mCurrentLocation;
-    private boolean mTrackingLocation;
-    private List<PlaceDetails> mPlaceDetailsList;
-
-
+    protected ActionBar mActionBar;
+    int AUTOCOMPLETE_REQUEST_CODE = 1;
     @BindView(R.id.activity_welcome_bottom_navigation)
     BottomNavigationView mBottomNavigationView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-
-    protected ActionBar mActionBar;
-
-
     MapViewFragment mMapViewFragment;
     ListViewFragment mListViewFragment;
     WorkmatesFragment mWorkmatesFragment;
-
-    final FragmentManager mFragmentManager = getSupportFragmentManager();
     Fragment activeFragment;
     PlacesClient mPlacesClient;
-
+    private Location mCurrentLocation;
+  //  private LocationRequest mLocationRequest;
+  //  private LocationCallback mLocationCallback;
+   // private Boolean requestingLocationUpdates;
+   // private boolean mTrackingLocation;
+    private List<PlaceDetails> mPlaceDetailsList;
     private Disposable mDisposable;
+    private User mUser;
 
     @Override
     public int getActivityLayout() {
@@ -148,6 +134,7 @@ public class WelcomeActivity extends BaseActivity
         toolbar.setTitle(R.string.title_activity_maps);
         initFragments();
         handleIntent(getIntent());
+        getConnectedUser();
 
         //updateValuesFromBundle(mSaveInstanceState);
 
@@ -171,21 +158,11 @@ public class WelcomeActivity extends BaseActivity
         mPlacesClient = Places.createClient(this);
     }
 
-
     @Override
     protected void onNewIntent(Intent intent) {
         setIntent(intent);
         handleIntent(intent);
     }
-
-
-    //----------------------------------------------------------------------------------------------
-    //                                   CONFIGURE VIEWS.
-    //----------------------------------------------------------------------------------------------
-
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -195,10 +172,11 @@ public class WelcomeActivity extends BaseActivity
 
         return super.onCreateOptionsMenu(menu);
     }
-    //----------------------------------------------------------------------------------------------
-    //---------------    ACTIONS
-    //----------------------------------------------------------------------------------------------
 
+
+    //----------------------------------------------------------------------------------------------
+    //                                   CONFIGURE VIEWS.
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public void onBackPressed() {
@@ -209,6 +187,9 @@ public class WelcomeActivity extends BaseActivity
             super.onBackPressed();
         }
     }
+    //----------------------------------------------------------------------------------------------
+    //---------------    ACTIONS
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -237,10 +218,12 @@ public class WelcomeActivity extends BaseActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
+   // @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected( MenuItem item) {
+
         // Handle navigation view item clicks here.
+
         int id = item.getItemId();
 
         if (id == R.id.setting) {
@@ -251,11 +234,59 @@ public class WelcomeActivity extends BaseActivity
 
         } else if (id == R.id.your_lunch) {
             // Go to your lunch.
+            goToLunch();
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    /**
+     * This method to lunch the place activity and will show the restaurant selected by the user.
+     */
+    private void goToLunch(){
+       // getConnectedUser();
+        PlaceDetails placeDetails=null;
+
+        if(mUser.getRestaurantId()!=null){
+            for(int i=0;i<mPlaceDetailsList.size();i++){
+                if(mPlaceDetailsList.get(i).getResult().getPlaceId().equals(mUser.getRestaurantId())){
+                    placeDetails=mPlaceDetailsList.get(i);
+                    Log.d(TAG, " place details fund.");
+                }
+
+            }
+        }
+        if(placeDetails!=null){
+            DataSingleton.getInstance().setPlaceDetails(placeDetails);
+            startActivity(PlaceDetailsActivity.class);
+
+        }
+
+
+    }
+
+    /**
+     * This method to get the connected user.
+     */
+    private void getConnectedUser(){
+        if(getCurrentUser()!=null)
+        UserHelper.getUser(getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                mUser = documentSnapshot.toObject(User.class);
+
+                if(mUser!=null)
+                Log.d(TAG, "user "+ mUser.getUsername() +"   retrieved");
+
+
+            }
+        });
+
+
+    }
+
+
 
     // Configure BottomNavigationView
     public void configureBottomNavigationView() {
@@ -285,11 +316,6 @@ public class WelcomeActivity extends BaseActivity
         });
     }
 
-
-    //-------------------------------------------------------------------------------------------------------------
-    //                    AUTOCOMPLETE MANAGEMENT
-    //-------------------------------------------------------------------------------------------------------------
-
     private void onPlaceAutoCompleteRequested() {
         // Set the fields to specify which types of place data to
         // return after the user has made a selection.
@@ -302,6 +328,11 @@ public class WelcomeActivity extends BaseActivity
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
 
     }
+
+
+    //-------------------------------------------------------------------------------------------------------------
+    //                    AUTOCOMPLETE MANAGEMENT
+    //-------------------------------------------------------------------------------------------------------------
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -344,6 +375,7 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
+
     /**
      * This method to load the fragment in to the frame.
      *
@@ -363,21 +395,11 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
+
+
     //--------------------------------------------------------------------------------------------------
     //    AUTHENTICATION MANAGEMENT
     //----------------------------------------------------------------------------------------------
-
-    /**
-     * This to sign out from firebae.
-     */
-    private void signOutFromFirebase() {
-        Log.d(TAG, " sign out");
-
-        AuthUI.getInstance()
-                .signOut(this)
-                .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
-    }
-
 
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin) {
 
@@ -395,11 +417,44 @@ public class WelcomeActivity extends BaseActivity
         };
     }
 
+    /**
+     * This to sign out from firebae.
+     */
+    private void signOutFromFirebase() {
+        Log.d(TAG, " sign out");
+
+        AuthUI.getInstance()
+                .signOut(this)
+                .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
+    }
 
     //------------------------------------------------------------------------------------------------
     //        PERMISSION AND LOCATION AND UPDATE.
     //------------------------------------------------------------------------------------------------
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION_PERMISSION:
+                // If the permission is granted, get the location,
+                // otherwise, show a Toast
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    getDeviceLocation();
+                    // startTrackingLocation();
+                } else {
+                    Toast.makeText(this,
+                            R.string.location_permission_denied,
+                            Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+
+    /**
+     * This method to get the device location.
+     */
     private void getDeviceLocation() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -434,41 +489,20 @@ public class WelcomeActivity extends BaseActivity
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_LOCATION_PERMISSION:
-                // If the permission is granted, get the location,
-                // otherwise, show a Toast
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getDeviceLocation();
-                    // startTrackingLocation();
-                } else {
-                    Toast.makeText(this,
-                            R.string.location_permission_denied,
-                            Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
-    }
 
-
-    protected LocationRequest getLocationRequest() {
+  /*  protected LocationRequest getLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest = locationRequest;
         return mLocationRequest;
-    }
-
+    }*/
 
     /**
      * This method to initialize the location callback.
      */
-    private void initLocationCallback() {
+   /* private void initLocationCallback() {
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -483,14 +517,7 @@ public class WelcomeActivity extends BaseActivity
                 }
             }
         };
-    }
-
-
-
-
-    //----------------------------------------------------------------------------------------------
-    //                           REQUESTS
-    //----------------------------------------------------------------------------------------------
+    }*/
 
     private void executeHttpRequestWithRetrofit() {
 
@@ -525,8 +552,11 @@ public class WelcomeActivity extends BaseActivity
                 });
     }
 
+
+
+
     //----------------------------------------------------------------------------------------------
-    //                                   HELP METHODS
+    //                           REQUESTS
     //----------------------------------------------------------------------------------------------
 
     private void updateUIWithResult(List<PlaceDetails> list) {
@@ -537,17 +567,20 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
+    //----------------------------------------------------------------------------------------------
+    //                                   HELP METHODS
+    //----------------------------------------------------------------------------------------------
+
     /**
      * Stops tracking the device. Removes the location
      * updates, stops the animation, and resets the UI.
      */
-    private void stopTrackingLocation() {
+  /*  private void stopTrackingLocation() {
         if (mTrackingLocation) {
             mTrackingLocation = false;
 
         }
-    }
-
+    }*/
 
     /* @Override
      protected void onPause() {
@@ -559,15 +592,20 @@ public class WelcomeActivity extends BaseActivity
      }
 
  */
+
+    private void disposeWhenDestroy() {
+        if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
       //  stopLocationUpdates();
     }
 
-    private void stopLocationUpdates() {
+  /*  private void stopLocationUpdates() {
         mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-    }
+    }*/
 
     @Override
     protected void onResume() {
@@ -579,7 +617,13 @@ public class WelcomeActivity extends BaseActivity
   //      }
     }
 
-    private void startLocationUpdates() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        this.disposeWhenDestroy();
+    }
+
+    /*  private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -591,7 +635,7 @@ public class WelcomeActivity extends BaseActivity
             mFusedLocationProviderClient.requestLocationUpdates
                     (getLocationRequest(),
                             mLocationCallback,
-                            null /* Looper */);
+                            null *//* Looper *//*);
 
             // Set a loading text while you wait for the address to be
             // returned
@@ -599,18 +643,8 @@ public class WelcomeActivity extends BaseActivity
 
         }
     }
-
-
-
-   /* @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
-                requestingLocationUpdates);
-        // ...
-        super.onSaveInstanceState(outState);
-    }*/
-
-    private void updateValuesFromBundle(Bundle savedInstanceState) {
+*/
+  /*  private void updateValuesFromBundle(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             return;
         }
@@ -626,8 +660,24 @@ public class WelcomeActivity extends BaseActivity
         // Update UI to match restored state
         updateUI();
     }
-    private void updateUI(){
 
+*/
+
+   /* @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
+                requestingLocationUpdates);
+        // ...
+        super.onSaveInstanceState(outState);
+    }*/
+
+   /* private void updateUI(){
+
+    }*/
+    public interface DataInterface {
+        void doMySearch(String query);
+
+        void update(List<PlaceDetails> placeDetailsList);
     }
 
 

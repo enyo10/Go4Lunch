@@ -77,9 +77,9 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
         String url= "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&maxheight=100&photoreference=";
         String apiKey = "&key=" + BuildConfig.ApiKey;// "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
         String urlbis= "https://maps.googleapis.com/maps/api/place/photo?key=AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8&photoreference=";
-        int nbOfWorkmate=mSubscribers.size();
 
-        getSubscribers(placeDetails);
+
+        int nbOfWorkmate = getSubscribers(placeDetails).size();
 
         if ( placeDetails.getResult() != null)
         {
@@ -136,10 +136,10 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
      *       the place details that the user are supposed to choose.
      */
 
-    private void getSubscribers(PlaceDetails placeDetails) {
+    private List<User> getSubscribers(PlaceDetails placeDetails) {
 
 
-        String placeId=placeDetails.getResult().getPlaceId();
+        String placeId =placeDetails.getResult().getPlaceId();
 
         UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -160,11 +160,13 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
 
                 }
                 mSubscribers = activeUserList;
+                Log.d(TAG, "subscriber size " + mSubscribers.size());
 
 
                 // Update UI
                 // ...
             }
         });
+        return mSubscribers;
     }
 }

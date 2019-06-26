@@ -79,7 +79,9 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     private WorkmatesViewsAdapter mWorkmatesViewsAdapter;
     private List<User> mUserList;
+    private List<User>mSubscriberList;
     private PlaceDetails mPlaceDetails;
+    private List<PlaceDetails>mPlaceDetailsList;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mPendingIntent;
@@ -94,7 +96,10 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     @Override
     public void configureView() {
         mUserList=new ArrayList<>();
+        mSubscriberList=new ArrayList<>();
         mPlaceDetails = DataSingleton.getInstance().getPlaceDetails();
+        mPlaceDetailsList=DataSingleton.getInstance().getPlaceDetailsList();
+
 
         Log.d(TAG, " place Details "+mPlaceDetails);
         ButterKnife.bind(this);
@@ -108,7 +113,8 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         showPlaceDetails(mPlaceDetails,url,apiKey);
         configeRecyclerView();
         configureSwipeRefreshLayout();
-        getAllActiveUsersFromFireBase();
+        //getAllActiveUsersFromFireBase();
+        getSubscribersFromFireBase();
         configureAlarmManager();
 
     }
@@ -153,14 +159,21 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     }
 
 
-    private void updateUserList(List<User>users){
-/*
+  /*  private void updateUserList(List<User>users){
+*//*
         Collections.sort(users,Collections.<User>reverseOrder());
-        */
+        *//*
        this.mSwipeRefreshLayout.setRefreshing(false);
        this.mUserList.clear();
        this.mUserList.addAll(users);
        this.mWorkmatesViewsAdapter.notifyDataSetChanged();
+    }*/
+
+    private void updateSubscriberList(List<User>subscriberList){
+        this.mSwipeRefreshLayout.setRefreshing(false);
+        this.mSubscriberList.clear();
+        this.mSubscriberList.addAll(subscriberList);
+        this.mWorkmatesViewsAdapter.notifyDataSetChanged();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -174,7 +187,8 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getAllActiveUsersFromFireBase();
+                //getAllActiveUsersFromFireBase();
+                getSubscribersFromFireBase();
             }
         });
     }
@@ -247,7 +261,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     // --------------------
     // REST REQUESTS
     // --------------------
-    private void getAllActiveUsersFromFireBase(){
+ /*   private void getAllActiveUsersFromFireBase(){
 
         UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -270,12 +284,50 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
                         activeUserList.add(list.get(k));
 
                 }
-                updateUserList(activeUserList);
+              //  updateUserList(activeUserList);
                 Log.d(TAG," actual User "+mUser);
                 // Update UI
                 // ...
             }
         });
+    }
+*/
+    /**
+     * This method to retrieve all user that select the given restaurant.
+     */
+    private void getSubscribersFromFireBase(){
+
+
+        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    // Handle error
+                    Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+                // Convert query snapshot to a list of users.
+                List<User> list = snapshot.toObjects(User.class);
+                List<User>subscribers=new ArrayList<>();
+                if(getCurrentUser()!=null)
+                    for (int k=0;k<list.size();k++) {
+                        if(getCurrentUser().getUid().equals(list.get(k).getUid())){
+                            mUser=list.get(k);
+                        }
+                        else if(list.get(k).getRestaurantId()!=null&& placeId.equals(list.get(k).getRestaurantId()))
+                            subscribers.add(list.get(k));
+
+                    }
+                //updateUserList(activeUserList);
+                  updateSubscriberList(subscribers);
+
+                Log.d(TAG," subscribers size  "+mSubscriberList.size());
+                // Update UI
+                // ...
+            }
+        });
+
     }
 
 
@@ -299,7 +351,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     }
 
     public void configeRecyclerView(){
-        this.mWorkmatesViewsAdapter = new WorkmatesViewsAdapter(mUserList, Glide.with(this));
+        this.mWorkmatesViewsAdapter = new WorkmatesViewsAdapter(mSubscriberList, Glide.with(this),this);
         this.mRecyclerView.setAdapter(mWorkmatesViewsAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         this.mRecyclerView.setLayoutManager(layoutManager);

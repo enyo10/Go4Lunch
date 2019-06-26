@@ -12,7 +12,7 @@ import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.common.Photo;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.common.PlusCode;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.common.Review;
 
-public class PlaceDetailsResult {
+public class PlaceDetailsResult implements Comparable<PlaceDetailsResult> {
 
     @SerializedName("address_components")
     @Expose
@@ -80,6 +80,11 @@ public class PlaceDetailsResult {
     @SerializedName("website")
     @Expose
     private String website;
+
+    //Default constructor.
+    public PlaceDetailsResult(){
+
+    }
 
     public List<AddressComponent> getAddressComponents() {
         return addressComponents;
@@ -257,4 +262,8 @@ public class PlaceDetailsResult {
         this.website = website;
     }
 
+    @Override
+    public int compareTo(PlaceDetailsResult o) {
+        return this.getRating().compareTo(o.getRating());
+    }
 }

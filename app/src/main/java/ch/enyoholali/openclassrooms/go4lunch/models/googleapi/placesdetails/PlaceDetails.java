@@ -4,7 +4,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class PlaceDetails {
+public class PlaceDetails implements Comparable<PlaceDetails>{
 
     @SerializedName("html_attributions")
     @Expose
@@ -17,6 +17,11 @@ public class PlaceDetails {
     private String status;
 
    private String imageUrl;
+
+   // Default constructor.
+   public PlaceDetails(){
+
+   }
 
     public List<Object> getHtmlAttributions() {
         return htmlAttributions;
@@ -48,5 +53,10 @@ public class PlaceDetails {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    @Override
+    public int compareTo(PlaceDetails o) {
+        return this.getResult().getRating().compareTo(o.getResult().getRating());
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.nearbysearch.Result;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 
@@ -26,6 +27,7 @@ public class DataSingleton implements Serializable {
     private Location mLocation;
     private String location = "";
     private String url;
+    private User actuelUser;
 
 
     private static volatile DataSingleton mSoleInstance;
@@ -109,6 +111,14 @@ public class DataSingleton implements Serializable {
 
     public String getUrl(){
         return url;
+    }
+
+    public User getActuelUser() {
+        return actuelUser;
+    }
+
+    public void setActuelUser(User actuelUser) {
+        this.actuelUser = actuelUser;
     }
 }
 

@@ -13,7 +13,9 @@ import com.bumptech.glide.RequestManager;
 import java.util.List;
 
 import ch.enyoholali.openclassrooms.go4lunch.R;
+import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
+import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 
 
 public class WorkmatesViewsAdapter extends RecyclerView.Adapter<WorkmatesViewHolder> {
@@ -21,10 +23,16 @@ public class WorkmatesViewsAdapter extends RecyclerView.Adapter<WorkmatesViewHol
     // FOR DATA.
     private List<User> mWorkmateList;
     private RequestManager glide;
+    private Context mContext;
+    private List<PlaceDetails>mPlaceDetailsList;
 
-    public WorkmatesViewsAdapter(List<User>users,RequestManager glide){
+
+    public WorkmatesViewsAdapter(List<User>users,RequestManager glide,Context context){
         this.mWorkmateList=users;
         this.glide=glide;
+        this.mContext=context;
+        this.mPlaceDetailsList= DataSingleton.getInstance().getPlaceDetailsList();
+
 
 
     }
@@ -42,7 +50,7 @@ public class WorkmatesViewsAdapter extends RecyclerView.Adapter<WorkmatesViewHol
 
     @Override
     public void onBindViewHolder(@NonNull WorkmatesViewHolder holder, int position) {
-        holder.updateWithUser(mWorkmateList.get(position),glide);
+        holder.updateWithUser(mWorkmateList.get(position),glide,mContext,mPlaceDetailsList);
 
     }
 

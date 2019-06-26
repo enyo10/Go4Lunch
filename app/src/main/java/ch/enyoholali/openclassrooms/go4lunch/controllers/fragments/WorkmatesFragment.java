@@ -23,6 +23,7 @@ import ch.enyoholali.openclassrooms.go4lunch.R;
 import ch.enyoholali.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyoholali.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WelcomeActivity;
+import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyoholali.openclassrooms.go4lunch.views.WorkmatesViewsAdapter;
@@ -41,6 +42,7 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
 
     private WorkmatesViewsAdapter mAdapter;
     private List<User>mUserList;
+    private List<PlaceDetails>mDetailsList;
 
 
     @Override
@@ -66,8 +68,6 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
         this.mUserList.clear();
         this.mUserList.addAll(users);
         this.mAdapter.notifyDataSetChanged();
-
-
     }
 
     /**
@@ -89,6 +89,7 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
     @Override
     protected void configureView() {
       mUserList=new ArrayList<>();
+      mDetailsList=new ArrayList<>();
       configureRecyclerView();
       configureSwipeRefreshLayout();
       getAllUsersWithoutCurrentUser();
@@ -97,7 +98,7 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
 
     private void configureRecyclerView(){
 
-        this.mAdapter = new WorkmatesViewsAdapter(mUserList, Glide.with(this));
+        this.mAdapter = new WorkmatesViewsAdapter(mUserList, Glide.with(this),getContext());
         this.mRecyclerView.setAdapter(mAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         this.mRecyclerView.setLayoutManager(layoutManager);
@@ -136,10 +137,13 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
                 List<User>otherList=new ArrayList<>();
 
                 for (User u:userList) {
-                    if(!getCurrentUser().getUid().equals(u.getUid()))
+                    if(!getCurrentUser().getUid().equals(u.getUid())) {
                         otherList.add(u);
 
-                    Log.i(TAG, " user :"+u.getUsername());
+                    }
+                    else {
+                        DataSingleton.getInstance().setActuelUser(u);
+                    }
 
                 }
                 updateUserList(otherList);
@@ -156,7 +160,8 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
 
     @Override
     public void update(List<PlaceDetails>placeDetailsList) {
-
+        Log.d(TAG, " place details updated. Size is "+placeDetailsList.size());
+        DataSingleton.getInstance().setPlaceDetailsList(placeDetailsList);
 
     }
 

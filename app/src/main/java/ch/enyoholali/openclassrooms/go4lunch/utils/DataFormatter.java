@@ -13,7 +13,7 @@ public interface DataFormatter {
 
     /**
      * @param fullName String
-     * @method formatFullName
+     *
      * <p>
      * Split last name and first name if exists
      */
@@ -23,22 +23,20 @@ public interface DataFormatter {
     }
 
     /**
+     * This method to format ratting.
      * @param rating double
-     * @method formatRating
-     * <p>
      * Convert 5 stars rating into 3
      */
     default float formatRating(double rating) {
         DecimalFormat df = new DecimalFormat("#.#");
-        rating = Math.round(rating * 3) / 5;
-        rating = Double.parseDouble(df.format(rating));
+        rating = Math.round(rating * 3/5);
+        //rating = Double.parseDouble(df.format(rating));
         return (float) rating;
     }
 
     /**
+     * This method to format the address
      * @param address String
-     * @method formatAddress
-     * <p>
      * Take the first element in an address array (exclude zip code)
      */
     default String formatAddress(String address) {
@@ -47,10 +45,9 @@ public interface DataFormatter {
     }
 
     /**
+     * This method to
      * @param listPeriod List
      * @param openNow    boolean
-     * @method formatOpeningTime
-     * <p>
      * Give opening time of a restaurant from place Api info
      */
     default String formatOpeningTime(boolean openNow, List<Period> listPeriod) {
@@ -63,14 +60,11 @@ public interface DataFormatter {
                 return "Open until " + listPeriod.get(dayOfWeek()).getClose().getTime() + "pm";
             }
         }
-
         return "Closed Soon";
     }
 
     /**
      * @param weekDayArray List
-     * @method formatWeekDayText
-     * <p>
      * Give opening time of a restaurant from place Api info
      */
     default String formatWeekDayText(List<String> weekDayArray) {
@@ -89,8 +83,6 @@ public interface DataFormatter {
     }
 
     /**
-     * @method dayOfWeek
-     * <p>
      * Give the current day digit of the week
      */
     default Integer dayOfWeek() {
@@ -101,8 +93,6 @@ public interface DataFormatter {
 
     /**
      * @param s string
-     * @method convertStringIdIntoInteger
-     * <p>
      * change marker id into integer id
      */
     // Change marker id into integer id
@@ -113,8 +103,6 @@ public interface DataFormatter {
 
     /**
      * @param s String
-     * @method convertStringIntoInteger
-     * <p>
      * Simply convert a string into an integer
      */
     default Integer convertStringIntoInteger(String s) {
@@ -122,12 +110,11 @@ public interface DataFormatter {
     }
 
     /**
+     * This method to compute distance between two restaurant.
      * @param deviceLat     device latitude
      * @param restaurantLat restaurant latitude
      * @param deviceLng     device longitude
      * @param restaurantLng restaurant longitude
-     * @method computeDistance
-     * <p>
      * compute the distance between a place and the device thanks the gps (note: accuracy less performable than metrics api)
      */
     // Find the computeDistance between two coordinates
@@ -149,8 +136,8 @@ public interface DataFormatter {
     }
 
     /**
+     * This method to format the date.
      * @param date date object
-     * @method formatDate
      * <p>
      * format timestamp into european date pattern
      */

@@ -2,6 +2,9 @@ package ch.enyoholali.openclassrooms.go4lunch.views;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
+import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,6 +23,7 @@ import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 
 public class WorkmatesViewHolder extends ViewHolder {
+    private static final String TAG=WorkmatesViewHolder.class.getSimpleName();
 
     @BindView(R.id.fragment_workmates_list_item_image)
     ImageView mImageView;
@@ -31,24 +35,32 @@ public class WorkmatesViewHolder extends ViewHolder {
         ButterKnife.bind(this,itemView);
     }
 
-    public void updateWithUser(User user, RequestManager glide){
-        List<PlaceDetails> placeDetailsList= DataSingleton.getInstance().getPlaceDetailsList();
+    public void updateWithUser(User user, RequestManager glide, Context context,List<PlaceDetails>placeDetailsList){
+
         String restaurant_name=null;
-        String eatType;
+
         if(user.getRestaurantId()!=null){
+            Log.d(TAG," restaurant id not null");
+            Log.d(TAG, " place details list size  " +placeDetailsList.size());
             for(int i=0;i<placeDetailsList.size();i++){
-                if(placeDetailsList.get(i).getResult().getPlaceId().equals(user.getRestaurantId()))
-                    restaurant_name=placeDetailsList.get(i).getResult().getName();
+              //  Log.d(TAG, " id : "+user.getRestaurantId() + "  place id "+ placeDetailsList.get(i).getResult().getPlaceId());
+                if(user.getRestaurantId().equals(placeDetailsList.get(i).getResult().getPlaceId()))
+
+                    restaurant_name = placeDetailsList.get(i).getResult().getName();
+                Log.i(TAG, "matching  user-Rest-id " + user.getRestaurantId() +" placeId "+placeDetailsList.get(i).getResult().getName());
+
 
             }
         }
 
         if(restaurant_name!=null){
 
-            mTextView.setText(String.format(Locale.US,"%s",user.getUsername()+ " "+R.string.workmate_has_decides));
+            mTextView.setText(String.format(Locale.US,"%s",user.getUsername()+ " "+context.getResources().
+                    getString(R.string.workmate_has_decides)+ " "+restaurant_name));
+            mTextView.setTextSize(11);
 
         }
-        mTextView.setText(String.format(Locale.US,"%s",user.getUsername() +" "+R.string.workmate_has_not_decided));
+        mTextView.setText(String.format(Locale.US,"%s",user.getUsername() +" "+context.getResources().getString(R.string.workmate_has_not_decided)));
         if(user.getUrlPicture()!=null)
             glide.load(user.getUrlPicture()).apply(RequestOptions.circleCropTransform()).into(mImageView);
 

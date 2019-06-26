@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -81,9 +82,10 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
 
     @Override
     public void update(List<PlaceDetails>placeDetailsList) {
+
         Log.d(TAG, "in ListView Fragment: place details size "+ placeDetailsList.size());
+        Collections.sort(placeDetailsList,Collections.reverseOrder());
         updateUIWithResult(placeDetailsList);
-       // executeHttpRequestWithRetrofit();
 
     }
 
@@ -101,12 +103,13 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     @Override
     protected void configureView() {
         configureRecyclerView();
-        configureSwipeRefreshLayout();
+      //  configureSwipeRefreshLayout();
 
 
     }
 
     private  void configureRecyclerView(){
+        Collections.sort(mPlaceDetailsList,Collections.reverseOrder());
 
         this.mAdapter = new PlaceDetailsViewAdapter(mPlaceDetailsList, Glide.with(this));
         this.mRecyclerView.setAdapter(mAdapter);
@@ -123,8 +126,8 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if(mLocation!=null)
-                executeHttpRequestWithRetrofit();
+
+                updateUIWithResult( DataSingleton.getInstance().getPlaceDetailsList());
 
             }
         });
@@ -206,32 +209,14 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     //----------------------------------------------------------------------------------------------
 
     private void updateUIWithResult(List<PlaceDetails>list){
+        Collections.sort(list,Collections.reverseOrder());
         this.mSwipeRefreshLayout.setRefreshing(false);
         this.mPlaceDetailsList.clear();
         //setImageUrls(list);
         this.mPlaceDetailsList.addAll(list);
         this.mAdapter.notifyDataSetChanged();
     }
-    /**
-     * This method is a helper that help to add an image url to the place details.
-  //   * @param list, a list of place details that will be modify.
-     */
-   /* private void setImageUrls(List<PlaceDetails>list){
-        String url= DataSingleton.getInstance().getUrl();
-        String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
-        for(int i=0;i<list.size();i++){
-            if (list.get(i).getResult().getPhotos() != null) {
-                String imageUrl=url +list.get(i).getResult().getPhotos().get(0).getPhotoReference() + apiKey;
-                list.get(i).setImageUrl(imageUrl);
 
-                Log.i(TAG, "image Url "+ list.get(i).getImageUrl());
-            }
-
-        }
-
-    }
-
-*/
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
