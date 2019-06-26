@@ -286,8 +286,6 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
-
-
     // Configure BottomNavigationView
     public void configureBottomNavigationView() {
 
@@ -316,6 +314,13 @@ public class WelcomeActivity extends BaseActivity
         });
     }
 
+
+
+
+    //-------------------------------------------------------------------------------------------------------------
+    //                    AUTOCOMPLETE MANAGEMENT
+    //-------------------------------------------------------------------------------------------------------------
+
     private void onPlaceAutoCompleteRequested() {
         // Set the fields to specify which types of place data to
         // return after the user has made a selection.
@@ -329,11 +334,6 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
-
-    //-------------------------------------------------------------------------------------------------------------
-    //                    AUTOCOMPLETE MANAGEMENT
-    //-------------------------------------------------------------------------------------------------------------
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         // super.onActivityResult(requestCode, resultCode, data);
@@ -342,6 +342,27 @@ public class WelcomeActivity extends BaseActivity
                 if (resultCode == RESULT_OK) {
                     Place place = Autocomplete.getPlaceFromIntent(data);
                     Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+
+                    mDisposable = GoogleApiPlaceStreams.fetchPlaceDetailsStream(place.getId())
+                            .subscribeWith(new DisposableObserver<PlaceDetails>() {
+                                @Override
+                                public void onNext(PlaceDetails placeDetails) {
+                                    DataSingleton.getInstance().setPlaceDetails(placeDetails);
+                                    startActivity(PlaceDetailsActivity.class);
+
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    Log.i("TAG", "aie, error in place details search: " + Log.getStackTraceString(e));
+                                }
+
+                                @Override
+                                public void onComplete() {
+                                    Log.i(TAG, " Place details downloaded ");
+                                }
+                            });
+
                 } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                     //  Handle the error.
                     Status status = Autocomplete.getStatusFromIntent(data);
