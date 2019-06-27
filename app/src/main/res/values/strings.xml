@@ -108,5 +108,7 @@
     <string name="text_view_chat_error">Erreur dans la discussion</string>
     <string name="button_title_chat_activity">Acceder au chat</string>
 
+    <string name="is_joining">  Rejoint </string>
+
 
 </resources>

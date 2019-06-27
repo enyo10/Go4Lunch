@@ -84,7 +84,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     public void update(List<PlaceDetails>placeDetailsList) {
 
         Log.d(TAG, "in ListView Fragment: place details size "+ placeDetailsList.size());
-        Collections.sort(placeDetailsList,Collections.reverseOrder());
+//        Collections.sort(placeDetailsList,Collections.reverseOrder());
         updateUIWithResult(placeDetailsList);
 
     }

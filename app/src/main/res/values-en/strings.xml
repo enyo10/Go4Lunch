@@ -97,8 +97,9 @@
     <string name="likeSubmit">Liked submit</string>
     <string name="search_restaurant">Search for a lunch</string>
     <string name="action_search">Search</string>
-    <string name="app_label">Chercher un restaurant</string>
-    <string name="search_hint">Recherche</string>
+    <string name="app_label">Search a lunch</string>
+    <string name="search_hint">Search</string>
+    <string name="is_joining">  is joining </string>
 
     <string name="text_view_chat_error">Error in discussion</string>
     <string name="button_title_chat_activity"> Go to tchat</string>

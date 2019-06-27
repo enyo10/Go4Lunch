@@ -64,11 +64,14 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
     private double lat = DataSingleton.getInstance().getLocation().getLatitude();
     private double lng = DataSingleton.getInstance().getLocation().getLongitude();
     private List<User>mSubscribers=new ArrayList<>();
+    private List<User>mUserList=new ArrayList<>();
+    private PlaceDetails mPlaceDetails;
 
 
 
     public PlaceDetailsViewHolder(@NonNull View itemView) {
         super(itemView);
+        getAllUsersFromFireBase();
         ButterKnife.bind(this,itemView);
 
     }
@@ -77,9 +80,9 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
         String url= "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&maxheight=100&photoreference=";
         String apiKey = "&key=" + BuildConfig.ApiKey;// "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
         String urlbis= "https://maps.googleapis.com/maps/api/place/photo?key=AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8&photoreference=";
+              updateSubscriberList(placeDetails);
 
-
-        int nbOfWorkmate = getSubscribers(placeDetails).size();
+        int nbOfWorkmate = mSubscribers.size();
 
         if ( placeDetails.getResult() != null)
         {
@@ -132,14 +135,10 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
 
     /**
      * Get the users who has selected a given restaurant.
-     * @param placeDetails,
      *       the place details that the user are supposed to choose.
      */
 
-    private List<User> getSubscribers(PlaceDetails placeDetails) {
-
-
-        String placeId =placeDetails.getResult().getPlaceId();
+    private void getAllUsersFromFireBase() {
 
         UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -152,21 +151,35 @@ public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter 
                 }
                 // Convert query snapshot to a list of users.
                 List<User> list = snapshot.toObjects(User.class);
-                List<User> activeUserList = new ArrayList<>();
-                for(int i=0;i<list.size();i++){
-                    if(placeId.equals(list.get(i).getRestaurantId())){
-                        activeUserList.add(list.get(i));
-                    }
+                updateUserList(list);
 
                 }
-                mSubscribers = activeUserList;
-                Log.d(TAG, "subscriber size " + mSubscribers.size());
 
 
-                // Update UI
-                // ...
-            }
         });
-        return mSubscribers;
+    }
+
+    /**
+     * This to update the subscriber list.
+     * @param list,
+     *      the list to add.
+     */
+    private void updateUserList(List<User>list){
+        mUserList.clear();
+        mUserList.addAll(list);
+
+    }
+
+    private void updateSubscriberList(PlaceDetails placeDetails){
+        mSubscribers.clear();
+
+        for(int i=0;i<mUserList.size();i++){
+            if(mUserList.get(i).getRestaurantId()!=null){
+                if(mUserList.get(i).getRestaurantId().equals(placeDetails.getResult().getPlaceId()))
+                    mSubscribers.add(mUserList.get(i));
+            }
+
+        }
+
     }
 }

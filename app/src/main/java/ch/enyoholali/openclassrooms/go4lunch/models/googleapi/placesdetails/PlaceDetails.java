@@ -4,7 +4,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class PlaceDetails implements Comparable<PlaceDetails>{
+public class PlaceDetails implements Comparable<PlaceDetails> {
 
     @SerializedName("html_attributions")
     @Expose

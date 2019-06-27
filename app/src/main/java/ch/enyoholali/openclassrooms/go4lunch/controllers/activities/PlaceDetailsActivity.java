@@ -100,6 +100,8 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         mPlaceDetails = DataSingleton.getInstance().getPlaceDetails();
         mPlaceDetailsList=DataSingleton.getInstance().getPlaceDetailsList();
 
+        Log.d(TAG, " in Configure View "+ mPlaceDetails.getResult().getName());
+
 
         Log.d(TAG, " place Details "+mPlaceDetails);
         ButterKnife.bind(this);
@@ -111,7 +113,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
         if(mPlaceDetails!=null)
         showPlaceDetails(mPlaceDetails,url,apiKey);
-        configeRecyclerView();
+        configureRecyclerView();
         configureSwipeRefreshLayout();
         //getAllActiveUsersFromFireBase();
         getSubscribersFromFireBase();
@@ -122,7 +124,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private void showPlaceDetails(PlaceDetails placeDetails,String url,String apiKey){
         if ( placeDetails.getResult() != null) {
             // Retrieve the place details id.
-            placeId=placeDetails.getResult().getPlaceId();
+       //     placeId=placeDetails.getResult().getPlaceId();
             //Restaurant name
             this.mNameTextView.setText(placeDetails.getResult().getName());
             //Restaurant photo
@@ -212,25 +214,38 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private boolean isRestaurantSelected(){
 
         String restaurantId =mUser.getRestaurantId();
-         return (restaurantId!=null && !restaurantId.isEmpty());
+         //return (restaurantId!=null && !restaurantId.isEmpty());
+        return restaurantId!=null;
+    }
+
+    /**
+     * This method to remove a selected restaurant or
+     */
+    private void selectLunch(){
+        if(isRestaurantSelected()&& mUser.getRestaurantId().equals(mPlaceDetails.getResult().getPlaceId())){
+            addSelectedRestaurantIdToFireBase(null);
+        } else {
+            addSelectedRestaurantIdToFireBase(mPlaceDetails.getResult().getPlaceId());
+            scheduleAlarm();
+        }
     }
 
     @OnClick(R.id.floatingActionButton)
     public void selectRestaurant(){
-        restaurantSelected=isRestaurantSelected();
+       //restaurantSelected=isRestaurantSelected();
 
-        if(restaurantSelected){
+        if(isRestaurantSelected()){
             addSelectedRestaurantIdToFireBase(null);
-            restaurantSelected=false;
+           // restaurantSelected=false;
             stopAlarm();
             Log.i(TAG, "Restaurant with id : "+placeId+"  removed");
 
         }
         else{
-            addSelectedRestaurantIdToFireBase(placeId);
-            restaurantSelected=true;
+            addSelectedRestaurantIdToFireBase(mPlaceDetails.getResult().getPlaceId());
+          //  restaurantSelected=true;
             scheduleAlarm();
-            Log.i(TAG, "Restaurant with id : "+placeId+"  selected");
+            Log.i(TAG, "Restaurant with id : "+mPlaceDetails.getResult().getName()+"  selected");
         }
        // getAllActiveUsersFromFireBase();
 
@@ -250,6 +265,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
 
     }
+
     @OnClick(R.id.restaurant_phone_button)
     public void callRestaurant(){
         Log.d(TAG, " call number "+mPlaceDetails.getResult().getFormattedPhoneNumber());
@@ -350,7 +366,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         }
     }
 
-    public void configeRecyclerView(){
+    public void configureRecyclerView(){
         this.mWorkmatesViewsAdapter = new WorkmatesViewsAdapter(mSubscriberList, Glide.with(this),this);
         this.mRecyclerView.setAdapter(mWorkmatesViewsAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
