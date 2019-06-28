@@ -107,16 +107,6 @@
         </LinearLayout>
 
 
-
-        <!-- CHECKBOX IS USER MENTOR -->
-
-        <CheckBox
-            android:id="@+id/profile_activity_check_box_is_mentor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/check_box_is_mentor"/>
-
-
     </LinearLayout>
 
 

@@ -25,13 +25,15 @@ public class WorkmatesViewsAdapter extends RecyclerView.Adapter<WorkmatesViewHol
     private RequestManager glide;
     private Context mContext;
     private List<PlaceDetails>mPlaceDetailsList;
+    private int tag;
 
 
-    public WorkmatesViewsAdapter(List<User>users,RequestManager glide,Context context){
+    public WorkmatesViewsAdapter(List<User>users,RequestManager glide,Context context, int tag){
         this.mWorkmateList=users;
         this.glide=glide;
         this.mContext=context;
         this.mPlaceDetailsList= DataSingleton.getInstance().getPlaceDetailsList();
+        this.tag=tag;
 
 
 
@@ -50,7 +52,7 @@ public class WorkmatesViewsAdapter extends RecyclerView.Adapter<WorkmatesViewHol
 
     @Override
     public void onBindViewHolder(@NonNull WorkmatesViewHolder holder, int position) {
-        holder.updateWithUser(mWorkmateList.get(position),glide,mContext,mPlaceDetailsList);
+        holder.updateWithUser(mWorkmateList.get(position),glide,mContext,mPlaceDetailsList,tag);
 
     }
 

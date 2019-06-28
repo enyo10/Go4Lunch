@@ -81,12 +81,6 @@ public class ProfileActivity extends BaseActivity {
     }
 
 
-    /*@OnClick(R.id.profile_activity_check_box_is_mentor)
-    public void onClickCheckBoxIsMentor() {
-        this.updateUserIsMentor();
-    }
-*/
-
     // --------------------
     // REST REQUESTS
     // --------------------

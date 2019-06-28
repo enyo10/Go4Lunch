@@ -81,7 +81,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private List<User> mUserList;
     private List<User>mSubscriberList;
     private PlaceDetails mPlaceDetails;
-    private List<PlaceDetails>mPlaceDetailsList;
+   // private List<PlaceDetails>mPlaceDetailsList;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mPendingIntent;
@@ -98,7 +98,9 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         mUserList=new ArrayList<>();
         mSubscriberList=new ArrayList<>();
         mPlaceDetails = DataSingleton.getInstance().getPlaceDetails();
-        mPlaceDetailsList=DataSingleton.getInstance().getPlaceDetailsList();
+        placeId=mPlaceDetails.getResult().getPlaceId();
+      //  mPlaceDetailsList=DataSingleton.getInstance().getPlaceDetailsList();
+
 
         Log.d(TAG, " in Configure View "+ mPlaceDetails.getResult().getName());
 
@@ -200,13 +202,10 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         Log.i(TAG, " on liked");
         String placeId=this.placeId;
         Log.i(TAG,"placeId "+placeId);
-       // LikeDataHelper.createLikeData(placeId).addOnFailureListener(this.onFailureListener());
-       Log.i(TAG, "Collection like data toString  "+ LikeDataHelper.getLikeDataCollection().toString());
-       Log.i(TAG, "Collection like data user "+UserHelper.getUsersCollection().toString());
+       LikeDataHelper.createLikeData(placeId).addOnFailureListener(this.onFailureListener());
        addLikedPlaceToFireBase();
 
     }
-
     /**
      * This method check if the current user has selected a restaurant.
      * @return boolean,
@@ -331,7 +330,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
                         if(getCurrentUser().getUid().equals(list.get(k).getUid())){
                             mUser=list.get(k);
                         }
-                        else if(list.get(k).getRestaurantId()!=null&& placeId.equals(list.get(k).getRestaurantId()))
+                        if(list.get(k).getRestaurantId()!=null&& placeId.equals(list.get(k).getRestaurantId()))
                             subscribers.add(list.get(k));
 
                     }
@@ -367,7 +366,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     }
 
     public void configureRecyclerView(){
-        this.mWorkmatesViewsAdapter = new WorkmatesViewsAdapter(mSubscriberList, Glide.with(this),this);
+        this.mWorkmatesViewsAdapter = new WorkmatesViewsAdapter(mSubscriberList, Glide.with(this),this,2);
         this.mRecyclerView.setAdapter(mWorkmatesViewsAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         this.mRecyclerView.setLayoutManager(layoutManager);

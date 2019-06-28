@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,7 +36,7 @@ public class WorkmatesViewHolder extends ViewHolder {
         ButterKnife.bind(this,itemView);
     }
 
-    public void updateWithUser(User user, RequestManager glide, Context context,List<PlaceDetails>placeDetailsList){
+    public void updateWithUser(User user, RequestManager glide, Context context,List<PlaceDetails>placeDetailsList,int tag){
 
         String restaurant_name=null;
 
@@ -53,14 +54,23 @@ public class WorkmatesViewHolder extends ViewHolder {
             }
         }
 
-        if(restaurant_name!=null){
+      /*  if(restaurant_name!=null){
 
             mTextView.setText(String.format(Locale.US,"%s",user.getUsername()+ " "+context.getResources().
                     getString(R.string.workmate_has_decides)+ " "+restaurant_name));
             mTextView.setTextSize(11);
 
-        }
-        mTextView.setText(String.format(Locale.US,"%s",user.getUsername() +" "+context.getResources().getString(R.string.workmate_has_not_decided)));
+        }*/
+      String value;
+      if(tag==1){
+        value= !TextUtils.isEmpty(restaurant_name)?String.format(Locale.US,"%s",user.getUsername()+ " "+context.getResources().
+               getString(R.string.workmate_has_decides)+ " "+restaurant_name): String.format(Locale.US,"%s",user.getUsername() +" "+context.getResources().getString(R.string.workmate_has_not_decided));}
+      else{
+          value=String.format(Locale.US,"%s",user.getUsername()+ "  "+context.getResources().getString(R.string.is_joining));
+      }
+        mTextView.setText(value);
+
+      //  String.format(Locale.US,"%s",user.getUsername() +" "+context.getResources().getString(R.string.workmate_has_not_decided));
         if(user.getUrlPicture()!=null)
             glide.load(user.getUrlPicture()).apply(RequestOptions.circleCropTransform()).into(mImageView);
 

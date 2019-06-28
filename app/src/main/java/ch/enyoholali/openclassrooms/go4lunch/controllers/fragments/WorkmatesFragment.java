@@ -98,7 +98,7 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
 
     private void configureRecyclerView(){
 
-        this.mAdapter = new WorkmatesViewsAdapter(mUserList, Glide.with(this),getContext());
+        this.mAdapter = new WorkmatesViewsAdapter(mUserList, Glide.with(this),getContext(),1);
         this.mRecyclerView.setAdapter(mAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         this.mRecyclerView.setLayoutManager(layoutManager);
