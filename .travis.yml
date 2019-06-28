@@ -16,6 +16,7 @@ env:
    
   #Install Timeout (by default 2min is not enough for slow computers)
   - ADB_INSTALL_TIMEOUT=5 # minutes
+  - ANDROID_ABI=armeabi-v7a
 
 android:
   components:
