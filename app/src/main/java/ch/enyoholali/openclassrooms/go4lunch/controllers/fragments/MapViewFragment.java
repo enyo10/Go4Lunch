@@ -2,7 +2,6 @@ package ch.enyoholali.openclassrooms.go4lunch.controllers.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 
 import androidx.core.app.ActivityCompat;
@@ -41,7 +40,6 @@ import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.nearbysearch.Resul
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 
 import icepick.Icepick;
-import io.reactivex.disposables.Disposable;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,7 +53,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private static final String KEY_LOCATION = "location";
     private GoogleMap mMap;
     private Marker mMarker;
-    private Location mLastKnownLocation;
 
     private List<Result> mPlaceList;
     private List<User> mUserList;
@@ -64,7 +61,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private List<PlaceDetails> mPlaceDetailsList;
 
     MapView mMapView;
-    private Disposable mDisposable;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -154,7 +150,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     /**
      * This method to update the location on the map.
      */
-    private void updateLocationUI() {
+  /*  private void updateLocationUI() {
         if (mMap == null) {
             return;
         }
@@ -173,7 +169,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
-    }
+    }*/
 
     private void setMyLocationOnMap() {
         if(getActivity()!=null)
@@ -189,6 +185,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         }
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        //mMap.getUiSettings().setCompassEnabled(true);
 
     }
 
@@ -442,16 +439,12 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
             mMapView.onDestroy();
     }
 
-    private void disposeWhenDestroy() {
-        if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
-    }
 
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        disposeWhenDestroy();
         destroyMap();
 
         Log.d(TAG, "onDestroy");

@@ -327,19 +327,18 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
                 List<User>subscribers=new ArrayList<>();
                 if(getCurrentUser()!=null)
                     for (int k=0;k<list.size();k++) {
-                        if(getCurrentUser().getUid().equals(list.get(k).getUid())){
+                        if(!getCurrentUser().getUid().equals(list.get(k).getUid())){
+                           // mUser=list.get(k);
+                            if(list.get(k).getRestaurantId()!=null)
+                                if(list.get(k).getRestaurantId().equals(placeId))
+                                    subscribers.add(list.get(k));
+                        }else
                             mUser=list.get(k);
-                        }
-                        if(list.get(k).getRestaurantId()!=null&& placeId.equals(list.get(k).getRestaurantId()))
-                            subscribers.add(list.get(k));
 
                     }
-                //updateUserList(activeUserList);
                   updateSubscriberList(subscribers);
 
                 Log.d(TAG," subscribers size  "+mSubscriberList.size());
-                // Update UI
-                // ...
             }
         });
 

@@ -136,16 +136,17 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
                 List<User> userList = snapshot.toObjects(User.class);
                 List<User>otherList=new ArrayList<>();
 
-                for (User u:userList) {
-                    if(!getCurrentUser().getUid().equals(u.getUid())) {
-                        otherList.add(u);
+                for (int i=0;i<userList.size();i++) {
+                    if(!getCurrentUser().getUid().equals(userList.get(i).getUid())) {
+                        otherList.add(userList.get(i));
 
                     }
                     else {
-                        DataSingleton.getInstance().setActuelUser(u);
+                        DataSingleton.getInstance().setActuelUser(userList.get(i));
                     }
 
                 }
+                Log.d(TAG, " other list size "+otherList.size());
                 updateUserList(otherList);
 
             }

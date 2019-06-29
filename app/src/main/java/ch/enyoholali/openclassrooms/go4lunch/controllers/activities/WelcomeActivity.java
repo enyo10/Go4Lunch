@@ -3,18 +3,26 @@ package ch.enyoholali.openclassrooms.go4lunch.controllers.activities;
 import android.Manifest;
 import android.app.SearchManager;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 //import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -75,10 +83,16 @@ public class WelcomeActivity extends BaseActivity
     private static final int DELETE_USER_TASK = 20;
     // private final static int ALL_PERMISSIONS_RESULT = 101;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    public static final String SHARED_PREF_NAME = "pref";
+    public static final String LONGTITUDE = "long";
+    public static final String LATITUDE = "lat";
   //  private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
     final FragmentManager mFragmentManager = getSupportFragmentManager();
     protected FusedLocationProviderClient mFusedLocationProviderClient;
+    protected LocationRequest mLocationRequest;
     protected ActionBar mActionBar;
+
     int AUTOCOMPLETE_REQUEST_CODE = 1;
     @BindView(R.id.activity_welcome_bottom_navigation)
     BottomNavigationView mBottomNavigationView;
@@ -89,7 +103,7 @@ public class WelcomeActivity extends BaseActivity
     WorkmatesFragment mWorkmatesFragment;
     Fragment activeFragment;
     PlacesClient mPlacesClient;
-    private Location mCurrentLocation;
+      Location mCurrentLocation;
   //  private LocationRequest mLocationRequest;
   //  private LocationCallback mLocationCallback;
    // private Boolean requestingLocationUpdates;
@@ -97,6 +111,8 @@ public class WelcomeActivity extends BaseActivity
     private List<PlaceDetails> mPlaceDetailsList;
     private Disposable mDisposable;
     private User mUser;
+    SharedPreferences mSharedPreferences;
+
 
     @Override
     public int getActivityLayout() {
@@ -105,8 +121,13 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void configureView() {
+         mSharedPreferences=getSharedPreferences(SHARED_PREF_NAME,MODE_PRIVATE);
         // Initialize the FusedLocationClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        // Location request.
+        createLocationRequest();
+        getCurrentLocationSettings();
+
         this.mPlaceDetailsList = new ArrayList<>();
         toolbar = findViewById(R.id.toolbar);
         ButterKnife.bind(this);
@@ -115,7 +136,6 @@ public class WelcomeActivity extends BaseActivity
         mActionBar = getSupportActionBar();
         intAppClient();
 
-        //createLocationRequest();
       //  initLocationCallback();
         getDeviceLocation();
 
@@ -376,7 +396,7 @@ public class WelcomeActivity extends BaseActivity
 
 
 //--------------------------------------------------------------------------------------------------
-    //               HELPER.
+    //               FRAGMENT MANAGEMENT
     //----------------------------------------------------------------------------------------------
 
     /**
@@ -394,8 +414,6 @@ public class WelcomeActivity extends BaseActivity
         // activeFragment = mMapViewFragment;
 
     }
-
-
 
     /**
      * This method to load the fragment in to the frame.
@@ -491,7 +509,7 @@ public class WelcomeActivity extends BaseActivity
                 public void onSuccess(Location location) {
 
                     if (location != null) {
-                        if (mCurrentLocation != null) {
+                       /* if (mCurrentLocation != null) {
                             mCurrentLocation = location;
                             activeFragment = mMapViewFragment;
                             executeHttpRequestWithRetrofit();
@@ -500,6 +518,11 @@ public class WelcomeActivity extends BaseActivity
                         }
                         DataSingleton.getInstance().setLocation(mCurrentLocation);
 
+*/
+                       mCurrentLocation=location;
+                       executeHttpRequestWithRetrofit();
+                       activeFragment=mMapViewFragment;
+                       DataSingleton.getInstance().setLocation(mCurrentLocation);
                         Log.i(TAG, "Location found " + location);
 
                     } else {
@@ -510,15 +533,49 @@ public class WelcomeActivity extends BaseActivity
         }
     }
 
+    protected void createLocationRequest() {
+        mLocationRequest  = LocationRequest.create();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
 
-  /*  protected LocationRequest getLocationRequest() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest = locationRequest;
-        return mLocationRequest;
-    }*/
+    protected void  getCurrentLocationSettings(){
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                // All location settings are satisfied. The client can initialize
+                // location requests here.
+                // ...
+                getDeviceLocation();
+            }
+        });
+
+        task.addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof ResolvableApiException) {
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+                    try {
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(WelcomeActivity.this,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        // Ignore the error.
+                    }
+                }
+            }
+        });
+    }
+
 
     /**
      * This method to initialize the location callback.
@@ -540,9 +597,27 @@ public class WelcomeActivity extends BaseActivity
         };
     }*/
 
+
+
+
+    //----------------------------------------------------------------------------------------------
+    //                           REQUESTS
+    //----------------------------------------------------------------------------------------------
+
     private void executeHttpRequestWithRetrofit() {
 
-        LatLng latlng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+       // LatLng latlng=new LatLng(37.422001,-122.0840034);
+
+      /*  if (mCurrentLocation == null) {
+            String latitude = mSharedPreferences.getString(LATITUDE, "37.422001");
+            String longitude = mSharedPreferences.getString(LONGTITUDE, "-122.0840034");
+            if (latitude != null && longitude != null) {
+
+                latlng = new LatLng(Double.valueOf(latitude), Double.valueOf(longitude));
+            }
+        } else
+*/
+       LatLng     latlng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 
         String latlng1 = latlng.latitude + "," + latlng.longitude;
 
@@ -575,11 +650,9 @@ public class WelcomeActivity extends BaseActivity
 
 
 
-
     //----------------------------------------------------------------------------------------------
-    //                           REQUESTS
+    //                                   HELP METHODS
     //----------------------------------------------------------------------------------------------
-
     private void updateUIWithResult(List<PlaceDetails> list) {
         this.mPlaceDetailsList.clear();
         this.mPlaceDetailsList.addAll(list);
@@ -587,10 +660,6 @@ public class WelcomeActivity extends BaseActivity
         dataInterface.update(list);
 
     }
-
-    //----------------------------------------------------------------------------------------------
-    //                                   HELP METHODS
-    //----------------------------------------------------------------------------------------------
 
     /**
      * Stops tracking the device. Removes the location
@@ -640,6 +709,13 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     protected void onDestroy() {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        float longitude = (float) mCurrentLocation.getLongitude();
+        float latitude= (float)mCurrentLocation.getLatitude();
+        editor.putFloat(LONGTITUDE,longitude);
+        editor.putFloat(LATITUDE,latitude);
+        editor.apply();
+
         super.onDestroy();
         this.disposeWhenDestroy();
     }
@@ -695,6 +771,10 @@ public class WelcomeActivity extends BaseActivity
    /* private void updateUI(){
 
     }*/
+
+    /**
+     * This interface help us to send data to the class that implement it.
+     */
     public interface DataInterface {
         void doMySearch(String query);
 

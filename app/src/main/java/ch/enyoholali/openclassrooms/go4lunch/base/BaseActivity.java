@@ -3,6 +3,7 @@ package ch.enyoholali.openclassrooms.go4lunch.base;
 import android.content.Intent;
 import androidx.annotation.Nullable;
 
+import android.location.Location;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +22,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     // LIFE CYCLE
     // --------------------
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +30,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         configureView();
         FirebaseApp.initializeApp(this);
         Icepick.restoreInstanceState (this,savedInstanceState);
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Icepick.saveInstanceState(this,outState);
 
     }
 

@@ -100,7 +100,7 @@ public class MainActivity extends BaseActivity {
                         .setAvailableProviders(
                                 Arrays.asList(
                                         new AuthUI.IdpConfig.EmailBuilder().build()
-                                     //  ,  new AuthUI.IdpConfig.GoogleBuilder().build()
+                                       ,  new AuthUI.IdpConfig.GoogleBuilder().build()
                                         ,  new AuthUI.IdpConfig.FacebookBuilder().build()
                                         )
                                                 )

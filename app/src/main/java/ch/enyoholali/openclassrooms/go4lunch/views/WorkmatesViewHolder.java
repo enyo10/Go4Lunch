@@ -45,11 +45,11 @@ public class WorkmatesViewHolder extends ViewHolder {
             Log.d(TAG, " place details list size  " +placeDetailsList.size());
             for(int i=0;i<placeDetailsList.size();i++){
               //  Log.d(TAG, " id : "+user.getRestaurantId() + "  place id "+ placeDetailsList.get(i).getResult().getPlaceId());
-                if(user.getRestaurantId().equals(placeDetailsList.get(i).getResult().getPlaceId()))
+                if(user.getRestaurantId().equals(placeDetailsList.get(i).getResult().getPlaceId())) {
 
                     restaurant_name = placeDetailsList.get(i).getResult().getName();
-                Log.i(TAG, "matching  user-Rest-id " + user.getRestaurantId() +" placeId "+placeDetailsList.get(i).getResult().getName());
-
+                    Log.i(TAG, "matching  user-Rest-id " + user.getRestaurantId() + " placeId " + placeDetailsList.get(i).getResult().getName());
+                }
 
             }
         }

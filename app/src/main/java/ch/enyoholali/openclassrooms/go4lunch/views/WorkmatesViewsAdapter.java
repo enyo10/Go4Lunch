@@ -52,6 +52,7 @@ public class WorkmatesViewsAdapter extends RecyclerView.Adapter<WorkmatesViewHol
 
     @Override
     public void onBindViewHolder(@NonNull WorkmatesViewHolder holder, int position) {
+        mPlaceDetailsList=DataSingleton.getInstance().getPlaceDetailsList();
         holder.updateWithUser(mWorkmateList.get(position),glide,mContext,mPlaceDetailsList,tag);
 
     }
