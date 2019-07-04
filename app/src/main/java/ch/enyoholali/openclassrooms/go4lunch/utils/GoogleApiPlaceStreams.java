@@ -22,9 +22,6 @@ public class GoogleApiPlaceStreams {
 
     private static Map<String,String>mParametersMap=new HashMap<>();
 
-
-
-
    // String mString="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500&type=" +"restaurant&keyword=cruise&key=AIzaSyD9pp59K2tcqgbzpAXeyjXQ_7DVcOaHQl0";
     //"AIzaSyDor0zXuE7bHOAJvcG8X4QVWZI5XhEx9fo"
     //String mString2="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500&type=restaurant&keyword=cruise&key=AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";

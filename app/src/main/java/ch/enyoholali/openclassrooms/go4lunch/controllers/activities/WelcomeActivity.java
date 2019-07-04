@@ -10,12 +10,11 @@ import android.location.Location;
 
 import androidx.annotation.NonNull;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-//import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -25,6 +24,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
@@ -47,6 +47,9 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -81,33 +84,33 @@ public class WelcomeActivity extends BaseActivity
     //  - Identify each Http Request
     private static final int SIGN_OUT_TASK = 10;
     private static final int DELETE_USER_TASK = 20;
-    // private final static int ALL_PERMISSIONS_RESULT = 101;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     public static final String SHARED_PREF_NAME = "pref";
     public static final String LONGTITUDE = "long";
     public static final String LATITUDE = "lat";
-  //  private static final String REQUESTING_LOCATION_UPDATES_KEY = "tracking_location";
     final FragmentManager mFragmentManager = getSupportFragmentManager();
     protected FusedLocationProviderClient mFusedLocationProviderClient;
     protected LocationRequest mLocationRequest;
     protected ActionBar mActionBar;
 
     int AUTOCOMPLETE_REQUEST_CODE = 1;
-    @BindView(R.id.activity_welcome_bottom_navigation)
-    BottomNavigationView mBottomNavigationView;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+
+    @BindView(R.id.nav_view)NavigationView mNavigationView;
+
+    TextView mUserEmailTextView;
+    ImageView mImageView;
+    TextView mUsernameTextView;
+    @BindView(R.id.activity_welcome_bottom_navigation) BottomNavigationView mBottomNavigationView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+
     MapViewFragment mMapViewFragment;
     ListViewFragment mListViewFragment;
     WorkmatesFragment mWorkmatesFragment;
     Fragment activeFragment;
     PlacesClient mPlacesClient;
-      Location mCurrentLocation;
-  //  private LocationRequest mLocationRequest;
-  //  private LocationCallback mLocationCallback;
-   // private Boolean requestingLocationUpdates;
-   // private boolean mTrackingLocation;
+    Location mCurrentLocation;
+
     private List<PlaceDetails> mPlaceDetailsList;
     private Disposable mDisposable;
     private User mUser;
@@ -121,6 +124,7 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void configureView() {
+        getConnectedUser();
          mSharedPreferences=getSharedPreferences(SHARED_PREF_NAME,MODE_PRIVATE);
         // Initialize the FusedLocationClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -140,6 +144,7 @@ public class WelcomeActivity extends BaseActivity
         getDeviceLocation();
 
         configureBottomNavigationView();
+        configureNavHeader();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -154,12 +159,12 @@ public class WelcomeActivity extends BaseActivity
         toolbar.setTitle(R.string.title_activity_maps);
         initFragments();
         handleIntent(getIntent());
-        getConnectedUser();
 
-        //updateValuesFromBundle(mSaveInstanceState);
+
 
 
     }
+
 
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -167,8 +172,7 @@ public class WelcomeActivity extends BaseActivity
 
             DataInterface searchInterface = (DataInterface) activeFragment;
             searchInterface.doMySearch(query);
-            // placePrediction(query);
-            //Log.d(TAG, "search query "+query);
+
         }
     }
 
@@ -184,6 +188,21 @@ public class WelcomeActivity extends BaseActivity
         handleIntent(intent);
     }
 
+
+    //----------------------------------------------------------------------------------------------
+    //                                   CONFIGURE VIEWS.
+    //----------------------------------------------------------------------------------------------
+
+    private void configureNavHeader(){
+        View view= mNavigationView.getHeaderView(0);
+        mUserEmailTextView =view.findViewById(R.id.nav_header_email_textView);
+        mUsernameTextView=  view.findViewById(R.id.nav_header_username_textView);
+        mImageView =view.findViewById(R.id.nav_header_imageView);
+
+
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -192,10 +211,8 @@ public class WelcomeActivity extends BaseActivity
 
         return super.onCreateOptionsMenu(menu);
     }
-
-
     //----------------------------------------------------------------------------------------------
-    //                                   CONFIGURE VIEWS.
+    //                                        ACTIONS
     //----------------------------------------------------------------------------------------------
 
     @Override
@@ -207,9 +224,7 @@ public class WelcomeActivity extends BaseActivity
             super.onBackPressed();
         }
     }
-    //----------------------------------------------------------------------------------------------
-    //---------------    ACTIONS
-    //----------------------------------------------------------------------------------------------
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -280,31 +295,13 @@ public class WelcomeActivity extends BaseActivity
         if(placeDetails!=null){
             DataSingleton.getInstance().setPlaceDetails(placeDetails);
             startActivity(PlaceDetailsActivity.class);
+        }else {
+            Toast.makeText(this,"You do not select lunch yet",Toast.LENGTH_LONG).show();
 
         }
 
-
     }
 
-    /**
-     * This method to get the connected user.
-     */
-    private void getConnectedUser(){
-        if(getCurrentUser()!=null)
-        UserHelper.getUser(getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                mUser = documentSnapshot.toObject(User.class);
-
-                if(mUser!=null)
-                Log.d(TAG, "user "+ mUser.getUsername() +"   retrieved");
-
-
-            }
-        });
-
-
-    }
 
     // Configure BottomNavigationView
     public void configureBottomNavigationView() {
@@ -349,7 +346,9 @@ public class WelcomeActivity extends BaseActivity
         // Start the autocomplete intent.
         Intent intent = new Autocomplete.IntentBuilder(
                 AutocompleteActivityMode.OVERLAY, fields)
+                .setTypeFilter(TypeFilter.ESTABLISHMENT)
                 .build(this);
+
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
 
     }
@@ -411,7 +410,6 @@ public class WelcomeActivity extends BaseActivity
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mWorkmatesFragment, "3").hide(mWorkmatesFragment).commit();
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mMapViewFragment, "1").commit();
-        // activeFragment = mMapViewFragment;
 
     }
 
@@ -509,16 +507,7 @@ public class WelcomeActivity extends BaseActivity
                 public void onSuccess(Location location) {
 
                     if (location != null) {
-                       /* if (mCurrentLocation != null) {
-                            mCurrentLocation = location;
-                            activeFragment = mMapViewFragment;
-                            executeHttpRequestWithRetrofit();
-                        } else {
-                            mCurrentLocation = location;
-                        }
-                        DataSingleton.getInstance().setLocation(mCurrentLocation);
 
-*/
                        mCurrentLocation=location;
                        executeHttpRequestWithRetrofit();
                        activeFragment=mMapViewFragment;
@@ -539,6 +528,7 @@ public class WelcomeActivity extends BaseActivity
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
+
 
     protected void  getCurrentLocationSettings(){
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -577,27 +567,6 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-    /**
-     * This method to initialize the location callback.
-     */
-   /* private void initLocationCallback() {
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                //super.onLocationResult(locationResult);
-                if (locationResult == null) {
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
-                    Log.d(TAG, "location update " + location);
-                    // Update UI with location data
-                    // ...
-                }
-            }
-        };
-    }*/
-
-
 
 
     //----------------------------------------------------------------------------------------------
@@ -606,17 +575,6 @@ public class WelcomeActivity extends BaseActivity
 
     private void executeHttpRequestWithRetrofit() {
 
-       // LatLng latlng=new LatLng(37.422001,-122.0840034);
-
-      /*  if (mCurrentLocation == null) {
-            String latitude = mSharedPreferences.getString(LATITUDE, "37.422001");
-            String longitude = mSharedPreferences.getString(LONGTITUDE, "-122.0840034");
-            if (latitude != null && longitude != null) {
-
-                latlng = new LatLng(Double.valueOf(latitude), Double.valueOf(longitude));
-            }
-        } else
-*/
        LatLng     latlng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 
         String latlng1 = latlng.latitude + "," + latlng.longitude;
@@ -648,6 +606,29 @@ public class WelcomeActivity extends BaseActivity
                 });
     }
 
+    /**
+     * This method to get the connected user.
+     */
+    private void getConnectedUser(){
+        if(getCurrentUser()!=null)
+            UserHelper.getUser(getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    mUser = documentSnapshot.toObject(User.class);
+
+                    if(mUser!=null){
+                        Log.d(TAG, "user "+ mUser.getUsername() +"   retrieved");
+
+                        updateNavigationHeader();
+
+                    }
+
+
+                }
+            });
+
+    }
+
 
 
     //----------------------------------------------------------------------------------------------
@@ -661,27 +642,17 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
-    /**
-     * Stops tracking the device. Removes the location
-     * updates, stops the animation, and resets the UI.
-     */
-  /*  private void stopTrackingLocation() {
-        if (mTrackingLocation) {
-            mTrackingLocation = false;
+    private void updateNavigationHeader(){
 
-        }
-    }*/
+        Log.d(TAG, " actual user "+mUser.getEmail() );
 
-    /* @Override
-     protected void onPause() {
-         if (mTrackingLocation) {
-             stopTrackingLocation();
-             mTrackingLocation = true;
-         }
-         super.onPause();
-     }
+        mUsernameTextView.setText(mUser.getUsername());
+        mUserEmailTextView.setText(mUser.getEmail());
+        Glide.with(this).load(mUser.getUrlPicture()).into(mImageView);
 
- */
+    }
+
+
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
@@ -690,21 +661,15 @@ public class WelcomeActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
-      //  stopLocationUpdates();
+
     }
 
-  /*  private void stopLocationUpdates() {
-        mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-    }*/
 
     @Override
     protected void onResume() {
         super.onResume();
         getDeviceLocation();
-     //   startLocationUpdates();
-//        if (requestingLocationUpdates) {
-   //         startLocationUpdates();
-  //      }
+
     }
 
     @Override
@@ -720,57 +685,6 @@ public class WelcomeActivity extends BaseActivity
         this.disposeWhenDestroy();
     }
 
-    /*  private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]
-                            {Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION_PERMISSION);
-        } else {
-            mTrackingLocation = true;
-            mFusedLocationProviderClient.requestLocationUpdates
-                    (getLocationRequest(),
-                            mLocationCallback,
-                            null *//* Looper *//*);
-
-            // Set a loading text while you wait for the address to be
-            // returned
-
-
-        }
-    }
-*/
-  /*  private void updateValuesFromBundle(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            return;
-        }
-
-        // Update the value of requestingLocationUpdates from the Bundle.
-        if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
-            requestingLocationUpdates = savedInstanceState.getBoolean(
-                    REQUESTING_LOCATION_UPDATES_KEY);
-        }
-
-        // ...
-
-        // Update UI to match restored state
-        updateUI();
-    }
-
-*/
-
-   /* @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
-                requestingLocationUpdates);
-        // ...
-        super.onSaveInstanceState(outState);
-    }*/
-
-   /* private void updateUI(){
-
-    }*/
 
     /**
      * This interface help us to send data to the class that implement it.

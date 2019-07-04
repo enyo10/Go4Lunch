@@ -109,6 +109,7 @@
     <string name="button_title_chat_activity">Acceder au chat</string>
 
     <string name="is_joining"> a rejoint </string>
+    <string name="go_lunch"> Tu n\'as pas encore choisi où manger</string>
 
 
 </resources>

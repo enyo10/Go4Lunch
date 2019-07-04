@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.annotations.Nullable;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -50,7 +51,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
     // Constant
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final String KEY_LOCATION = "location";
     private GoogleMap mMap;
     private Marker mMarker;
 
@@ -132,13 +132,14 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     public boolean onMarkerClick(Marker marker) {
         Log.d(TAG, " on marker clicked "+marker.getPosition().toString() + " "+marker.getId());
        // PlaceDetails placeDetails = DataSingleton.getInstance().getPlaceDetailsHashMap().get(marker.getId());
-        PlaceDetails placeDetails=mPlaceDetailsMap.get(marker.getPosition().toString());
+        PlaceDetails placeDetails= mPlaceDetailsMap.get(marker.getPosition().toString());
         Log.d(TAG, "marker size " +mPlaceDetailsMap.keySet());
         if(placeDetails!=null){
         Log.d(TAG, " place details " +placeDetails.getResult().getId());
         DataSingleton.getInstance().setPlaceDetails(placeDetails);
 
         startActivity(PlaceDetailsActivity.class);
+
         }
 
 
@@ -185,62 +186,61 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         }
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        //mMap.getUiSettings().setCompassEnabled(true);
-
+        mMap.getUiSettings().setZoomControlsEnabled(true);
     }
+/*
 
-  /*  *//**
-     * this method to add the marker on the map.
-     * @param placesDetailsList,
-     *          the placesDetailsList containing the restaurant to be add.
-     *//*
-       private void addMarkerOnMap(List<Result> placesDetailsList) {
+    private void addMarkersOnMap(List<PlaceDetails>placesDetailsList){
         Log.d(TAG, "in addMarker on map method");
-        Map<String,Result>resultMap=new HashMap<>();
+        Map<String,PlaceDetails>resultMap=new HashMap<>();
 
-        getAllUsersFromFireBase();
+        getAllUsersFromFireBase1();
 
         if(placesDetailsList.size()!=0)
 
             for (int i = 0; i < placesDetailsList.size(); i++) {
-                Double lat = placesDetailsList.get(i).getGeometry().getLocation().getLat();
-                Double lng = placesDetailsList.get(i).getGeometry().getLocation().getLng();
-                String placename = placesDetailsList.get(i).getName();
-                String vinicity = placesDetailsList.get(i).getVicinity();
+                Double lat = placesDetailsList.get(i).getResult().getGeometry().getLocation().getLat();
+                Double lng = placesDetailsList.get(i).getResult().getGeometry().getLocation().getLng();
+                String placename = placesDetailsList.get(i).getResult().getName();
+                String vinicity = placesDetailsList.get(i).getResult().getVicinity();
 
                 MarkerOptions markerOptions = new MarkerOptions();
                 LatLng latLng = new LatLng(lat, lng);
                 markerOptions.position(latLng);
                 markerOptions.title(placename + " : " + vinicity);
+                for(int j=0; j<mUserList.size();j++){
+                    if(mUserList.get(j).getRestaurantId().equals(placesDetailsList.get(i))){
+                        mMarker = mMap.addMarker(new MarkerOptions()
+                                .position(latLng)
+                                .title(placename + " :" + vinicity)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_green)));
 
-                if( mSelectedPlaceId.contains(placesDetailsList.get(i).getPlaceId())) {
-
-
-                    mMarker = mMap.addMarker(new MarkerOptions()
-                            .position(latLng)
-                            .title(placename + " :" + vinicity)
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_green)));
+                    }
+                    else {
+                        mMarker = mMap.addMarker(new MarkerOptions()
+                                .position(latLng)
+                                .title(placename + " :" + vinicity)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
+                    }
                 }
-                else {
-                    mMarker = mMap.addMarker(new MarkerOptions()
-                            .position(latLng)
-                            .title(placename + " :" + vinicity)
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
-                }
-                Log.d(TAG, " marker id "+ mMarker.getId());
-                resultMap.put(mMarker.getId(),placesDetailsList.get(i));
+
+
+
+                resultMap.put(mMarker.getPosition().toString(),placesDetailsList.get(i));
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-
             }
-        DataSingleton.getInstance().setResultHashMap(resultMap);
+        mPlaceDetailsMap = resultMap;
         setMyLocationOnMap();
+        // DataSingleton.getInstance().setPlaceDetailsMap(resultMap);
 
 
     }
+
 */
-    private void addMarkerOnMap1(List<PlaceDetails> placesDetailsList) {
+
+   private void addMarkerOnMap(List<PlaceDetails> placesDetailsList) {
         Log.d(TAG, "in addMarker on map method");
         Map<String,PlaceDetails>resultMap=new HashMap<>();
 
@@ -281,7 +281,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         setMyLocationOnMap();
        // DataSingleton.getInstance().setPlaceDetailsMap(resultMap);
 
-
     }
 
 
@@ -294,34 +293,53 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     @Override
     public void update(List<PlaceDetails>placeDetailsList) {
         Log.d(TAG, " In mapView fragment: place details list " +placeDetailsList.size());
-        updateUIWithPlaceDetailsList(placeDetailsList);
-       // addMarkerOnMap1(placeDetailsList);
-        Log.i(TAG, " Place details list update and size : "+mPlaceDetailsList.size());
-        try {
-            addMarkerOnMap1(placeDetailsList);
+        updateUIWithPlaceDetailsList(mPlaceDetailsList);
 
+        try {
+            addMarkerOnMap(placeDetailsList);
 
         }catch (Exception e){
             Log.d(TAG, "onNext: error");
         }
-
-
-
     }
-
-
 
     private void updateUIWithPlaceDetailsList(List<PlaceDetails>list){
 
-      //  this.mPlaceDetailsList.clear();
-        this.mPlaceDetailsList=list;
+        this.mPlaceDetailsList.clear();
+        this.mPlaceDetailsList.addAll(list);
 
     }
+    private void updateUserList(List<User>list){
+        mUserList.clear();
+        mUserList.addAll(list);
+    }
+    private void updateSelectedIdList(List<String>list){
+       mSelectedPlaceId.clear();
+       mSelectedPlaceId.addAll(list);
+    }
+
 
 
     //---------------------------------------------------------------------------------------------//
     //                                       HTTP FIRE BASE                                         //
     //---------------------------------------------------------------------------------------------//
+
+   /* private void getAllUsersFromFireBase1(){
+        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    // Handle error
+                    Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+
+               List<User>users= queryDocumentSnapshots.toObjects(User.class);
+                updateUserList(users);
+            }
+        });
+    }*/
 
     private void getAllUsersFromFireBase(){
 
@@ -337,17 +355,19 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 // Convert query snapshot to a list of users.
 
                 List<User> userList = snapshot.toObjects(User.class);
-                List<String>selectedRestaurantId=new ArrayList<>();
+                List<String>selectedRestaurantIdList= new ArrayList<>();
                 for (int k=0;k<userList.size();k++) {
 
                     String id =userList.get(k).getRestaurantId();
                     if(id!=null)
-                        selectedRestaurantId.add(id);
+                        selectedRestaurantIdList.add(id);
 
                 }
-                mUserList=userList;
+                updateUserList(userList);
+               // mUserList=userList;
                 // Selected Restaurant id list.
-                mSelectedPlaceId=selectedRestaurantId;
+               // mSelectedPlaceId=selectedRestaurantId;
+                updateSelectedIdList(selectedRestaurantIdList);
                 Log.d(TAG," User list size : "+mUserList.size());
                 Log.d(TAG, "Selected id list size : "+mSelectedPlaceId.size());
 
@@ -358,88 +378,10 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     }
 
 
-
-
-
-
-    /**
-     * This method to get the device localisation.
-     */
-   /* private void getDeviceLocation() {
-        try {
-            if (mLocationPermissionGranted && getActivity() != null) {
-                Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(getActivity(), task -> {
-                    if (task.isSuccessful()) {
-                        // Set the map's camera position to the current location of the device.
-                        mLastKnownLocation = task.getResult();
-                        if (mLastKnownLocation != null) {
-                            DataSingleton.getInstance().setLocation(mLastKnownLocation);
-
-                            // Store device coordinates
-                            double latitude = mLastKnownLocation.getLatitude();
-                            double longitude = mLastKnownLocation.getLongitude();
-
-                            //Move camera toward device position
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(latitude, longitude), DEFAULT_ZOOM));
-
-                            //Execute http request with retrofit and RxJava2
-                            this.executeRequestWithRetrofit();
-
-                        } else {
-                            Toast.makeText(getContext(),
-                                    R.string.toast_message_geolocation,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                    } else {
-                        Log.d(TAG, "Current location is null. Using defaults.");
-                        Log.e(TAG, "getDeviceLocation => Exception: %s" + task.getException());
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-                        mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage());
-
-        }
-    }*/
-    //---------------------------------------------------------------------------------------------
-    //                                          UI
-    //---------------------------------------------------------------------------------------------
-
-    /*private void updateUI(){
-        if (mMap == null) {
-            return;
-        }
-        try {
-            if (mLocationPermissionGranted) {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
-              //  getDeviceLocation();
-            }
-            else {
-
-                mMap.setMyLocationEnabled(false);
-                Toast.makeText(this.getActivity(), "ERROR", Toast.LENGTH_SHORT).show();
-                mLastKnownLocation = null;
-//              Try to obtain location permission
-                getLocationPermission();
-            }
-        } catch (SecurityException e) {
-            Log.e(TAG, "updateUI: SecurityException " + e.getMessage());
-        }
-
-    }*/
-
     private void destroyMap(){
         if(mMapView!=null)
             mMapView.onDestroy();
     }
-
-
 
 
     @Override

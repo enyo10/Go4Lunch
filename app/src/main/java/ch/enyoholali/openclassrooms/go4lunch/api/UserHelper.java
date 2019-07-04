@@ -19,9 +19,9 @@ public class UserHelper {
 
     // --- CREATE ---
 
-    public static Task<Void> createUser(String uid, String username, String urlPicture) {
+    public static Task<Void> createUser(String uid, String username, String urlPicture,String email) {
         // 1 - Create User object
-        User userToCreate = new User(uid, username, urlPicture);
+        User userToCreate = new User(uid, username, urlPicture,email);
         // 2 - Add a new User Document to Firestore
         return UserHelper.getUsersCollection()
                 .document(uid) // Setting uID for Document
@@ -37,18 +37,11 @@ public class UserHelper {
         return UserHelper.getUsersCollection()
                 .orderBy("uid").limit(20);
     }
-  /*  public static Query getAllUsersWithoutCurrentUser(){
-        return UserHelper.getUsersCollection().ord;
-    }*/
 
     // --- UPDATE ---
 
     public static Task<Void> updateUsername(String username, String uid) {
         return UserHelper.getUsersCollection().document(uid).update("username", username);
-    }
-
-    public static Task<Void> updateIsMentor(String uid, Boolean isMentor) {
-        return UserHelper.getUsersCollection().document(uid).update("isMentor", isMentor);
     }
 
     public static Task<Void>updateRestaurantSelection(String uid,String restaurantId){

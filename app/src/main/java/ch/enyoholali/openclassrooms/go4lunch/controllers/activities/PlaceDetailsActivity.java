@@ -58,6 +58,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     // The views.
     @BindView(R.id.restaurant_image)ImageView mInfoImage;
     @BindView(R.id.floatingActionButton) FloatingActionButton mFloatingActionButton;
+    @BindView(R.id.floatingActionButton1)FloatingActionButton mFloatingActionButton1;
     @BindView(R.id.restaurant_name) TextView mNameTextView;
     @BindView(R.id.restaurant_address)TextView mAddress;
     @BindView(R.id.restaurant_rating_bar) RatingBar mRatingBar;
@@ -218,9 +219,9 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     }
 
     /**
-     * This method to remove a selected restaurant or
+     * This method to remove a selected restaurant
      */
-    private void selectLunch(){
+    /*private void selectLunch(){
         if(isRestaurantSelected()&& mUser.getRestaurantId().equals(mPlaceDetails.getResult().getPlaceId())){
             addSelectedRestaurantIdToFireBase(null);
         } else {
@@ -228,13 +229,15 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
             scheduleAlarm();
         }
     }
-
+*/
     @OnClick(R.id.floatingActionButton)
     public void selectRestaurant(){
        //restaurantSelected=isRestaurantSelected();
 
         if(isRestaurantSelected()){
             addSelectedRestaurantIdToFireBase(null);
+            mFloatingActionButton1.setAlpha(1f);
+            mFloatingActionButton.setAlpha(0f);
            // restaurantSelected=false;
             stopAlarm();
             Log.i(TAG, "Restaurant with id : "+placeId+"  removed");
@@ -242,6 +245,9 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         }
         else{
             addSelectedRestaurantIdToFireBase(mPlaceDetails.getResult().getPlaceId());
+            mFloatingActionButton1.setAlpha(0f);
+            mFloatingActionButton.setAlpha(1f);
+
           //  restaurantSelected=true;
             scheduleAlarm();
             Log.i(TAG, "Restaurant with id : "+mPlaceDetails.getResult().getName()+"  selected");
@@ -328,7 +334,6 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
                 if(getCurrentUser()!=null)
                     for (int k=0;k<list.size();k++) {
                         if(!getCurrentUser().getUid().equals(list.get(k).getUid())){
-                           // mUser=list.get(k);
                             if(list.get(k).getRestaurantId()!=null)
                                 if(list.get(k).getRestaurantId().equals(placeId))
                                     subscribers.add(list.get(k));
@@ -358,6 +363,11 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     }
 
+    /**
+     * This method add a selected restaurant to fire store.
+     * @param placeId,
+     *        the id of the restaurant to be add.
+     */
     public void addSelectedRestaurantIdToFireBase(String placeId){
         if(this.getCurrentUser()!=null){
         UserHelper.updateRestaurantSelection(this.getCurrentUser().getUid(),placeId).addOnFailureListener(this.onFailureListener());

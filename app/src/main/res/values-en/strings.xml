@@ -103,6 +103,7 @@
 
     <string name="text_view_chat_error">Error in discussion</string>
     <string name="button_title_chat_activity"> Go to tchat</string>
+    <string name="go_lunch"> You have not chosen where to eat yet</string>
 
 
 </resources>

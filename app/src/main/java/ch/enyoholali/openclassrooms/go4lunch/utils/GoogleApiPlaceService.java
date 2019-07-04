@@ -15,8 +15,8 @@ import retrofit2.http.QueryMap;
 
 
 public interface GoogleApiPlaceService {
-    String mString="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500&type=" +
-            "restaurant&keyword=cruise&key=AIzaSyD9pp59K2tcqgbzpAXeyjXQ_7DVcOaHQl0";
+   // String mString="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500&type=" +
+     //       "restaurant&keyword=cruise&key=AIzaSyD9pp59K2tcqgbzpAXeyjXQ_7DVcOaHQl0";
 
 
     @GET("nearbysearch/json")
@@ -25,6 +25,9 @@ public interface GoogleApiPlaceService {
     @GET("details/json?")
   // @GET("details/json?&key="+apiKey)
     Observable<PlaceDetails> getPlaceDetails(@Query("key")String key,@Query("placeid")String placeId);
+
+    @GET("details/json?&key="+"restaurant")
+    Observable<PlaceDetails>getAutoCompletePlaceDetails();
 
 
 

@@ -60,7 +60,6 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     }
 
 
-
     @Override
     public BaseFragment newInstance() {
         ListViewFragment listViewFragment=new ListViewFragment();
@@ -109,7 +108,6 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     }
 
     private  void configureRecyclerView(){
-      //  Collections.sort(mPlaceDetailsList,Collections.reverseOrder());
 
         this.mAdapter = new PlaceDetailsViewAdapter(mPlaceDetailsList, Glide.with(this));
         this.mRecyclerView.setAdapter(mAdapter);
@@ -212,7 +210,6 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
         Collections.sort(list,Collections.reverseOrder());
         this.mSwipeRefreshLayout.setRefreshing(false);
         this.mPlaceDetailsList.clear();
-        //setImageUrls(list);
         this.mPlaceDetailsList.addAll(list);
         this.mAdapter.notifyDataSetChanged();
     }
