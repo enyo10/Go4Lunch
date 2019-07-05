@@ -96,17 +96,12 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     @Override
     public void configureView() {
+        getSubscribersFromFireBase();
         mUserList=new ArrayList<>();
         mSubscriberList=new ArrayList<>();
         mPlaceDetails = DataSingleton.getInstance().getPlaceDetails();
         placeId=mPlaceDetails.getResult().getPlaceId();
-      //  mPlaceDetailsList=DataSingleton.getInstance().getPlaceDetailsList();
 
-
-        Log.d(TAG, " in Configure View "+ mPlaceDetails.getResult().getName());
-
-
-        Log.d(TAG, " place Details "+mPlaceDetails);
         ButterKnife.bind(this);
         glide = Glide.with(this);
         String  url="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference=";
@@ -118,10 +113,16 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         showPlaceDetails(mPlaceDetails,url,apiKey);
         configureRecyclerView();
         configureSwipeRefreshLayout();
-        //getAllActiveUsersFromFireBase();
-        getSubscribersFromFireBase();
         configureAlarmManager();
 
+    }
+
+    private void updateFloatingButton(){
+        Log.d(TAG, " user "+ mUser);
+        Log.d(TAG, " is selected " +isRestaurantSelected());
+        if(isRestaurantSelected())
+            mFloatingActionButton1.setAlpha(0f);
+        else mFloatingActionButton1.setAlpha(1f);
     }
 
     private void showPlaceDetails(PlaceDetails placeDetails,String url,String apiKey){
@@ -164,16 +165,6 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     }
 
 
-  /*  private void updateUserList(List<User>users){
-*//*
-        Collections.sort(users,Collections.<User>reverseOrder());
-        *//*
-       this.mSwipeRefreshLayout.setRefreshing(false);
-       this.mUserList.clear();
-       this.mUserList.addAll(users);
-       this.mWorkmatesViewsAdapter.notifyDataSetChanged();
-    }*/
-
     private void updateSubscriberList(List<User>subscriberList){
         this.mSwipeRefreshLayout.setRefreshing(false);
         this.mSubscriberList.clear();
@@ -212,24 +203,11 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
      * @return boolean,
      */
     private boolean isRestaurantSelected(){
+        return mUser != null && mUser.getRestaurantId() != null;
 
-        String restaurantId =mUser.getRestaurantId();
-         //return (restaurantId!=null && !restaurantId.isEmpty());
-        return restaurantId!=null;
+
     }
 
-    /**
-     * This method to remove a selected restaurant
-     */
-    /*private void selectLunch(){
-        if(isRestaurantSelected()&& mUser.getRestaurantId().equals(mPlaceDetails.getResult().getPlaceId())){
-            addSelectedRestaurantIdToFireBase(null);
-        } else {
-            addSelectedRestaurantIdToFireBase(mPlaceDetails.getResult().getPlaceId());
-            scheduleAlarm();
-        }
-    }
-*/
     @OnClick(R.id.floatingActionButton)
     public void selectRestaurant(){
        //restaurantSelected=isRestaurantSelected();
@@ -237,7 +215,6 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         if(isRestaurantSelected()){
             addSelectedRestaurantIdToFireBase(null);
             mFloatingActionButton1.setAlpha(1f);
-            mFloatingActionButton.setAlpha(0f);
            // restaurantSelected=false;
             stopAlarm();
             Log.i(TAG, "Restaurant with id : "+placeId+"  removed");
@@ -246,7 +223,6 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         else{
             addSelectedRestaurantIdToFireBase(mPlaceDetails.getResult().getPlaceId());
             mFloatingActionButton1.setAlpha(0f);
-            mFloatingActionButton.setAlpha(1f);
 
           //  restaurantSelected=true;
             scheduleAlarm();
@@ -282,37 +258,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     // --------------------
     // REST REQUESTS
     // --------------------
- /*   private void getAllActiveUsersFromFireBase(){
 
-        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    // Handle error
-                    Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-                // Convert query snapshot to a list of users.
-               List<User> list = snapshot.toObjects(User.class);
-                List<User>activeUserList=new ArrayList<>();
-                if(getCurrentUser()!=null)
-                for (int k=0;k<list.size();k++) {
-                    if(getCurrentUser().getUid().equals(list.get(k).getUid())){
-                        mUser=list.get(k);
-                    }
-                    else if(list.get(k).getRestaurantId()!=null)
-                        activeUserList.add(list.get(k));
-
-                }
-              //  updateUserList(activeUserList);
-                Log.d(TAG," actual User "+mUser);
-                // Update UI
-                // ...
-            }
-        });
-    }
-*/
     /**
      * This method to retrieve all user that select the given restaurant.
      */
@@ -329,18 +275,36 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
                     return;
                 }
                 // Convert query snapshot to a list of users.
-                List<User> list = snapshot.toObjects(User.class);
+                List<User> userList = snapshot.toObjects(User.class);
                 List<User>subscribers=new ArrayList<>();
-                if(getCurrentUser()!=null)
-                    for (int k=0;k<list.size();k++) {
-                        if(!getCurrentUser().getUid().equals(list.get(k).getUid())){
-                            if(list.get(k).getRestaurantId()!=null)
-                                if(list.get(k).getRestaurantId().equals(placeId))
-                                    subscribers.add(list.get(k));
-                        }else
-                            mUser=list.get(k);
+                for (int i=0;i<userList.size();i++) {
+                    if(!getCurrentUser().getUid().equals(userList.get(i).getUid())) {
+                        if(placeId.equals(userList.get(i).getRestaurantId()))
+                        subscribers.add(userList.get(i));
 
                     }
+                    else {
+                       // DataSingleton.getInstance().setActuelUser(userList.get(i));
+                        mUser=userList.get(i);
+                        Log.d(TAG, " current user "+mUser.getUsername());
+                        Log.d(TAG, "current user hss selected " +isRestaurantSelected());
+                        updateFloatingButton();
+                        
+                    }
+
+                }
+                  /* for(int k=0;k<list.size();k++){
+                       if(getCurrentUser().getUid().equals(list.get(k).getUid())){
+                           mUser=list.get(k);
+                           Log.d(TAG, " current User "+mUser.getUsername());
+                       }
+                       else {
+                           if(list.get(k).getRestaurantId().equals(placeId)){
+                               subscribers.add(list.get(k));
+
+                           }
+                       }
+                   }*/
                   updateSubscriberList(subscribers);
 
                 Log.d(TAG," subscribers size  "+mSubscriberList.size());

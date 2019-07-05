@@ -1,6 +1,8 @@
 package ch.enyoholali.openclassrooms.go4lunch.api;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -17,6 +19,7 @@ public class UserHelper {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
     }
 
+
     // --- CREATE ---
 
     public static Task<Void> createUser(String uid, String username, String urlPicture,String email) {
@@ -32,6 +35,10 @@ public class UserHelper {
     public static Task<DocumentSnapshot> getUser(String uid){
         return UserHelper.getUsersCollection().document(uid).get();
     }
+
+   /* public static DatabaseReference getUserDateReference(String uid){
+        return UserHelper.getUsersCollection().g
+    }*/
 
     public static Query getAllUsers() {
         return UserHelper.getUsersCollection()

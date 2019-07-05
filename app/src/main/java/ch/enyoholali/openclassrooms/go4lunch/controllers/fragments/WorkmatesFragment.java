@@ -143,6 +143,7 @@ public class WorkmatesFragment extends BaseFragment implements WelcomeActivity.D
                     }
                     else {
                         DataSingleton.getInstance().setActuelUser(userList.get(i));
+                        Log.d(TAG, " current user ");
                     }
 
                 }

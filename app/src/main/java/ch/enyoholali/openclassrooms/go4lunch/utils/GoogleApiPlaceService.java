@@ -28,6 +28,7 @@ public interface GoogleApiPlaceService {
 
     @GET("details/json?&key="+"restaurant")
     Observable<PlaceDetails>getAutoCompletePlaceDetails();
+   // https://maps.googleapis.com/maps/api/place/queryautocomplete/json?key=AIzaSyAD2U1ExuRrnbh1ZgV8CUeAtBmsFWzNAWw&input=Bienne
 
 
 

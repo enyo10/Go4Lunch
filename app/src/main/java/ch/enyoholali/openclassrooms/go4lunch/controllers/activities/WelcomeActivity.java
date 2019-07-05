@@ -55,6 +55,9 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,7 +127,8 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void configureView() {
-        getConnectedUser();
+      //  getConnectedUser();
+        reloadUser();
          mSharedPreferences=getSharedPreferences(SHARED_PREF_NAME,MODE_PRIVATE);
         // Initialize the FusedLocationClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -140,7 +144,6 @@ public class WelcomeActivity extends BaseActivity
         mActionBar = getSupportActionBar();
         intAppClient();
 
-      //  initLocationCallback();
         getDeviceLocation();
 
         configureBottomNavigationView();
@@ -159,8 +162,6 @@ public class WelcomeActivity extends BaseActivity
         toolbar.setTitle(R.string.title_activity_maps);
         initFragments();
         handleIntent(getIntent());
-
-
 
 
     }
@@ -280,11 +281,15 @@ public class WelcomeActivity extends BaseActivity
      * This method to lunch the place activity and will show the restaurant selected by the user.
      */
     private void goToLunch(){
-       // getConnectedUser();
+
         PlaceDetails placeDetails=null;
 
+
+
         if(mUser.getRestaurantId()!=null){
+            Log.d(TAG, " goToLunch  " +mUser.getUsername());
             for(int i=0;i<mPlaceDetailsList.size();i++){
+                Log.d(TAG,"placeDetails list size "+mPlaceDetailsList.size());
                 if(mPlaceDetailsList.get(i).getResult().getPlaceId().equals(mUser.getRestaurantId())){
                     placeDetails=mPlaceDetailsList.get(i);
                     Log.d(TAG, " place details fund.");
@@ -628,6 +633,36 @@ public class WelcomeActivity extends BaseActivity
             });
 
     }
+
+    private void reloadUser(){
+        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(@com.google.firebase.database.annotations.Nullable QuerySnapshot snapshot, @com.google.firebase.database.annotations.Nullable FirebaseFirestoreException e) {
+            if (e != null) {
+                // Handle error
+                Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
+                e.printStackTrace();
+                return;
+            }
+            // Convert query snapshot to a list of users.
+            List<User> userList = snapshot.toObjects(User.class);
+
+            for (int k=0;k<userList.size();k++) {
+
+                if(userList.get(k).getUid().equals(getCurrentUser().getUid())){
+                    mUser=userList.get(k);
+                }
+
+            }
+
+        }
+        });
+
+
+    }
+
+
+
 
 
 

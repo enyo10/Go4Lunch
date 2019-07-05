@@ -353,7 +353,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                     return;
                 }
                 // Convert query snapshot to a list of users.
-
                 List<User> userList = snapshot.toObjects(User.class);
                 List<String>selectedRestaurantIdList= new ArrayList<>();
                 for (int k=0;k<userList.size();k++) {

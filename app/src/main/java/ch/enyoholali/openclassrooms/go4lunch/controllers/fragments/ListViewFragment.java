@@ -178,13 +178,6 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
                         Log.i(TAG," Place details list downloading...");
                         Log.i(TAG," Details list size "+placeDetailsList.size());
 
-
-                        /*Double lat = placeNearbyResult.get(i).getGeometry().getLocation().getLat();
-                        Double lng = placeNearbyResult.get(i).getGeometry().getLocation().getLng();
-                        String placename = placeNearbyResult.get(i).getName();
-                        String vinicity = placeNearbyResult.get(i).getVicinity();
-*/
-
                         updateUIWithResult(placeDetailsList);
                         Log.i(TAG, " Place details list update and size : "+mPlaceDetailsList.size());
                     }

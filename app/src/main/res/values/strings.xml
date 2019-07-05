@@ -56,7 +56,7 @@
     <!-- BOTTOM NAVIGATION VIEW -->
 
     <string name="map_view"> Carte</string>
-    <string name="list_view">Liste Resto</string>
+    <string name="list_view">Liste</string>
     <string name="workmates">Collègue</string>
 
 
