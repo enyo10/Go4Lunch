@@ -131,7 +131,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     @Override
     public boolean onMarkerClick(Marker marker) {
         Log.d(TAG, " on marker clicked "+marker.getPosition().toString() + " "+marker.getId());
-       // PlaceDetails placeDetails = DataSingleton.getInstance().getPlaceDetailsHashMap().get(marker.getId());
+       // PlaceAutoComplete placeDetails = DataSingleton.getInstance().getPlaceDetailsHashMap().get(marker.getId());
         PlaceDetails placeDetails= mPlaceDetailsMap.get(marker.getPosition().toString());
         Log.d(TAG, "marker size " +mPlaceDetailsMap.keySet());
         if(placeDetails!=null){
@@ -190,9 +190,9 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     }
 /*
 
-    private void addMarkersOnMap(List<PlaceDetails>placesDetailsList){
+    private void addMarkersOnMap(List<PlaceAutoComplete>placesDetailsList){
         Log.d(TAG, "in addMarker on map method");
-        Map<String,PlaceDetails>resultMap=new HashMap<>();
+        Map<String,PlaceAutoComplete>resultMap=new HashMap<>();
 
         getAllUsersFromFireBase1();
 

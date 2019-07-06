@@ -18,17 +18,7 @@ public class WebContentActivity extends BaseActivity {
     @BindView(R.id.activity_web_view_layout)
     WebView mWebView;
 
-  /*  @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_web_content);
 
-        // Get & serialise all views
-        ButterKnife.bind(this);
-
-    }
-
-*/
     @Override
     public int getActivityLayout() {
         return R.layout.activity_web_content;

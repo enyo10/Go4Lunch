@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import ch.enyoholali.openclassrooms.go4lunch.BuildConfig;
+import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.autocomplete.PlaceAutoComplete;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.nearbysearch.Result;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
@@ -76,6 +77,20 @@ public class GoogleApiPlaceStreams {
                                 .toObservable();
                     }
                 });
+
+    }
+
+    /**
+     * This to retrieve the place details by autocomplete.
+     * @param map, the map of parameters.
+     * @return Observable of place details.
+     */
+    public static Observable<PlaceAutoComplete>streamAutocompletePlaceDetaills(Map<String,String>map){
+        GoogleApiPlaceService googleApiPlaceService = GoogleApiPlaceService.retrofit.create(GoogleApiPlaceService.class);
+        return googleApiPlaceService.getAutoCompletePlaceDetails(map)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .timeout(15,TimeUnit.SECONDS);
 
     }
 }

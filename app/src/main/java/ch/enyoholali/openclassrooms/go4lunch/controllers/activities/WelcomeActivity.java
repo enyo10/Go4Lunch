@@ -61,7 +61,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,6 +77,7 @@ import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.MapViewFragme
 import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
+import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.autocomplete.PlaceAutoComplete;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyoholali.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 import io.reactivex.disposables.Disposable;
@@ -127,7 +130,7 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void configureView() {
-      //  getConnectedUser();
+       // getConnectedUser();
         reloadUser();
          mSharedPreferences=getSharedPreferences(SHARED_PREF_NAME,MODE_PRIVATE);
         // Initialize the FusedLocationClient.
@@ -209,7 +212,6 @@ public class WelcomeActivity extends BaseActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.welcome, menu);
 
-
         return super.onCreateOptionsMenu(menu);
     }
     //----------------------------------------------------------------------------------------------
@@ -284,8 +286,6 @@ public class WelcomeActivity extends BaseActivity
 
         PlaceDetails placeDetails=null;
 
-
-
         if(mUser.getRestaurantId()!=null){
             Log.d(TAG, " goToLunch  " +mUser.getUsername());
             for(int i=0;i<mPlaceDetailsList.size();i++){
@@ -337,8 +337,6 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-
-
     //-------------------------------------------------------------------------------------------------------------
     //                    AUTOCOMPLETE MANAGEMENT
     //-------------------------------------------------------------------------------------------------------------
@@ -367,7 +365,7 @@ public class WelcomeActivity extends BaseActivity
                     Place place = Autocomplete.getPlaceFromIntent(data);
                     Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
 
-                    mDisposable = GoogleApiPlaceStreams.fetchPlaceDetailsStream(place.getId())
+                   mDisposable = GoogleApiPlaceStreams.fetchPlaceDetailsStream(place.getId())
                             .subscribeWith(new DisposableObserver<PlaceDetails>() {
                                 @Override
                                 public void onNext(PlaceDetails placeDetails) {
@@ -611,6 +609,32 @@ public class WelcomeActivity extends BaseActivity
                 });
     }
 
+    public  void executeHttpRequestPlaceAutoComplete(){
+        Map<String,String>map=new HashMap<>();
+        mDisposable=GoogleApiPlaceStreams.streamAutocompletePlaceDetaills(map)
+                .subscribeWith(new DisposableObserver<PlaceAutoComplete>() {
+                    @Override
+                    public void onNext(PlaceAutoComplete placeAutoComplete) {
+                        placeAutoComplete.getPredictions().size();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+
+
+
+
     /**
      * This method to get the connected user.
      */
@@ -651,6 +675,7 @@ public class WelcomeActivity extends BaseActivity
 
                 if(userList.get(k).getUid().equals(getCurrentUser().getUid())){
                     mUser=userList.get(k);
+                    updateNavigationHeader();
                 }
 
             }
@@ -658,18 +683,14 @@ public class WelcomeActivity extends BaseActivity
         }
         });
 
-
     }
-
-
-
-
 
 
     //----------------------------------------------------------------------------------------------
     //                                   HELP METHODS
     //----------------------------------------------------------------------------------------------
     private void updateUIWithResult(List<PlaceDetails> list) {
+        DataSingleton.getInstance().setPlaceDetailsList(list);
         this.mPlaceDetailsList.clear();
         this.mPlaceDetailsList.addAll(list);
         DataInterface dataInterface = (DataInterface) activeFragment;

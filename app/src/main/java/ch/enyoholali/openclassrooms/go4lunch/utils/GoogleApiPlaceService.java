@@ -3,6 +3,7 @@ package ch.enyoholali.openclassrooms.go4lunch.utils;
 import com.google.gson.GsonBuilder;
 import java.util.Map;
 
+import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.autocomplete.PlaceAutoComplete;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.nearbysearch.PlaceNearBySearch;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import io.reactivex.Observable;
@@ -26,13 +27,9 @@ public interface GoogleApiPlaceService {
   // @GET("details/json?&key="+apiKey)
     Observable<PlaceDetails> getPlaceDetails(@Query("key")String key,@Query("placeid")String placeId);
 
-    @GET("details/json?&key="+"restaurant")
-    Observable<PlaceDetails>getAutoCompletePlaceDetails();
-   // https://maps.googleapis.com/maps/api/place/queryautocomplete/json?key=AIzaSyAD2U1ExuRrnbh1ZgV8CUeAtBmsFWzNAWw&input=Bienne
+    @GET("queryautocomplete/json")
+    Observable<PlaceAutoComplete>getAutoCompletePlaceDetails(@QueryMap Map<String,String >parameters);
 
-
-
-    // Use excludeFieldsWithoutExposeAnnotation() for ignore some fields
 
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://maps.googleapis.com/maps/api/place/")
@@ -52,7 +49,7 @@ public interface GoogleApiPlaceService {
 //
 //   // @GET("details/json?")
 //   @GET("details/json?&key="+apiKey)
-//    Observable<PlaceDetails> getPlaceDetails(@Query("placeId")String placeId);
+//    Observable<PlaceAutoComplete> getPlaceDetails(@Query("placeId")String placeId);
 //
 //
 //

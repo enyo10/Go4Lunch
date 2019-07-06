@@ -102,7 +102,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     @Override
     protected void configureView() {
         configureRecyclerView();
-      //  configureSwipeRefreshLayout();
+        configureSwipeRefreshLayout();
 
 
     }
@@ -200,6 +200,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     //----------------------------------------------------------------------------------------------
 
     private void updateUIWithResult(List<PlaceDetails>list){
+        Log.d(TAG," placeDetails size "+list.size());
         Collections.sort(list,Collections.reverseOrder());
         this.mSwipeRefreshLayout.setRefreshing(false);
         this.mPlaceDetailsList.clear();

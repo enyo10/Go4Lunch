@@ -82,7 +82,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private List<User> mUserList;
     private List<User>mSubscriberList;
     private PlaceDetails mPlaceDetails;
-   // private List<PlaceDetails>mPlaceDetailsList;
+   // private List<PlaceAutoComplete>mPlaceDetailsList;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mPendingIntent;
@@ -120,9 +120,16 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private void updateFloatingButton(){
         Log.d(TAG, " user "+ mUser);
         Log.d(TAG, " is selected " +isRestaurantSelected());
-        if(isRestaurantSelected())
+        if(isRestaurantSelected()){
             mFloatingActionButton1.setAlpha(0f);
-        else mFloatingActionButton1.setAlpha(1f);
+            mFloatingActionButton.setAlpha(1f);
+        }
+
+        else{
+            mFloatingActionButton1.setAlpha(1f);
+            mFloatingActionButton.setAlpha(0f);
+        }
+
     }
 
     private void showPlaceDetails(PlaceDetails placeDetails,String url,String apiKey){
@@ -203,6 +210,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
      * @return boolean,
      */
     private boolean isRestaurantSelected(){
+
         return mUser != null && mUser.getRestaurantId() != null;
 
 
@@ -212,23 +220,19 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     public void selectRestaurant(){
        //restaurantSelected=isRestaurantSelected();
 
-        if(isRestaurantSelected()){
+        if(mUser.getRestaurantId()!=null){
             addSelectedRestaurantIdToFireBase(null);
-            mFloatingActionButton1.setAlpha(1f);
-           // restaurantSelected=false;
             stopAlarm();
             Log.i(TAG, "Restaurant with id : "+placeId+"  removed");
 
         }
         else{
             addSelectedRestaurantIdToFireBase(mPlaceDetails.getResult().getPlaceId());
-            mFloatingActionButton1.setAlpha(0f);
 
-          //  restaurantSelected=true;
             scheduleAlarm();
             Log.i(TAG, "Restaurant with id : "+mPlaceDetails.getResult().getName()+"  selected");
         }
-       // getAllActiveUsersFromFireBase();
+       updateFloatingButton();
 
     }
     @OnClick(R.id.restaurant_website_button)
@@ -289,7 +293,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
                         Log.d(TAG, " current user "+mUser.getUsername());
                         Log.d(TAG, "current user hss selected " +isRestaurantSelected());
                         updateFloatingButton();
-                        
+
                     }
 
                 }
