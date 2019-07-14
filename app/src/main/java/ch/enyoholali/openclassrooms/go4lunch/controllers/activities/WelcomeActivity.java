@@ -7,10 +7,27 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.bumptech.glide.Glide;
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -21,6 +38,7 @@ import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -30,40 +48,14 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.app.ActionBar;
-import android.util.Log;
-
 import com.google.android.material.navigation.NavigationView;
-
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
-
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,9 +69,9 @@ import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.MapViewFragme
 import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
-import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.autocomplete.PlaceAutoComplete;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyoholali.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
+import icepick.State;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
@@ -123,6 +115,25 @@ public class WelcomeActivity extends BaseActivity
     SharedPreferences mSharedPreferences;
 
 
+    @State String jsonArrayList;
+    @State String tag;
+
+    @Override
+    public void loadData() {
+
+    }
+
+    /*private Fragment getActiveFragment(String tag){
+        Fragment activeFragment=null;
+        List<Fragment>list =mFragmentManager.getFragments();
+        for(int k=0;k<list.size();k++)
+            if(list.get(k).getTag().equals(tag))
+                activeFragment=list.get(k);
+            return activeFragment;
+
+
+    }*/
+
     @Override
     public int getActivityLayout() {
         return R.layout.activity_welcome;
@@ -131,6 +142,8 @@ public class WelcomeActivity extends BaseActivity
     @Override
     public void configureView() {
        // getConnectedUser();
+
+        Log.d(TAG," load state "+tag);
         reloadUser();
          mSharedPreferences=getSharedPreferences(SHARED_PREF_NAME,MODE_PRIVATE);
         // Initialize the FusedLocationClient.
@@ -149,6 +162,7 @@ public class WelcomeActivity extends BaseActivity
 
         getDeviceLocation();
 
+
         configureBottomNavigationView();
         configureNavHeader();
 
@@ -166,8 +180,8 @@ public class WelcomeActivity extends BaseActivity
         initFragments();
         handleIntent(getIntent());
 
-
     }
+
 
 
     private void handleIntent(Intent intent) {
@@ -202,8 +216,6 @@ public class WelcomeActivity extends BaseActivity
         mUserEmailTextView =view.findViewById(R.id.nav_header_email_textView);
         mUsernameTextView=  view.findViewById(R.id.nav_header_username_textView);
         mImageView =view.findViewById(R.id.nav_header_imageView);
-
-
     }
 
 
@@ -261,7 +273,6 @@ public class WelcomeActivity extends BaseActivity
     public boolean onNavigationItemSelected( MenuItem item) {
 
         // Handle navigation view item clicks here.
-
         int id = item.getItemId();
 
         if (id == R.id.setting) {
@@ -414,6 +425,7 @@ public class WelcomeActivity extends BaseActivity
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mListViewFragment, "2").hide(mListViewFragment).commit();
         mFragmentManager.beginTransaction().add(R.id.activity_welcome_frame, mMapViewFragment, "1").commit();
 
+
     }
 
     /**
@@ -433,8 +445,6 @@ public class WelcomeActivity extends BaseActivity
         activeFragment = fragment;
 
     }
-
-
 
 
     //--------------------------------------------------------------------------------------------------
@@ -589,7 +599,6 @@ public class WelcomeActivity extends BaseActivity
                     @Override
                     public void onNext(List<PlaceDetails> placeDetailsList) {
                         Log.i(TAG, " Place details list downloading...");
-                        Log.i(TAG, " Details list size " + placeDetailsList.size());
 
                         updateUIWithResult(placeDetailsList);
                         Log.i(TAG, " Place details list update and size : " + mPlaceDetailsList.size());
@@ -609,7 +618,7 @@ public class WelcomeActivity extends BaseActivity
                 });
     }
 
-    public  void executeHttpRequestPlaceAutoComplete(){
+   /* public  void executeHttpRequestPlaceAutoComplete(){
         Map<String,String>map=new HashMap<>();
         mDisposable=GoogleApiPlaceStreams.streamAutocompletePlaceDetaills(map)
                 .subscribeWith(new DisposableObserver<PlaceAutoComplete>() {
@@ -632,13 +641,13 @@ public class WelcomeActivity extends BaseActivity
     }
 
 
-
+*/
 
 
     /**
      * This method to get the connected user.
      */
-    private void getConnectedUser(){
+  /*  private void getConnectedUser(){
         if(getCurrentUser()!=null)
             UserHelper.getUser(getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
@@ -656,7 +665,7 @@ public class WelcomeActivity extends BaseActivity
                 }
             });
 
-    }
+    }*/
 
     private void reloadUser(){
         UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -698,6 +707,7 @@ public class WelcomeActivity extends BaseActivity
 
     }
 
+
     private void updateNavigationHeader(){
 
         Log.d(TAG, " actual user "+mUser.getEmail() );
@@ -707,8 +717,6 @@ public class WelcomeActivity extends BaseActivity
         Glide.with(this).load(mUser.getUrlPicture()).into(mImageView);
 
     }
-
-
 
     private void disposeWhenDestroy() {
         if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
@@ -724,18 +732,21 @@ public class WelcomeActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        getDeviceLocation();
+      // getDeviceLocation();
 
     }
 
     @Override
     protected void onDestroy() {
+
+        /*
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         float longitude = (float) mCurrentLocation.getLongitude();
         float latitude= (float)mCurrentLocation.getLatitude();
         editor.putFloat(LONGTITUDE,longitude);
         editor.putFloat(LATITUDE,latitude);
         editor.apply();
+*/
 
         super.onDestroy();
         this.disposeWhenDestroy();

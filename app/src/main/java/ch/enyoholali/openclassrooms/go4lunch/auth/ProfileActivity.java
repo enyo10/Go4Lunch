@@ -51,6 +51,11 @@ public class ProfileActivity extends BaseActivity {
         this.updateUIWhenCreating();
     }
 
+    @Override
+    public void loadData() {
+
+    }
+
 
     // --------------------
     // ACTIONS

@@ -2,18 +2,15 @@ package ch.enyoholali.openclassrooms.go4lunch.controllers.activities;
 
 
 import android.content.Intent;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.snackbar.Snackbar;
 import android.util.Log;
 import android.widget.Button;
+
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
-
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Arrays;
 
@@ -44,6 +41,10 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void configureView() {
+
+    }
+    @Override
+    public void loadData() {
 
     }
 

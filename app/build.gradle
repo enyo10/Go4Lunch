@@ -2,13 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 
-/*
-Properties properties = new Properties()
-properties.load(project.rootProject.file("local.properties").newDataInputStream())
-def GOOGLE_MAPS_API_KEY = properties.getProperty("GoogleMapsApiKey")
-*/
-
-
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -106,11 +99,14 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
     //JUnit
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation ('junit:junit:4.12','org.junit.jupiter:junit-jupiter-api:5.4.2')
+    // Required for instrumented tests
+    androidTestImplementation 'androidx.annotation:annotation:1.1.0'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
@@ -132,11 +128,10 @@ dependencies {
 
 
     // FireBase Integration
-    // implementation 'com.google.firebase:firebase-firestore:19.0.2'
 
-    implementation 'com.google.firebase:firebase-core:17.0.0' // For FireBase Integration
+    implementation 'com.google.firebase:firebase-core:17.0.1' // For FireBase Integration
 
-    implementation 'com.google.firebase:firebase-messaging:19.0.0' // For FireBase Messaging
+    implementation 'com.google.firebase:firebase-messaging:19.0.1' // For FireBase Messaging
 
     implementation 'com.firebaseui:firebase-ui-database:5.0.0'
     // FirebaseUI for Firebase Realtime Database
@@ -165,13 +160,17 @@ dependencies {
 
 
     // Add Api Google Play Service : Map
-    implementation 'com.google.android.gms:play-services-maps:16.1.0'
+   // implementation 'com.google.android.gms:play-services-maps:16.1.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     // Add Api Google Play Service : Places
-    implementation 'com.google.android.gms:play-services-places:16.1.0'
+    //implementation 'com.google.android.gms:play-services-places:16.1.0'
+    implementation 'com.google.android.gms:play-services-places:17.0.0'
+
 
     // Add Api Google Play Service : Location
-    implementation 'com.google.android.gms:play-services-location:16.0.0'
+    //implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
 
 
     // Client library
@@ -186,6 +185,7 @@ dependencies {
         transitive = true
 
     }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 
 
 }

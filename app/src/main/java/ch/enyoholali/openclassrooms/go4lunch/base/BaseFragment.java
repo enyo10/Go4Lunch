@@ -3,7 +3,6 @@ package ch.enyoholali.openclassrooms.go4lunch.base;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -14,6 +13,7 @@ import android.view.ViewGroup;
 import com.google.firebase.auth.FirebaseUser;
 
 import butterknife.ButterKnife;
+import icepick.Icepick;
 
 
 public abstract class BaseFragment extends Fragment {
@@ -30,19 +30,6 @@ public abstract class BaseFragment extends Fragment {
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-         // Initialize the FusedLocationClient.
-      /*  if (getActivity() != null)
-            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-*/
-
-        // Initialize the FusedLocationClient.
-
-
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -52,12 +39,36 @@ public abstract class BaseFragment extends Fragment {
         Log.i(TAG, " On create View method.");
         configureView();
         configureOnclickRecyclerView();
+        Icepick.restoreInstanceState(this, savedInstanceState);
 
         return view;
     }
 
+    //_____________________________________________
 
+   /* @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "onSaveInstanceState BF");
+        Icepick.saveInstanceState(this, outState);
+    }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, "onViewCreated BF");
+        if (savedInstanceState != null && !savedInstanceState.isEmpty()) {
+            Icepick.restoreInstanceState(this, savedInstanceState);
+        }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate BF");
+        setRetainInstance(true);
+    }
+*/
 
     //Generic activity launcher method
     public void startActivity(Class activity) {
@@ -71,7 +82,6 @@ public abstract class BaseFragment extends Fragment {
         return activity. getCurrentUser();
         return null;
     }
-
 
 
     //----------------------------//

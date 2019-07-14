@@ -25,11 +25,13 @@ import ch.enyoholali.openclassrooms.go4lunch.R;
 import ch.enyoholali.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.activities.PlaceDetailsActivity;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WelcomeActivity;
+import ch.enyoholali.openclassrooms.go4lunch.data.DataManager;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyoholali.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
 import ch.enyoholali.openclassrooms.go4lunch.utils.ItemClickSupport;
 import ch.enyoholali.openclassrooms.go4lunch.views.PlaceDetailsViewAdapter;
+import icepick.State;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
@@ -41,7 +43,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     private static final String TAG = ListViewFragment.class.getSimpleName();
 
     private PlaceDetailsViewAdapter mAdapter;
-    private List<PlaceDetails> mPlaceDetailsList;
+    private List<PlaceDetails> mPlaceDetailsList=new ArrayList<>();
     private Location mLocation;
 
     @BindView(R.id.fragment_list_view_recycleView)
@@ -50,14 +52,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     SwipeRefreshLayout mSwipeRefreshLayout;
 
     private Disposable mDisposable;
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        this.mPlaceDetailsList =new ArrayList<>();
-
-    }
+    @State String jsonPlaceDetailsList;
 
 
     @Override
@@ -101,6 +96,9 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
 
     @Override
     protected void configureView() {
+        this.mPlaceDetailsList =new ArrayList<>();
+        if(jsonPlaceDetailsList!=null)
+            mPlaceDetailsList= DataManager.jsonToPlaceDetailsList(jsonPlaceDetailsList);
         configureRecyclerView();
         configureSwipeRefreshLayout();
 

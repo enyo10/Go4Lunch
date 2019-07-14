@@ -22,7 +22,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.annotations.Nullable;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.nearbysearch.Resul
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 
 import icepick.Icepick;
+import icepick.State;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,28 +54,15 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     private GoogleMap mMap;
     private Marker mMarker;
 
-    private List<Result> mPlaceList;
-    private List<User> mUserList;
-    private List<String> mSelectedPlaceId;
-    private Map<String , PlaceDetails> mPlaceDetailsMap;
-    private List<PlaceDetails> mPlaceDetailsList;
+    private List<Result> mPlaceList=new ArrayList<>();
+    private List<User> mUserList=new ArrayList<>();
+    private List<String> mSelectedPlaceId=new ArrayList<>();
+    private List<PlaceDetails> mPlaceDetailsList=new ArrayList<>();
+    private Map<String , PlaceDetails> mPlaceDetailsMap=new HashMap<>();
+
 
     MapView mMapView;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mPlaceList = new ArrayList<>();
-        mUserList = new ArrayList<>();
-        mSelectedPlaceId = new ArrayList<>();
-        mPlaceDetailsMap=new HashMap<>();
-        mPlaceDetailsList=new ArrayList<>();
-        getAllUsersFromFireBase();
-
-        Icepick.restoreInstanceState(this, savedInstanceState);
-
-    }
-
+    @State String jsonPlaceDetailsList;
 
 
     @Override
@@ -103,6 +90,8 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         if (mapFragment != null)
             mapFragment.getMapAsync(this);
         Log.i(TAG, " Configure view method.");
+
+        getAllUsersFromFireBase();
 
     }
 
@@ -137,12 +126,9 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         if(placeDetails!=null){
         Log.d(TAG, " place details " +placeDetails.getResult().getId());
         DataSingleton.getInstance().setPlaceDetails(placeDetails);
-
         startActivity(PlaceDetailsActivity.class);
 
         }
-
-
         return false;
     }
 
@@ -188,57 +174,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }
-/*
 
-    private void addMarkersOnMap(List<PlaceAutoComplete>placesDetailsList){
-        Log.d(TAG, "in addMarker on map method");
-        Map<String,PlaceAutoComplete>resultMap=new HashMap<>();
-
-        getAllUsersFromFireBase1();
-
-        if(placesDetailsList.size()!=0)
-
-            for (int i = 0; i < placesDetailsList.size(); i++) {
-                Double lat = placesDetailsList.get(i).getResult().getGeometry().getLocation().getLat();
-                Double lng = placesDetailsList.get(i).getResult().getGeometry().getLocation().getLng();
-                String placename = placesDetailsList.get(i).getResult().getName();
-                String vinicity = placesDetailsList.get(i).getResult().getVicinity();
-
-                MarkerOptions markerOptions = new MarkerOptions();
-                LatLng latLng = new LatLng(lat, lng);
-                markerOptions.position(latLng);
-                markerOptions.title(placename + " : " + vinicity);
-                for(int j=0; j<mUserList.size();j++){
-                    if(mUserList.get(j).getRestaurantId().equals(placesDetailsList.get(i))){
-                        mMarker = mMap.addMarker(new MarkerOptions()
-                                .position(latLng)
-                                .title(placename + " :" + vinicity)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_green)));
-
-                    }
-                    else {
-                        mMarker = mMap.addMarker(new MarkerOptions()
-                                .position(latLng)
-                                .title(placename + " :" + vinicity)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
-                    }
-                }
-
-
-
-                resultMap.put(mMarker.getPosition().toString(),placesDetailsList.get(i));
-
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-            }
-        mPlaceDetailsMap = resultMap;
-        setMyLocationOnMap();
-        // DataSingleton.getInstance().setPlaceDetailsMap(resultMap);
-
-
-    }
-
-*/
 
    private void addMarkerOnMap(List<PlaceDetails> placesDetailsList) {
         Log.d(TAG, "in addMarker on map method");
@@ -262,13 +198,13 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
                 if( mSelectedPlaceId.contains(placesDetailsList.get(i).getResult().getPlaceId())) {
                     mMarker = mMap.addMarker(new MarkerOptions()
                             .position(latLng)
-                            .title(placename + " :" + vinicity)
+                     //       .title(placename + " :" + vinicity)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_green)));
                 }
                 else {
                     mMarker = mMap.addMarker(new MarkerOptions()
                             .position(latLng)
-                            .title(placename + " :" + vinicity)
+                      //      .title(placename + " :" + vinicity)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_locator_for_map_orange)));
                 }
 
@@ -323,23 +259,6 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     //---------------------------------------------------------------------------------------------//
     //                                       HTTP FIRE BASE                                         //
     //---------------------------------------------------------------------------------------------//
-
-   /* private void getAllUsersFromFireBase1(){
-        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    // Handle error
-                    Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-
-               List<User>users= queryDocumentSnapshots.toObjects(User.class);
-                updateUserList(users);
-            }
-        });
-    }*/
 
     private void getAllUsersFromFireBase(){
 

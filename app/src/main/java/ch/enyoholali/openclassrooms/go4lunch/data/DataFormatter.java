@@ -1,6 +1,5 @@
-package ch.enyoholali.openclassrooms.go4lunch.utils;
+package ch.enyoholali.openclassrooms.go4lunch.data;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,7 +27,7 @@ public interface DataFormatter {
      * Convert 5 stars rating into 3
      */
     default float formatRating(double rating) {
-        DecimalFormat df = new DecimalFormat("#.#");
+        //DecimalFormat df = new DecimalFormat("#.#");
         rating = Math.round(rating * 3/5);
         //rating = Double.parseDouble(df.format(rating));
         return (float) rating;

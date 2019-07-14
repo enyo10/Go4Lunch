@@ -39,4 +39,9 @@ public class WebContentActivity extends BaseActivity {
         mWebView.loadUrl(url);
 
     }
+
+    @Override
+    public void loadData() {
+
+    }
 }

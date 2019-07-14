@@ -1,13 +1,13 @@
 package ch.enyoholali.openclassrooms.go4lunch.base;
 
 import android.content.Intent;
-import androidx.annotation.Nullable;
-
-import android.location.Location;
 import android.os.Bundle;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import android.widget.Toast;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,6 +18,9 @@ import ch.enyoholali.openclassrooms.go4lunch.R;
 import icepick.Icepick;
 
 public abstract class BaseActivity extends AppCompatActivity {
+
+
+
     //--------------------
     // LIFE CYCLE
     // --------------------
@@ -27,17 +30,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(getActivityLayout());
         ButterKnife.bind(this);
-        configureView();
+       // configureView();
         FirebaseApp.initializeApp(this);
         Icepick.restoreInstanceState (this,savedInstanceState);
+        configureView();
 
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Icepick.saveInstanceState(this,outState);
-
+        Icepick.saveInstanceState(this, outState);
     }
 
     // --------------------
@@ -60,6 +63,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     //     Some abstract methods.
     public abstract int getActivityLayout();
     public abstract void configureView();
+    public abstract void loadData();
 
     // --------------------
     // ERROR HANDLER

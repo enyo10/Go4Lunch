@@ -6,13 +6,10 @@
 
     <color name="yellow">#F8E71C</color>
     <color name="black">#272822</color>
-    <color name="green">#68F0AE</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#A2A0A0</color>
 
     <!--Transparency-->
-    <color name="trans">#272822</color>
-    <color name="baseColor">#F3EC3C14</color>
     <color name="colorError">#FF5252</color>
     <color name="colorGreen">#6BB18C</color>
     <color name="colorSandLight">#F3F0E9</color>

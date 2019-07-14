@@ -1,17 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Go4Lunch</string>
-    <string name="main_activity_description">Trouvez un bon restaurant et aller déjeuner avec vos collègues!</string>
 
     <string name="login">Connexion</string>
 
     <!-- MAIN ACTIVITY -->
-    <string name="error_not_connected">Vous devez vous connecter !</string>
     <string name="error_authentication_canceled">Authentification annulée&#8230;</string>
     <string name="error_no_internet">Aucune connexion internet !</string>
     <string name="error_unknown_error">Une erreur inconnue s\'est produite&#8230;</string>
     <string name="connection_succeed">Authentification réussie !</string>
-    <string name="button_login_text_logged">Afficher le profil</string>
-    <string name="button_login_text_not_logged">Connexion</string>
 
     <!--    Permissions    -->
     <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
@@ -29,8 +25,6 @@
     <string name="workmate_has_not_decided"> n\'a pas encore choisi</string>
     <string name="workmate_has_decides"> mange chez </string>
 
-    <string name="no_restaurants_available_check_the_map_view">Aucun restaurant proche &#8230; chercher sur la carte</string>
-
 
     <!-- LOGIN ACTIVITY -->
 
@@ -47,7 +41,6 @@
     <string name="popup_message_confirmation_delete_account">Es-tu sûr(e) de vouloir supprimer ton compte ?</string>
     <string name="popup_message_choice_yes">Oui !</string>
     <string name="popup_message_choice_no">Non</string>
-    <string name="check_box_is_mentor">Etes-vous un mentor ?</string>
 
     <!-- WELCOME ACTIVITY -->
 
@@ -77,15 +70,9 @@
     <string name="action_settings">Paramètres</string>
 
 
-    <string name="hello_blank_fragment">Bonjour, fragment blanc</string>
-    <string name="description">Image</string>
     <string name="search">Recherche</string>
 
 
-    <string name="default_info_title">Localistion par défaut</string>
-    <string name="default_info_snippet">Aucune place trouvée, because location permission is disabled.</string>
-    <string name="option_get_place">Obtenir une place</string>
-    <string name="pick_place">Choisir une place</string>
     <string name="call">Appel</string>
     <string name="website">Page Web</string>
     <string name="like">Like</string>
@@ -93,23 +80,14 @@
     <string name="your_lunch">VOTRE RESTAURANT</string>
     <string name="logout">SORTIR</string>
     <string name="log_out">sortir</string>
-    <string name="toast_message_geolocation">La dernière localisation</string>
     <string name="workmate_default_decision">N\'a pas encore choisi</string>
     <string name="workmate_profil">Collègue</string>
-    <string name="title_workmates">Collègues disponibles</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
     <string name="likeSubmit">Liked envoyé</string>
-    <string name="search_restaurant">Chercher un restaurant</string>
-    <string name="action_search">Recherche</string>
-    <string name="app_label">Chercher un restaurant</string>
     <string name="search_hint">Recherche</string>
     <string name="text_view_chat_error">Erreur dans la discussion</string>
     <string name="button_title_chat_activity">Acceder au chat</string>
 
     <string name="is_joining"> a rejoint </string>
-    <string name="go_lunch"> Tu n\'as pas encore choisi où manger</string>
 
 
 </resources>

@@ -45,7 +45,7 @@ import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
-import ch.enyoholali.openclassrooms.go4lunch.utils.DataFormatter;
+import ch.enyoholali.openclassrooms.go4lunch.data.DataFormatter;
 import ch.enyoholali.openclassrooms.go4lunch.utils.NotificationAlarmReceiver;
 
 import ch.enyoholali.openclassrooms.go4lunch.views.WorkmatesViewsAdapter;
@@ -114,6 +114,10 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         configureRecyclerView();
         configureSwipeRefreshLayout();
         configureAlarmManager();
+
+    }
+    @Override
+    public void loadData() {
 
     }
 
@@ -211,8 +215,10 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
      */
     private boolean isRestaurantSelected(){
 
-        return mUser != null && mUser.getRestaurantId() != null;
-
+        //return mUser != null && mUser.getRestaurantId() != null;
+        if(mUser!=null && mUser.getRestaurantId()!=null)
+            return mUser.getRestaurantId().equals(placeId);
+        return false;
 
     }
 

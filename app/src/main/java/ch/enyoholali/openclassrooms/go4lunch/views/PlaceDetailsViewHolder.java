@@ -29,7 +29,7 @@ import ch.enyoholali.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
-import ch.enyoholali.openclassrooms.go4lunch.utils.DataFormatter;
+import ch.enyoholali.openclassrooms.go4lunch.data.DataFormatter;
 
 public class PlaceDetailsViewHolder extends ViewHolder implements DataFormatter {
     private static final String TAG=PlaceDetailsViewHolder.class.getSimpleName();

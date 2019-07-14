@@ -71,6 +71,10 @@ public class ChatActivity extends BaseActivity implements ChatAdapter.Listener {
     public void configureView() {
 
     }
+    @Override
+    public void loadData() {
+
+    }
 
         // --------------------
         // ACTIONS
