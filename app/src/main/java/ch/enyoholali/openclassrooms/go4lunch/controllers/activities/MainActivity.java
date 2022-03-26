@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.viewbinding.ViewBinding;
@@ -18,11 +17,9 @@ import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
-import java.util.List;
+
 import java.util.Objects;
 
 import ch.enyoholali.openclassrooms.go4lunch.R;
@@ -33,11 +30,12 @@ import ch.enyoholali.openclassrooms.go4lunch.databinding.ActivityMainBinding;
 public class MainActivity extends BaseActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private ActivityMainBinding binding;
 
     // [START auth_fui_create_launcher]
     // See: https://developer.android.com/training/basics/intents/result
-    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
+    /*private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
             new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
                 @Override
@@ -45,6 +43,10 @@ public class MainActivity extends BaseActivity {
                     onSignInResult(result);
                 }
             }
+    );*/
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
+            new FirebaseAuthUIActivityResultContract(),
+            this::onSignInResult
     );
     // [END auth_fui_create_launcher]
 
@@ -68,16 +70,6 @@ public class MainActivity extends BaseActivity {
     // [START auth_fui_result]
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
         IdpResponse response = result.getIdpResponse();
-        /*if (result.getResultCode() == RESULT_OK) {
-            // Successfully signed in
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            // ...
-        } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
-        }*/
 
         if (result.getResultCode()==RESULT_OK){ // SUCCESS
             this.createUserInFirestore();
@@ -96,12 +88,6 @@ public class MainActivity extends BaseActivity {
         }
     }
     // [END auth_fui_result]
-
-
-    //FOR DATA
-    // 1 - Identifier for Sign-In Activity
-    private static final int RC_SIGN_IN = 123;
-
 
     @Override
     public int getActivityLayout() {
@@ -151,13 +137,6 @@ public class MainActivity extends BaseActivity {
         Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show();
     }
 
-  /*  @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // Handle SignIn Activity response on activity result.
-        this.handleResponseAfterSignIn(requestCode,resultCode,data);
-
-    }*/
 
     //  Update UI when activity is resuming
     private void updateUIWhenResuming(){
@@ -171,26 +150,6 @@ public class MainActivity extends BaseActivity {
     // NAVIGATION
     // --------------------
     // 2 - Launch Sign-In Activity
-    private void startSignInActivity(){
-        Log.i(TAG, "in start sign in activity Method");
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setTheme(R.style.LoginTheme)
-                        .setAvailableProviders(
-                                Arrays.asList(
-                                        new AuthUI.IdpConfig.EmailBuilder().build()
-                                       ,  new AuthUI.IdpConfig.GoogleBuilder().build()
-                                        ,  new AuthUI.IdpConfig.FacebookBuilder().build()
-                                        )
-                                                )
-
-                        .setIsSmartLockEnabled(false, true)
-                        .setLogo(R.drawable.logo_go_for_lunch144)
-                       // .setTheme(R.style.LoginTheme)
-                        .build(),
-                RC_SIGN_IN);
-    }
 
     private void createSignIntent(){
         Intent signInIntent= AuthUI.getInstance()
@@ -247,7 +206,7 @@ public class MainActivity extends BaseActivity {
     // ------------------------------------
 
     // Method that handles response after SignIn Activity close.
-    private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
+   /* private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
         IdpResponse response =IdpResponse.fromResultIntent(data);
 
         if(requestCode==RC_SIGN_IN){
@@ -267,7 +226,7 @@ public class MainActivity extends BaseActivity {
                 }
             }
         }
-    }
+    }*/
 
 
     @Override
