@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_workmates_linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!--WORKMATES PHOTO-->
+    <ImageView
+        android:id="@+id/fragment_workmates_list_item_image"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_margin="10dp"
+        android:contentDescription="@string/workmate_profil"
+        android:src="@drawable/ic_action_workmate" />
+
+    <RelativeLayout
+        android:id="@+id/item_workmates_relative_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--WORKMATES CHOICE-->
+        <TextView
+            android:id="@+id/fragment_workmates_list_item_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:gravity="center_horizontal"
+            android:text="@string/workmate_default_decision"
+            android:textColor="#546E7A"
+            android:textStyle="italic" />
+
+        <!--SEPARATION-->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/gray" />
+    </RelativeLayout>
+
+</LinearLayout>

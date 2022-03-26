@@ -1,0 +1,93 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Go4Lunch</string>
+
+    <string name="login">Connexion</string>
+
+    <!-- MAIN ACTIVITY -->
+    <string name="error_authentication_canceled">Authentification annulée&#8230;</string>
+    <string name="error_no_internet">Aucune connexion internet !</string>
+    <string name="error_unknown_error">Une erreur inconnue s\'est produite&#8230;</string>
+    <string name="connection_succeed">Authentification réussie !</string>
+
+    <!--    Permissions    -->
+    <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
+    <string name="permission_required_toast">Location permission is required for this demo.</string>
+    <string name="location_permission_denied">This sample requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.\nIf the permission has been permanently denied, it can be enabled from the System Settings &gt; Apps &gt; \'Google Maps API Demos\'.</string>
+
+    <!-- RecyclerView restaurants item -->
+    <string name="opening_time">Heure d\'ouverture</string>
+    <string name="distance" translatable="false">%1$sm</string>
+    <string name="nb_workmate_selection" translatable="false">(%1$s)</string>
+    <string name="workmate_icon" translatable="false">workmate_icon</string>
+    <string name="restaurant_type_address" translatable="false">%1$s - %2$s</string>
+    <string name="restaurant_image">Restaurant Image</string>
+    <string name="restaurant_name">Restaurant name</string>
+    <string name="workmate_has_not_decided"> n\'a pas encore choisi</string>
+    <string name="workmate_has_decides"> mange chez </string>
+
+
+    <!-- LOGIN ACTIVITY -->
+
+    <string name="toolbar_title_login_activity">Votre Profil</string>
+
+    <string name="text_input_username">Nom d\'utilisateur</string>
+
+    <string name="text_view_email">Adresse email :</string>
+    <string name="button_update_account">Mettre à jour le nom d\'utilisateur</string>
+    <string name="button_delete_account">Supprimer mon compte</string>
+    <string name="button_sign_out_account">Déconnexion</string>
+    <string name="info_no_email_found">Auncune adresse email</string>
+    <string name="info_no_username_found">Aucun nom d\'utilisateur</string>
+    <string name="popup_message_confirmation_delete_account">Es-tu sûr(e) de vouloir supprimer ton compte ?</string>
+    <string name="popup_message_choice_yes">Oui !</string>
+    <string name="popup_message_choice_no">Non</string>
+
+    <!-- WELCOME ACTIVITY -->
+
+    <string name="title_activity_welcome">J\'ai faim!</string>
+
+    <!-- BOTTOM NAVIGATION VIEW -->
+
+    <string name="map_view"> Carte</string>
+    <string name="list_view">Liste</string>
+    <string name="workmates">Collègue</string>
+
+
+    <!-- FACEBOOK PURPOSE -->
+
+   <!-- <string name="facebook_application_id" translatable="false">398159407688031</string>-->
+    <string name="facebook_application_id" translatable="false">307223896657222</string>
+    <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources"> fb307223896657222 </string>
+
+    <!--<string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb398159407688031</string>-->
+    <string name="title_activity_maps">Carte</string>
+
+    <string name="navigation_drawer_open">Ouvrir la  navigation drawer</string>
+    <string name="navigation_drawer_close">Fermer la navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc"> En-tête de Navigation </string>
+    <string name="action_settings">Paramètres</string>
+
+
+    <string name="search">Recherche</string>
+
+
+    <string name="call">Appel</string>
+    <string name="website">Page Web</string>
+    <string name="like">Like</string>
+    <string name="setting">REGLAGE</string>
+    <string name="your_lunch">VOTRE RESTAURANT</string>
+    <string name="logout">SORTIR</string>
+    <string name="log_out">sortir</string>
+    <string name="workmate_default_decision">N\'a pas encore choisi</string>
+    <string name="workmate_profil">Collègue</string>
+    <string name="likeSubmit">Liked envoyé</string>
+    <string name="search_hint">Recherche</string>
+    <string name="text_view_chat_error">Erreur dans la discussion</string>
+    <string name="button_title_chat_activity">Acceder au chat</string>
+
+    <string name="is_joining"> a rejoint </string>
+
+
+</resources>

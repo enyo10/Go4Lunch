@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".controllers.activities.PlaceDetailsActivity">
+
+    <!--RESTAURANT INFO PHOTO-->
+    <ImageView
+        android:id="@+id/restaurant_image"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:contentDescription="@string/restaurant_image"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="-11dp" />
+
+    <!--RESTAURANT INFO CHOICE-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_checked"
+        app:backgroundTint="@color/white"
+        app:fabSize="auto"
+        app:layout_constraintBottom_toBottomOf="@+id/restaurant_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image" />
+
+   <!-- android:layout_width="54dp"
+    android:layout_height="155dp"-->
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton1"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_unchecked"
+        app:backgroundTint="@color/white"
+        app:fabSize="auto"
+        app:layout_constraintBottom_toBottomOf="@+id/restaurant_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/floatingActionButton"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image"
+        app:layout_constraintVertical_bias="0.562" />
+
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@color/quantum_amber900"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image"
+        tools:layout_editor_absoluteX="0dp">
+
+    </RelativeLayout>
+
+    <!--RESTAURANT INFO NAME-->
+    <TextView
+        android:id="@+id/restaurant_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/restaurant_name"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image" />
+
+    <!--RESTAURANT INFO ADDRESS-->
+    <TextView
+        android:id="@+id/restaurant_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/restaurant_type_address"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_name"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <!--RESTAURANT INFO RATING BAR-->
+    <RatingBar
+        android:id="@+id/restaurant_rating_bar"
+        style="?android:attr/ratingBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:isIndicator="true"
+        android:numStars="3"
+        android:rating="0"
+        android:stepSize="0.5"
+        android:theme="@style/RatingBar"
+        app:layout_constraintStart_toEndOf="@+id/restaurant_name"
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:weightSum="100"
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
+
+        <!--RESTAURANT INFO PHONE-->
+        <Button
+            android:id="@+id/restaurant_phone_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="33"
+            android:background="@null"
+            android:clickable="true"
+            android:drawableTop="@drawable/ic_phone"
+            android:focusable="true"
+            android:text="@string/call"
+            android:textColor="@color/quantum_amber900"
+            android:textSize="15sp" />
+
+        <!--RESTAURANT INFO LIKE BUTTON-->
+        <Button
+            android:id="@+id/restaurant_like_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="33"
+            android:background="@null"
+            android:clickable="true"
+            android:drawableTop="@drawable/ic_star_border"
+            android:focusable="true"
+            android:text="@string/like"
+            android:textColor="@color/quantum_amber900"
+            android:textSize="15sp" />
+
+        <!--RESTAURANT INFO WEBSITE-->
+        <Button
+            android:id="@+id/restaurant_website_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="33"
+            android:background="@null"
+            android:clickable="true"
+            android:drawableTop="@drawable/ic_website"
+            android:focusable="true"
+            android:text="@string/website"
+            android:textColor="@color/quantum_amber900"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+
+    <!--RESTAURANT INFO WORKMATE LIST-->
+    <include
+        layout="@layout/recycler_view_layout"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

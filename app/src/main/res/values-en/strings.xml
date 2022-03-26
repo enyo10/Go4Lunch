@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Go4Lunch</string>
+    <string name="login">Log in</string>
+
+    <!-- MAIN ACTIVITY -->
+    <string name="error_authentication_canceled">Authentication canceled&#8230;</string>
+    <string name="error_no_internet">NO internet connection !</string>
+    <string name="error_unknown_error">An unknown error has occurred &#8230;</string>
+    <string name="connection_succeed">Authentication succeed !</string>
+
+    <!--    Permissions    -->
+    <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
+    <string name="permission_required_toast">Location permission is required for this demo.</string>
+    <string name="location_permission_denied">This sample requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.\nIf the permission has been permanently denied, it can be enabled from the System Settings &gt; Apps &gt; \'Google Maps API Demos\'.</string>
+
+    <!-- RecyclerView restaurants item -->
+    <string name="opening_time">opening time</string>
+    <string name="distance" translatable="false">%1$sm</string>
+    <string name="nb_workmate_selection" translatable="false">(%1$s)</string>
+    <string name="workmate_icon" translatable="false">workmate_icon</string>
+    <string name="restaurant_type_address" translatable="false">%1$s - %2$s</string>
+    <string name="restaurant_image">Restaurant Image</string>
+    <string name="restaurant_name">Restaurant name</string>
+    <string name="workmate_has_not_decided"> Hasn\'t decided yet</string>
+    <string name="workmate_has_decides"> is eating at </string>
+
+
+    <!-- LOGIN ACTIVITY -->
+
+    <string name="toolbar_title_login_activity">Yout Profil</string>
+    <string name="text_input_username"> User name</string>
+    <string name="text_view_email">E-mail address :</string>
+    <string name="button_update_account">Update user name </string>
+    <string name="button_delete_account">Delete my account</string>
+    <string name="button_sign_out_account">Log out</string>
+    <string name="info_no_email_found">No email address found</string>
+    <string name="info_no_username_found">No user name found</string>
+    <string name="popup_message_confirmation_delete_account">Are you sure to delete your account ?</string>
+    <string name="popup_message_choice_yes">YES !</string>
+    <string name="popup_message_choice_no">NO</string>
+
+    <!-- WELCOME ACTIVITY -->
+    <string name="title_activity_welcome">I\' am Hungry!</string>
+
+    <!-- BOTTOM NAVIGATION VIEW -->
+
+    <string name="map_view">MAP VIEW</string>
+    <string name="list_view">LIST</string>
+    <string name="workmates">WORKMATES</string>
+
+
+    <!-- FACEBOOK PURPOSE -->
+    <string name="facebook_application_id" translatable="false">398159407688031</string>
+    <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb398159407688031</string>
+    <string name="title_activity_maps">Map</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+
+    <string name="search">Search</string>
+
+
+    <string name="call">call</string>
+    <string name="website">website</string>
+    <string name="like">Like</string>
+    <string name="setting">SETTINGS</string>
+    <string name="your_lunch">YOUR LUNCH</string>
+    <string name="logout">LOG OUT</string>
+    <string name="log_out">Logout</string>
+    <string name="workmate_profil">Workmate</string>
+
+    <string name="workmate_default_decision">No choice yet </string>
+
+    <string name="likeSubmit">Liked submit</string>
+    <string name="search_hint">Search</string>
+    <string name="is_joining">  is joining </string>
+
+    <string name="text_view_chat_error">Error in discussion</string>
+    <string name="button_title_chat_activity"> Go to tchat</string>
+
+
+</resources>

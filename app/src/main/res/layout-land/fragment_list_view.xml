@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:clickable="true"
+    android:focusable="true"
+    android:id="@+id/fragment_list_view_swipeRefresh"
+    tools:context=".controllers.fragments.ListViewFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_list_view_recycleView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:scrollbars="vertical"/>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

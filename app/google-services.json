@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "699470613406",
+    "firebase_url": "https://enyo-openclassrooms-go4lunch.firebaseio.com",
+    "project_id": "enyo-openclassrooms-go4lunch",
+    "storage_bucket": "enyo-openclassrooms-go4lunch.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699470613406:android:8448e37875bfadf3",
+        "android_client_info": {
+          "package_name": "ch.enyoholali.openclassrooms.go4lunch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "699470613406-ba1vl6f5jcogupud97al82era4otfvdl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ch.enyoholali.openclassrooms.go4lunch",
+            "certificate_hash": "548c2a9004d422db8057d7e55f2802f2fd987cc7"
+          }
+        },
+        {
+          "client_id": "699470613406-mmdti88g9utbb7106voq2lspt4ajif93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCQIRHrRCEFUNwgo0lGsiZ43nptJEQRro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "699470613406-mmdti88g9utbb7106voq2lspt4ajif93.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/item_restaurant_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:padding="5dp">
+
+    <!--RESTAURANT PHOTO-->
+    <ImageView
+        android:id="@+id/item_restaurant_imageView"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="3dp"
+        android:contentDescription="@string/restaurant_image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_lunch" />
+
+    <!--RESTAURANTS NAME-->
+    <TextView
+        android:id="@+id/item_restaurants_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="3dp"
+        android:text="@string/restaurant_name"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--RESTAURANTS TYPE & ADDRESS-->
+    <TextView
+        android:id="@+id/item_restaurants_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/restaurant_type_address"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_restaurants_name" />
+
+    <!--RESTAURANT TIME OPENING-->
+    <TextView
+        android:id="@+id/item_restaurants_opening"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/opening_time"
+        android:textColor="#DD2C00"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_restaurants_address" />
+
+    <!--RESTAURANTS DISTANCE-->
+    <TextView
+        android:id="@+id/item_restaurants_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="3dp"
+        android:text="@string/distance"
+        app:layout_constraintEnd_toStartOf="@+id/item_restaurant_imageView"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/item_restaurants_name"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--RESTAURANTS COLLEAGUES NUMBER-->
+    <TextView
+        android:id="@+id/item_restaurants_nb_workmates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/nb_workmate_selection"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/item_restaurant_imageView"
+        app:layout_constraintTop_toBottomOf="@+id/item_restaurants_distance" />
+
+    <!--RESTAURANTS WORKMATES IMAGE-->
+    <ImageView
+        android:id="@+id/item_restaurants_workmates_images"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:contentDescription="@string/workmate_icon"
+        app:layout_constraintEnd_toStartOf="@+id/item_restaurants_nb_workmates"
+        app:layout_constraintHorizontal_bias="0.992"
+        app:layout_constraintStart_toEndOf="@+id/item_restaurants_address"
+        app:layout_constraintTop_toBottomOf="@+id/item_restaurants_distance"
+        app:srcCompat="@drawable/ic_action_workmate" />
+
+    <!--RESTAURANTS RATING-->
+    <RatingBar
+        android:id="@+id/item_restaurants_ratingbar"
+        style="?android:attr/ratingBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:isIndicator="true"
+        android:numStars="3"
+        android:rating="0"
+        android:stepSize="1"
+        android:theme="@style/RatingBar"
+        app:layout_constraintEnd_toStartOf="@+id/item_restaurant_imageView"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/item_restaurants_opening"
+        app:layout_constraintTop_toBottomOf="@+id/item_restaurants_nb_workmates" />
+
+
+    <!--SEPARATION-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/browser_actions_divider_color"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_restaurant_imageView" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
