@@ -1,13 +1,13 @@
 package ch.enyoholali.openclassrooms.go4lunch.controllers.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +16,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -26,7 +30,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.viewbinding.ViewBinding;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
@@ -49,7 +52,6 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -60,8 +62,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import ch.enyoholali.openclassrooms.go4lunch.R;
 import ch.enyoholali.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyoholali.openclassrooms.go4lunch.auth.ProfileActivity;
@@ -71,7 +71,6 @@ import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.MapViewFragme
 import ch.enyoholali.openclassrooms.go4lunch.controllers.fragments.WorkmatesFragment;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
 import ch.enyoholali.openclassrooms.go4lunch.databinding.ActivityWelcomeBinding;
-import ch.enyoholali.openclassrooms.go4lunch.databinding.ToolbarBinding;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyoholali.openclassrooms.go4lunch.utils.GoogleApiPlaceStreams;
@@ -80,7 +79,7 @@ import ch.enyoholali.openclassrooms.go4lunch.BuildConfig;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
-public class WelcomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = WelcomeActivity.class.getSimpleName();
     //  - Identify each Http Request
@@ -89,8 +88,7 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     public static final String SHARED_PREF_NAME = "pref";
-    public static final String LONGTITUDE = "long";
-    public static final String LATITUDE = "lat";
+//    public static final String LATITUDE = "lat";
     final FragmentManager mFragmentManager = getSupportFragmentManager();
     protected FusedLocationProviderClient mFusedLocationProviderClient;
     protected LocationRequest mLocationRequest;
@@ -98,15 +96,12 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
 
     int AUTOCOMPLETE_REQUEST_CODE = 1;
 
-  //  @BindView(R.id.nav_view)NavigationView mNavigationView;
-
-
     TextView mUserEmailTextView;
     ImageView mImageView;
     TextView mUsernameTextView;
-    @BindView(R.id.activity_welcome_bottom_navigation)
-    BottomNavigationView mBottomNavigationView;
-    @BindView(R.id.toolbar) Toolbar toolbar;
+
+    Toolbar toolbar;
+
 
     MapViewFragment mMapViewFragment;
     ListViewFragment mListViewFragment;
@@ -120,41 +115,72 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
     private User mUser;
     SharedPreferences mSharedPreferences;
 
+    String tag;
 
-     String jsonArrayList;
-     String tag;
+    ActivityResultLauncher<Intent> mStartForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    /*if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent intent = result.getData();
+                        // Handle the Intent
+                    }*/
+                    getPlaceInResult(result);
+                }
+            });
 
-     private ActivityWelcomeBinding activityWelcomeBinding;
+    private void getPlaceInResult(ActivityResult activityResult){
+        if (activityResult.getResultCode() == RESULT_OK) {
 
+            assert activityResult.getData() != null;
+            Place place = Autocomplete.getPlaceFromIntent(activityResult.getData());
+            Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        activityWelcomeBinding = ActivityWelcomeBinding.inflate(getLayoutInflater());
-        View view = activityWelcomeBinding.getRoot();
-        setContentView(view);
+            mDisposable = GoogleApiPlaceStreams.fetchPlaceDetailsStream(place.getId())
+                    .subscribeWith(new DisposableObserver<PlaceDetails>() {
+                        @Override
+                        public void onNext(PlaceDetails placeDetails) {
+                            DataSingleton.getInstance().setPlaceDetails(placeDetails);
+                            startActivity(PlaceDetailsActivity.class);
 
-        Log.d(TAG, "in Welcome on create");
-        configureView();
+                        }
 
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.i("TAG", "aie, error in place details search: " + Log.getStackTraceString(e));
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            Log.i(TAG, " Place details downloaded ");
+                        }
+                    });
+
+        }
+        else if (activityResult.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
+            //  Handle the error.
+            assert activityResult.getData() != null;
+            Status status = Autocomplete.getStatusFromIntent(activityResult.getData());
+            Log.i(TAG, status.getStatusMessage());
+        } else if (activityResult.getResultCode() == RESULT_CANCELED) {
+            // The user canceled the operation.
+            Log.d(TAG, " The user canceled the Operation");
+        }
     }
-
-
 
     @Override
     public void loadData() {
 
     }
 
-
     @Override
-    public int getActivityLayout() {
-        return R.layout.activity_welcome;
+    protected ActivityWelcomeBinding getViewBinding() {
+        return ActivityWelcomeBinding.inflate(getLayoutInflater());
     }
+
 
     @Override
     public void configureView() {
-       // getConnectedUser();
 
         Log.d(TAG," load state "+tag);
         reloadUser();
@@ -166,11 +192,10 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
         getCurrentLocationSettings();
 
         this.mPlaceDetailsList = new ArrayList<>();
-       // toolbar = findViewById(R.id.toolbar);
-        toolbar = ToolbarBinding.inflate(getLayoutInflater()).getRoot();
 
+        assert binding.toolbar != null;
+        toolbar = binding.toolbar.toolbar;
 
-        ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
 
@@ -185,14 +210,14 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
         configureNavHeader();
 
       //  DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        DrawerLayout drawer = activityWelcomeBinding.drawerLayout;
+        DrawerLayout drawer = binding.drawerLayout;
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         //NavigationView navigationView = findViewById(R.id.nav_view);
-        NavigationView navigationView = activityWelcomeBinding.navView;
+        NavigationView navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);
 
         // load the store fragment by default
@@ -202,10 +227,7 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
 
     }
 
-    @Override
-    public ViewBinding initViewBinding() {
-        return null;
-    }
+
 
 
     private void handleIntent(Intent intent) {
@@ -237,12 +259,8 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
     //----------------------------------------------------------------------------------------------
 
     private void configureNavHeader(){
-     //  View view= mNavigationView.getHeaderView(0);
-        View view = activityWelcomeBinding.navView.getHeaderView(0);
-
+        View view = binding.navView.getHeaderView(0);
         mUserEmailTextView =view.findViewById(R.id.nav_header_email_textView);
-
-
         mUsernameTextView=  view.findViewById(R.id.nav_header_username_textView);
         mImageView =view.findViewById(R.id.nav_header_imageView);
     }
@@ -298,7 +316,6 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
         return super.onOptionsItemSelected(item);
     }
 
-   // @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected( MenuItem item) {
 
@@ -352,29 +369,21 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
     // Configure BottomNavigationView
     public void configureBottomNavigationView() {
 
-        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        assert binding.contentActivity != null;
 
-                switch (menuItem.getItemId()) {
+        binding.contentActivity.activityWelcomeBottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId==R.id.bottom_navigation_map)
+                loadFragment(mMapViewFragment, R.string.title_activity_welcome);
+            if (itemId== R.id.bottom_navigation_restaurants)
+                loadFragment(mListViewFragment, R.string.title_activity_welcome);
+            if (itemId==R.id.bottom_navigation_workmates)
+                loadFragment(mWorkmatesFragment, R.string.title_activity_welcome);
 
-                    case R.id.bottom_navigation_map:
-                        loadFragment(mMapViewFragment, R.string.title_activity_welcome);
-                        return true;
-
-                    case R.id.bottom_navigation_restaurants:
-                        loadFragment(mListViewFragment, R.string.title_activity_welcome);
-                        return true;
-
-                    case R.id.bottom_navigation_workmates:
-                        loadFragment(mWorkmatesFragment, R.string.title_activity_welcome);
-                        return true;
-
-                }
-
-                return false;
-            }
+            return true;
         });
+
+
     }
 
 
@@ -393,9 +402,76 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
                 .setTypeFilter(TypeFilter.ESTABLISHMENT)
                 .build(this);
 
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+       // startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+       // someActivityResultLauncher.launch(intent);
+        mStartForResult.launch(intent);
+
+
 
     }
+
+
+   /* public void openActivityForResult() {
+
+        //Instead of startActivityForResult use this one
+        Intent intent = new Intent(this,OtherActivity.class);
+        someActivityResultLauncher.launch(intent);
+    }*/
+
+
+//Instead of onActivityResult() method use this one
+/*
+    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    Intent data = result.getData();
+                    assert data != null;
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // Here, no request code
+                      //  Intent data = result.getData();
+
+
+                        Place place = Autocomplete.getPlaceFromIntent(data);
+                        Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+
+                        mDisposable = GoogleApiPlaceStreams.fetchPlaceDetailsStream(place.getId())
+                                .subscribeWith(new DisposableObserver<PlaceDetails>() {
+                                    @Override
+                                    public void onNext(PlaceDetails placeDetails) {
+                                        DataSingleton.getInstance().setPlaceDetails(placeDetails);
+                                        startActivity(PlaceDetailsActivity.class);
+
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        Log.i("TAG", "aie, error in place details search: " + Log.getStackTraceString(e));
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+                                        Log.i(TAG, " Place details downloaded ");
+                                    }
+                                });
+
+                    }
+
+                    else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
+                        //  Handle the error.
+                        Status status = Autocomplete.getStatusFromIntent(data);
+                        Log.i(TAG, status.getStatusMessage());
+                    } else if (result.getResultCode() == RESULT_CANCELED) {
+                        // The user canceled the operation.
+                        Log.d(TAG, " The user canceled the Operation");
+                    }
+                }
+
+
+            });*/
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -427,7 +503,8 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
                                 }
                             });
 
-                } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                }
+                else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                     //  Handle the error.
                     Status status = Autocomplete.getStatusFromIntent(data);
                     Log.i(TAG, status.getStatusMessage());
@@ -437,7 +514,6 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
                 }
             }
     }
-
 
 //--------------------------------------------------------------------------------------------------
     //               FRAGMENT MANAGEMENT
@@ -487,8 +563,6 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
         return aVoid -> {
             switch (origin) {
                 case SIGN_OUT_TASK:
-                    finish();
-                    break;
                 case DELETE_USER_TASK:
                     finish();
                     break;
@@ -544,21 +618,18 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
 
             Log.d(TAG, "Location permission do not grandted");
         } else {
-            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
+            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
 
-                    if (location != null) {
+                if (location != null) {
 
-                       mCurrentLocation=location;
-                       executeHttpRequestWithRetrofit();
-                       activeFragment=mMapViewFragment;
-                       DataSingleton.getInstance().setLocation(mCurrentLocation);
-                        Log.i(TAG, "Location found " + location);
+                   mCurrentLocation=location;
+                   executeHttpRequestWithRetrofit();
+                   activeFragment=mMapViewFragment;
+                   DataSingleton.getInstance().setLocation(mCurrentLocation);
+                    Log.i(TAG, "Location found " + location);
 
-                    } else {
-                        Log.d(TAG, " Location not found ");
-                    }
+                } else {
+                    Log.d(TAG, " Location not found ");
                 }
             });
         }
@@ -698,6 +769,7 @@ public class WelcomeActivity extends BaseActivity implements NavigationView.OnNa
     private void updateNavigationHeader(){
 
         Log.d(TAG, " actual user "+mUser.getEmail() );
+
 
         mUsernameTextView.setText(mUser.getUsername());
         mUserEmailTextView.setText(mUser.getEmail());

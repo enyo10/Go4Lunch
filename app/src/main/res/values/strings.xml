@@ -88,6 +88,8 @@
     <string name="button_title_chat_activity">Acceder au chat</string>
 
     <string name="is_joining"> a rejoint </string>
+    <string name="floating_button_to_select_restaurant">floating button to select restaurant</string>
+    <string name="profile_image">Profile image</string>
 
 
 </resources>

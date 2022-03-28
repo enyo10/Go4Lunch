@@ -6,49 +6,42 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import androidx.viewbinding.ViewBinding;
 
-import butterknife.BindView;
-import ch.enyoholali.openclassrooms.go4lunch.R;
 import ch.enyoholali.openclassrooms.go4lunch.base.BaseActivity;
+import ch.enyoholali.openclassrooms.go4lunch.databinding.ActivityWebContentBinding;
 
-public class WebContentActivity extends BaseActivity {
+public class WebContentActivity extends BaseActivity<ActivityWebContentBinding> {
 
     // For Debug
     private static final String TAG = WebContentActivity.class.getSimpleName();
-
-    @BindView(R.id.activity_web_view_layout)
-    WebView mWebView;
-
-
-    @Override
-    public int getActivityLayout() {
-        return R.layout.activity_web_content;
-    }
 
     @Override
     public void configureView() {
         Log.d(TAG," web content activity ");
         Intent intent = getIntent();
         String url = intent.getStringExtra(PlaceDetailsActivity.BUNDLE_CONTENT_URL);
+        WebView webView = binding.activityWebViewLayout;
 
         Log.d(TAG," url  "+url);
-        mWebView.setWebViewClient(new WebViewClient());
-        WebSettings webSettings = mWebView.getSettings();
+        webView.setWebViewClient(new WebViewClient());
+        WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
         // Show the page of the news
-        mWebView.loadUrl(url);
+        webView.loadUrl(url);
 
     }
 
-    @Override
-    public ViewBinding initViewBinding() {
-        return null;
-    }
 
     @Override
     public void loadData() {
 
     }
+
+    @Override
+    protected ActivityWebContentBinding getViewBinding() {
+        return ActivityWebContentBinding.inflate(getLayoutInflater());
+    }
+
+
 }

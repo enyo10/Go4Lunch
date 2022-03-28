@@ -2,13 +2,10 @@ package ch.enyoholali.openclassrooms.go4lunch.controllers.activities;
 
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.viewbinding.ViewBinding;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
@@ -16,10 +13,8 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.FirebaseApp;
 
 import java.util.Arrays;
-
 import java.util.Objects;
 
 import ch.enyoholali.openclassrooms.go4lunch.R;
@@ -27,11 +22,10 @@ import ch.enyoholali.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyoholali.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyoholali.openclassrooms.go4lunch.databinding.ActivityMainBinding;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity<ActivityMainBinding> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private ActivityMainBinding binding;
 
     // [START auth_fui_create_launcher]
     // See: https://developer.android.com/training/basics/intents/result
@@ -50,22 +44,6 @@ public class MainActivity extends BaseActivity {
     );
     // [END auth_fui_create_launcher]
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        FirebaseApp.initializeApp(this);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
-        setContentView(view);
-        configureToolbar();
-
-        binding.mainActivityButtonLogin.setOnClickListener(view1 -> onClickLoginButton());
-
-
-        Log.d(TAG, " In on Create");
-
-    }
 
     // [START auth_fui_result]
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
@@ -89,24 +67,27 @@ public class MainActivity extends BaseActivity {
     }
     // [END auth_fui_result]
 
-    @Override
-    public int getActivityLayout() {
-        return R.layout.activity_main;
-    }
 
     @Override
     public void configureView() {
+        configureToolbar();
+
+        binding.mainActivityButtonLogin.setOnClickListener(view1 -> onClickLoginButton());
+
+        Log.d(TAG, " In on Create");
 
     }
 
-    @Override
-    public ViewBinding initViewBinding() {
-        return ActivityMainBinding.inflate(getLayoutInflater());
-    }
+
 
     @Override
     public void loadData() {
 
+    }
+
+    @Override
+    protected ActivityMainBinding getViewBinding() {
+        return ActivityMainBinding.inflate(getLayoutInflater());
     }
 
     // --------------------

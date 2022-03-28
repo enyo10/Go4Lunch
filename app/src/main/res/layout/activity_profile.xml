@@ -34,7 +34,8 @@
 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/logo_go_for_lunch144"/>
+                android:background="@drawable/logo_go_for_lunch144"
+                android:contentDescription="@string/profile_image" />
 
 
             <!-- PROGRESS BAR -->
@@ -55,7 +56,8 @@
                 android:id="@+id/profile_activity_imageview_profile"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:srcCompat="@drawable/ic_anon_user_48dp"/>
+                app:srcCompat="@drawable/ic_anon_user_48dp"
+                android:contentDescription="@string/profile_image" />
 
         </LinearLayout>
 

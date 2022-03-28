@@ -18,8 +18,8 @@ import com.google.firebase.auth.FirebaseUser;
 
 import ch.enyoholali.openclassrooms.go4lunch.R;
 
-public abstract class BaseActivity extends AppCompatActivity {
-   public ViewBinding binding;
+ public abstract class BaseActivity<V extends ViewBinding> extends AppCompatActivity {
+   protected V binding;
 
     //--------------------
     // LIFE CYCLE
@@ -29,10 +29,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FirebaseApp.initializeApp(this);
-
-       /*binding = initViewBinding();
+        binding = getViewBinding();
         View view = binding.getRoot();
-        setContentView(view);*/
+        setContentView(view);
+
+        configureToolbar();
+        configureView();
+
 
     }
 
@@ -59,11 +62,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
 
+
+
     //     Some abstract methods.
-    public abstract int getActivityLayout();
+
     public abstract void configureView();
-    public abstract ViewBinding initViewBinding();
+
     public abstract void loadData();
+    protected abstract V getViewBinding();
 
     // --------------------
     // ERROR HANDLER

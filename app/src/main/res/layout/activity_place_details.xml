@@ -29,7 +29,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/restaurant_image" />
+        app:layout_constraintTop_toBottomOf="@+id/restaurant_image"
+        android:contentDescription="@string/floating_button_to_select_restaurant" />
 
    <!-- android:layout_width="54dp"
     android:layout_height="155dp"-->
@@ -39,6 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="@string/floating_button_to_select_restaurant"
         android:src="@drawable/ic_unchecked"
         app:backgroundTint="@color/white"
         app:fabSize="auto"
@@ -65,7 +67,6 @@
         android:id="@+id/restaurant_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/restaurant_name"
@@ -81,7 +82,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:text="@string/restaurant_type_address"
         android:textColor="@color/white"
@@ -96,7 +96,6 @@
         style="?android:attr/ratingBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:isIndicator="true"
@@ -167,6 +166,7 @@
 
     <!--RESTAURANT INFO WORKMATE LIST-->
     <include
+        android:id="@+id/place_detail_recycler_view"
         layout="@layout/recycler_view_layout"
         android:layout_width="match_parent"
         android:layout_height="180dp"

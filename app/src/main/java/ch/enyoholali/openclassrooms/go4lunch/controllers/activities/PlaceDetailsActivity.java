@@ -9,74 +9,44 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.RatingBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.viewbinding.ViewBinding;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.database.annotations.Nullable;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import ch.enyoholali.openclassrooms.go4lunch.R;
 import ch.enyoholali.openclassrooms.go4lunch.api.LikeDataHelper;
 import ch.enyoholali.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyoholali.openclassrooms.go4lunch.base.BaseActivity;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataFormatter;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyoholali.openclassrooms.go4lunch.databinding.ActivityPlaceDetailsBinding;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
 import ch.enyoholali.openclassrooms.go4lunch.utils.NotificationAlarmReceiver;
 import ch.enyoholali.openclassrooms.go4lunch.views.WorkmatesViewsAdapter;
 
-public class PlaceDetailsActivity extends BaseActivity implements DataFormatter {
+public class PlaceDetailsActivity extends BaseActivity<ActivityPlaceDetailsBinding> implements DataFormatter {
     private static final String TAG = PlaceDetailsActivity.class.getSimpleName();
     public static final String RESTAURANT_NAME="RestaurantName";
     public static final String BUNDLE_CONTENT_URL="BUNDLE_WEB_CONTENT_URL";
 
-    // The views.
-    @BindView(R.id.restaurant_image)ImageView mInfoImage;
-    @BindView(R.id.floatingActionButton) FloatingActionButton mFloatingActionButton;
-    @BindView(R.id.floatingActionButton1)FloatingActionButton mFloatingActionButton1;
-    @BindView(R.id.restaurant_name) TextView mNameTextView;
-    @BindView(R.id.restaurant_address)TextView mAddress;
-    @BindView(R.id.restaurant_rating_bar) RatingBar mRatingBar;
-    @BindView(R.id.restaurant_phone_button) Button mPhoneButton;
-    @BindView(R.id.restaurant_like_button)Button mRestaurantLikeButton;
-    @BindView(R.id.restaurant_website_button)Button mWebsiteButton;
-    @BindView(R.id.recycler_view_id) RecyclerView mRecyclerView;
-    @BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefreshLayout;
-
-
 
     // For DATA
     RequestManager glide;
-    private String phoneNumber;
-    private String webAddress;
-    private double rating;
     private String placeId;
     private boolean restaurantSelected;
 
     private WorkmatesViewsAdapter mWorkmatesViewsAdapter;
-    private List<User> mUserList;
     private List<User>mSubscriberList;
     private PlaceDetails mPlaceDetails;
    // private List<PlaceAutoComplete>mPlaceDetailsList;
@@ -87,19 +57,12 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
 
     @Override
-    public int getActivityLayout() {
-        return R.layout.activity_place_details;
-    }
-
-    @Override
     public void configureView() {
         getSubscribersFromFireBase();
-        mUserList=new ArrayList<>();
         mSubscriberList=new ArrayList<>();
         mPlaceDetails = DataSingleton.getInstance().getPlaceDetails();
         placeId=mPlaceDetails.getResult().getPlaceId();
 
-        ButterKnife.bind(this);
         glide = Glide.with(this);
         String  url="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference=";
         String apiKey = "&key=" + "AIzaSyAj8TgbhVVLCxEldGuNHxxo2w4P-S2mxG8";
@@ -112,11 +75,15 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
         configureSwipeRefreshLayout();
         configureAlarmManager();
 
-    }
 
-    @Override
-    public ViewBinding initViewBinding() {
-        return null;
+        binding.restaurantLikeButton.setOnClickListener(view -> liked());
+
+        binding.floatingActionButton.setOnClickListener(view -> { });
+
+        binding.restaurantWebsiteButton.setOnClickListener(view -> getRestaurantWebsite());
+
+        binding.restaurantPhoneButton.setOnClickListener(view -> callRestaurant());
+
     }
 
     @Override
@@ -124,17 +91,26 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     }
 
+    @Override
+    protected ActivityPlaceDetailsBinding getViewBinding() {
+        return ActivityPlaceDetailsBinding.inflate(getLayoutInflater());
+    }
+
     private void updateFloatingButton(){
         Log.d(TAG, " user "+ mUser);
         Log.d(TAG, " is selected " +isRestaurantSelected());
         if(isRestaurantSelected()){
-            mFloatingActionButton1.setAlpha(0f);
-            mFloatingActionButton.setAlpha(1f);
+           // mFloatingActionButton1.setAlpha(0f);
+            binding.floatingActionButton1.setAlpha(0f);
+           // mFloatingActionButton.setAlpha(1f);
+            binding.floatingActionButton.setAlpha(1f);
         }
 
         else{
-            mFloatingActionButton1.setAlpha(1f);
-            mFloatingActionButton.setAlpha(0f);
+           // mFloatingActionButton1.setAlpha(1f);
+            binding.floatingActionButton1.setAlpha(1f);
+           // mFloatingActionButton.setAlpha(0f);
+            binding.floatingActionButton.setAlpha(0f);
         }
 
     }
@@ -144,19 +120,19 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
             // Retrieve the place details id.
        //     placeId=placeDetails.getResult().getPlaceId();
             //Restaurant name
-            this.mNameTextView.setText(placeDetails.getResult().getName());
+            binding.restaurantName.setText(placeDetails.getResult().getName());
             //Restaurant photo
             if (placeDetails.getResult().getPhotos() != null) {
                 String imageUrl=url + placeDetails.getResult().getPhotos().get(0).getPhotoReference() + apiKey;
                 // String imageUrl = placeDetails.getImageUrl();
                 glide.load(imageUrl)
                         .apply(RequestOptions.centerCropTransform())
-                        .into(this.mInfoImage);
+                        .into(binding.restaurantImage);
             }
             // Address
-            this.mAddress.setText(formatAddress(placeDetails.getResult().getFormattedAddress()));
+            binding.restaurantAddress.setText(formatAddress(placeDetails.getResult().getFormattedAddress()));
             if (placeDetails.getResult().getRating() != null) {
-                this.mRatingBar.setRating(formatRating(placeDetails.getResult().getRating()));
+                binding.restaurantRatingBar.setRating(formatRating(placeDetails.getResult().getRating()));
             }
             // Distance
            /* if (lat != 0 && lng != 0) {
@@ -170,9 +146,9 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
             }*/
 
-            phoneNumber= placeDetails.getResult().getInternationalPhoneNumber();
-            webAddress=placeDetails.getResult().getWebsite();
-            rating=placeDetails.getResult().getRating();
+            String phoneNumber = placeDetails.getResult().getInternationalPhoneNumber();
+            String webAddress = placeDetails.getResult().getWebsite();
+            double rating = placeDetails.getResult().getRating();
 
         }
 
@@ -180,7 +156,8 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
 
     private void updateSubscriberList(List<User>subscriberList){
-        this.mSwipeRefreshLayout.setRefreshing(false);
+
+        binding.placeDetailRecyclerView.swipeContainer.setRefreshing(false);
         this.mSubscriberList.clear();
         this.mSubscriberList.addAll(subscriberList);
         this.mWorkmatesViewsAdapter.notifyDataSetChanged();
@@ -194,16 +171,10 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
      * This method to refresh the layout.
      */
     protected void configureSwipeRefreshLayout(){
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                //getAllActiveUsersFromFireBase();
-                getSubscribersFromFireBase();
-            }
-        });
+        //getAllActiveUsersFromFireBase();
+        binding.placeDetailRecyclerView.swipeContainer.setOnRefreshListener(this::getSubscribersFromFireBase);
     }
 
-    @OnClick(R.id.restaurant_like_button)
     public void liked(){
         Log.i(TAG, " on liked");
         String placeId=this.placeId;
@@ -212,6 +183,8 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
        addLikedPlaceToFireBase();
 
     }
+
+
     /**
      * This method check if the current user has selected a restaurant.
      * @return boolean,
@@ -225,7 +198,6 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     }
 
-    @OnClick(R.id.floatingActionButton)
     public void selectRestaurant(){
        //restaurantSelected=isRestaurantSelected();
 
@@ -244,7 +216,7 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
        updateFloatingButton();
 
     }
-    @OnClick(R.id.restaurant_website_button)
+
     public void getRestaurantWebsite(){
         Log.d(TAG, " Website button clicked  --");
         String website =mPlaceDetails.getResult().getWebsite();
@@ -260,7 +232,6 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
 
     }
 
-    @OnClick(R.id.restaurant_phone_button)
     public void callRestaurant(){
         Log.d(TAG, " call number "+mPlaceDetails.getResult().getFormattedPhoneNumber());
         Toast.makeText(this,"phone number "+ mPlaceDetails.getResult().getFormattedPhoneNumber(),Toast.LENGTH_LONG).show();
@@ -278,50 +249,48 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     private void getSubscribersFromFireBase(){
 
 
-        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot snapshot, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    // Handle error
-                    Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-                // Convert query snapshot to a list of users.
-                List<User> userList = snapshot.toObjects(User.class);
-                List<User>subscribers=new ArrayList<>();
-                for (int i=0;i<userList.size();i++) {
-                    if(!getCurrentUser().getUid().equals(userList.get(i).getUid())) {
-                        if(placeId.equals(userList.get(i).getRestaurantId()))
-                        subscribers.add(userList.get(i));
-
-                    }
-                    else {
-                       // DataSingleton.getInstance().setActuelUser(userList.get(i));
-                        mUser=userList.get(i);
-                        Log.d(TAG, " current user "+mUser.getUsername());
-                        Log.d(TAG, "current user hss selected " +isRestaurantSelected());
-                        updateFloatingButton();
-
-                    }
-
-                }
-                  /* for(int k=0;k<list.size();k++){
-                       if(getCurrentUser().getUid().equals(list.get(k).getUid())){
-                           mUser=list.get(k);
-                           Log.d(TAG, " current User "+mUser.getUsername());
-                       }
-                       else {
-                           if(list.get(k).getRestaurantId().equals(placeId)){
-                               subscribers.add(list.get(k));
-
-                           }
-                       }
-                   }*/
-                  updateSubscriberList(subscribers);
-
-                Log.d(TAG," subscribers size  "+mSubscriberList.size());
+        UserHelper.getAllUsers().addSnapshotListener((snapshot, e) -> {
+            if (e != null) {
+                // Handle error
+                Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
+                e.printStackTrace();
+                return;
             }
+            // Convert query snapshot to a list of users.
+            assert snapshot != null;
+            List<User> userList = snapshot.toObjects(User.class);
+            List<User>subscribers=new ArrayList<>();
+            for (int i=0;i<userList.size();i++) {
+                if(!Objects.requireNonNull(getCurrentUser()).getUid().equals(userList.get(i).getUid())) {
+                    if(placeId.equals(userList.get(i).getRestaurantId()))
+                    subscribers.add(userList.get(i));
+
+                }
+                else {
+                   // DataSingleton.getInstance().setActuelUser(userList.get(i));
+                    mUser=userList.get(i);
+                    Log.d(TAG, " current user "+mUser.getUsername());
+                    Log.d(TAG, "current user hss selected " +isRestaurantSelected());
+                    updateFloatingButton();
+
+                }
+
+            }
+              /* for(int k=0;k<list.size();k++){
+                   if(getCurrentUser().getUid().equals(list.get(k).getUid())){
+                       mUser=list.get(k);
+                       Log.d(TAG, " current User "+mUser.getUsername());
+                   }
+                   else {
+                       if(list.get(k).getRestaurantId().equals(placeId)){
+                           subscribers.add(list.get(k));
+
+                       }
+                   }
+               }*/
+              updateSubscriberList(subscribers);
+
+            Log.d(TAG," subscribers size  "+mSubscriberList.size());
         });
 
     }
@@ -352,10 +321,12 @@ public class PlaceDetailsActivity extends BaseActivity implements DataFormatter 
     }
 
     public void configureRecyclerView(){
+        RecyclerView recyclerView =  binding.placeDetailRecyclerView.recyclerViewId;
         this.mWorkmatesViewsAdapter = new WorkmatesViewsAdapter(mSubscriberList, Glide.with(this),this,2);
-        this.mRecyclerView.setAdapter(mWorkmatesViewsAdapter);
+
+       recyclerView.setAdapter(mWorkmatesViewsAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        this.mRecyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(layoutManager);
 
         Log.i(TAG, " Recycler view configured ");
     }

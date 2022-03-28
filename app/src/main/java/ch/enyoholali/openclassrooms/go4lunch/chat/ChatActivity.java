@@ -25,10 +25,11 @@ import ch.enyoholali.openclassrooms.go4lunch.R;
 import ch.enyoholali.openclassrooms.go4lunch.api.MessageHelper;
 import ch.enyoholali.openclassrooms.go4lunch.api.UserHelper;
 import ch.enyoholali.openclassrooms.go4lunch.base.BaseActivity;
+import ch.enyoholali.openclassrooms.go4lunch.databinding.ActivityChatBinding;
 import ch.enyoholali.openclassrooms.go4lunch.models.chat.Message;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 
-public class ChatActivity extends BaseActivity implements ChatAdapter.Listener {
+public class ChatActivity extends BaseActivity<ActivityChatBinding> implements ChatAdapter.Listener {
 
 
         // FOR DESIGN
@@ -63,27 +64,26 @@ public class ChatActivity extends BaseActivity implements ChatAdapter.Listener {
             this.getCurrentUserFromFirestore();
         }
 
-    @Override
-    public int getActivityLayout() {
-        return R.layout.activity_chat;
-    }
+
 
     @Override
     public void configureView() {
 
     }
 
-    @Override
-    public ViewBinding initViewBinding() {
-        return null;
-    }
+
 
     @Override
     public void loadData() {
 
     }
 
-        // --------------------
+    @Override
+    protected ActivityChatBinding getViewBinding() {
+        return ActivityChatBinding.inflate(getLayoutInflater());
+    }
+
+    // --------------------
         // ACTIONS
         // --------------------
 
