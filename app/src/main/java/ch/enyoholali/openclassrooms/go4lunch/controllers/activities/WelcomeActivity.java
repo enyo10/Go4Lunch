@@ -1,7 +1,6 @@
 package ch.enyoholali.openclassrooms.go4lunch.controllers.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -17,11 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
@@ -42,7 +39,6 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -53,9 +49,6 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,8 +87,6 @@ public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implem
     protected LocationRequest mLocationRequest;
     protected ActionBar mActionBar;
 
-    int AUTOCOMPLETE_REQUEST_CODE = 1;
-
     TextView mUserEmailTextView;
     ImageView mImageView;
     TextView mUsernameTextView;
@@ -117,17 +108,12 @@ public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implem
 
     String tag;
 
+    /*if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent intent = result.getData();
+                    // Handle the Intent
+                }*/
     ActivityResultLauncher<Intent> mStartForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    /*if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent intent = result.getData();
-                        // Handle the Intent
-                    }*/
-                    getPlaceInResult(result);
-                }
-            });
+            this::getPlaceInResult);
 
     private void getPlaceInResult(ActivityResult activityResult){
         if (activityResult.getResultCode() == RESULT_OK) {
@@ -402,118 +388,10 @@ public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implem
                 .setTypeFilter(TypeFilter.ESTABLISHMENT)
                 .build(this);
 
-       // startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
-       // someActivityResultLauncher.launch(intent);
         mStartForResult.launch(intent);
 
-
-
     }
 
-
-   /* public void openActivityForResult() {
-
-        //Instead of startActivityForResult use this one
-        Intent intent = new Intent(this,OtherActivity.class);
-        someActivityResultLauncher.launch(intent);
-    }*/
-
-
-//Instead of onActivityResult() method use this one
-/*
-    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    Intent data = result.getData();
-                    assert data != null;
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        // Here, no request code
-                      //  Intent data = result.getData();
-
-
-                        Place place = Autocomplete.getPlaceFromIntent(data);
-                        Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
-
-                        mDisposable = GoogleApiPlaceStreams.fetchPlaceDetailsStream(place.getId())
-                                .subscribeWith(new DisposableObserver<PlaceDetails>() {
-                                    @Override
-                                    public void onNext(PlaceDetails placeDetails) {
-                                        DataSingleton.getInstance().setPlaceDetails(placeDetails);
-                                        startActivity(PlaceDetailsActivity.class);
-
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        Log.i("TAG", "aie, error in place details search: " + Log.getStackTraceString(e));
-                                    }
-
-                                    @Override
-                                    public void onComplete() {
-                                        Log.i(TAG, " Place details downloaded ");
-                                    }
-                                });
-
-                    }
-
-                    else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
-                        //  Handle the error.
-                        Status status = Autocomplete.getStatusFromIntent(data);
-                        Log.i(TAG, status.getStatusMessage());
-                    } else if (result.getResultCode() == RESULT_CANCELED) {
-                        // The user canceled the operation.
-                        Log.d(TAG, " The user canceled the Operation");
-                    }
-                }
-
-
-            });*/
-
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        // super.onActivityResult(requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
-        if (data != null)
-            if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-                if (resultCode == RESULT_OK) {
-                    Place place = Autocomplete.getPlaceFromIntent(data);
-                    Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
-
-                    mDisposable = GoogleApiPlaceStreams.fetchPlaceDetailsStream(place.getId())
-                            .subscribeWith(new DisposableObserver<PlaceDetails>() {
-                                @Override
-                                public void onNext(PlaceDetails placeDetails) {
-                                    DataSingleton.getInstance().setPlaceDetails(placeDetails);
-                                    startActivity(PlaceDetailsActivity.class);
-
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Log.i("TAG", "aie, error in place details search: " + Log.getStackTraceString(e));
-                                }
-
-                                @Override
-                                public void onComplete() {
-                                    Log.i(TAG, " Place details downloaded ");
-                                }
-                            });
-
-                }
-                else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                    //  Handle the error.
-                    Status status = Autocomplete.getStatusFromIntent(data);
-                    Log.i(TAG, status.getStatusMessage());
-                } else if (resultCode == RESULT_CANCELED) {
-                    // The user canceled the operation.
-                    Log.d(TAG, " The user canceled the Operation");
-                }
-            }
-    }
 
 //--------------------------------------------------------------------------------------------------
     //               FRAGMENT MANAGEMENT
@@ -649,31 +527,25 @@ public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implem
         SettingsClient client = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
 
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // All location settings are satisfied. The client can initialize
-                // location requests here.
-                // ...
-                getDeviceLocation();
-            }
+        task.addOnSuccessListener(this, locationSettingsResponse -> {
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            // ...
+            getDeviceLocation();
         });
 
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
-                    try {
-                        // Show the dialog by calling startResolutionForResult(),
-                        // and check the result in onActivityResult().
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(WelcomeActivity.this,
-                                REQUEST_CHECK_SETTINGS);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
-                    }
+        task.addOnFailureListener(this, e -> {
+            if (e instanceof ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(WelcomeActivity.this,
+                            REQUEST_CHECK_SETTINGS);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    // Ignore the error.
                 }
             }
         });
@@ -726,9 +598,7 @@ public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implem
      */
 
     private void reloadUser(){
-        UserHelper.getAllUsers().addSnapshotListener(new EventListener<QuerySnapshot>() {
-        @Override
-        public void onEvent(@com.google.firebase.database.annotations.Nullable QuerySnapshot snapshot, @com.google.firebase.database.annotations.Nullable FirebaseFirestoreException e) {
+        UserHelper.getAllUsers().addSnapshotListener((snapshot, e) -> {
             if (e != null) {
                 // Handle error
                 Log.i(TAG, " Error by retrieve user from fire base-->: "+e.getMessage());
@@ -736,6 +606,7 @@ public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implem
                 return;
             }
             // Convert query snapshot to a list of users.
+            assert snapshot != null;
             List<User> userList = snapshot.toObjects(User.class);
 
             for (int k=0;k<userList.size();k++) {
@@ -747,7 +618,6 @@ public class WelcomeActivity extends BaseActivity<ActivityWelcomeBinding> implem
 
             }
 
-        }
         });
 
     }

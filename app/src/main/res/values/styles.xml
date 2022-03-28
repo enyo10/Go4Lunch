@@ -9,6 +9,7 @@
     </style>
 
 
+
     <!-- STYLE FOR MAIN ACTIVITY -->
     <style name="AppTheme.NoTitle" parent="AppTheme">
         <item name="windowNoTitle">true</item>

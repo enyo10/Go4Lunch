@@ -3,7 +3,9 @@ package ch.enyoholali.openclassrooms.go4lunch.controllers.fragments;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -33,6 +35,7 @@ import ch.enyoholali.openclassrooms.go4lunch.base.BaseFragment;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.activities.PlaceDetailsActivity;
 import ch.enyoholali.openclassrooms.go4lunch.controllers.activities.WelcomeActivity;
 import ch.enyoholali.openclassrooms.go4lunch.data.DataSingleton;
+import ch.enyoholali.openclassrooms.go4lunch.databinding.FragmentMapViewBinding;
 import ch.enyoholali.openclassrooms.go4lunch.models.firebase.User;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.nearbysearch.Result;
 import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.PlaceDetails;
@@ -40,7 +43,7 @@ import ch.enyoholali.openclassrooms.go4lunch.models.googleapi.placesdetails.Plac
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapViewFragment extends BaseFragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, WelcomeActivity.DataInterface {
+public class MapViewFragment extends BaseFragment<FragmentMapViewBinding> implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, WelcomeActivity.DataInterface {
 
     private static final String TAG = MapViewFragment.class.getSimpleName();
 
@@ -61,7 +64,7 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
 
 
     @Override
-    public BaseFragment newInstance() {
+    public BaseFragment<FragmentMapViewBinding> newInstance() {
 
         MapViewFragment mapViewFragment = new MapViewFragment();
         mapViewFragment.name = "Map View";
@@ -69,9 +72,10 @@ public class MapViewFragment extends BaseFragment implements OnMapReadyCallback,
     }
 
     @Override
-    protected int getFragmentLayout() {
-        return R.layout.fragment_map_view;
+    public FragmentMapViewBinding getBinding(LayoutInflater inflater, ViewGroup container) {
+        return FragmentMapViewBinding.inflate(inflater,container,false);
     }
+
 
     @Override
     protected void configureDesign(View v) {

@@ -9,7 +9,9 @@
     tools:context=".controllers.fragments.WorkmatesFragment">
 
     <!--Recycler view fragment -->
-    <include layout="@layout/recycler_view_layout" />
+    <include
+        android:id="@+id/workmates_recycler"
+        layout="@layout/recycler_view_layout" />
 
   <!--  <TextView
         android:id="@+id/workmates_fragment_message"

@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/enyo1/Desktop/Go4Lunch/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
+        <entry key="..\:/Users/enyo1/Desktop/Go4Lunch/app/src/main/res/layout-land/fragment_list_view.xml" value="0.1" />
         <entry key="..\:/Users/enyo1/Desktop/Go4Lunch/app/src/main/res/layout-land/fragment_map_view.xml" value="0.1" />
         <entry key="..\:/Users/enyo1/Desktop/Go4Lunch/app/src/main/res/layout/activity_chat.xml" value="0.1" />
         <entry key="..\:/Users/enyo1/Desktop/Go4Lunch/app/src/main/res/layout/activity_chat_item.xml" value="0.10729166666666666" />

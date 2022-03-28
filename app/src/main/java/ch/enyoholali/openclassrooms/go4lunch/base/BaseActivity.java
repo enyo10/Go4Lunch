@@ -42,7 +42,7 @@ import ch.enyoholali.openclassrooms.go4lunch.R;
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-      //  Icepick.saveInstanceState(this, outState);
+
     }
 
     // --------------------

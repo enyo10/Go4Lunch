@@ -8,20 +8,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.viewbinding.ViewBinding;
 
 import com.google.firebase.auth.FirebaseUser;
 
-import butterknife.ButterKnife;
-//import icepick.Icepick;
 
 
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment<V extends ViewBinding> extends Fragment {
     private static final String TAG = BaseFragment.class.getSimpleName();
-
 
     // Constant
     public String name;
+    protected V binding;
 
 
     public BaseFragment() {
@@ -30,45 +30,22 @@ public abstract class BaseFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView( LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view =    inflater.inflate(getFragmentLayout(), container, false);
-        ButterKnife.bind(this,view);
+
+        binding = getBinding(inflater,container);
+        View view = binding.getRoot();
+        Log.i(TAG, binding.toString());
 
         Log.i(TAG, " On create View method.");
         configureView();
         configureOnclickRecyclerView();
-        //Icepick.restoreInstanceState(this, savedInstanceState);
 
         return view;
     }
 
     //_____________________________________________
 
-   /* @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState BF");
-        Icepick.saveInstanceState(this, outState);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        Log.d(TAG, "onViewCreated BF");
-        if (savedInstanceState != null && !savedInstanceState.isEmpty()) {
-            Icepick.restoreInstanceState(this, savedInstanceState);
-        }
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG,"onCreate BF");
-        setRetainInstance(true);
-    }
-*/
 
     //Generic activity launcher method
     public void startActivity(Class activity) {
@@ -88,15 +65,14 @@ public abstract class BaseFragment extends Fragment {
     // ABSTRACT METHODS
     //----------------------------//
 
-    public abstract  BaseFragment newInstance();
+    public abstract  BaseFragment<V> newInstance();
+    public abstract V getBinding(LayoutInflater inflater,ViewGroup container);
 
     /**
      * This method to get the fragment layout resource id.
      * @return id,
      *         the resource id.
      */
-    protected abstract int getFragmentLayout();
-
     /**
      * This method to configure the fragment view.
      */

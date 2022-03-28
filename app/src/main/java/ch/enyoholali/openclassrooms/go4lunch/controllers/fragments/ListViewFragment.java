@@ -2,13 +2,11 @@ package ch.enyoholali.openclassrooms.go4lunch.controllers.fragments;
 
 
 import android.location.Location;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,7 +34,7 @@ import io.reactivex.disposables.Disposable;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListViewFragment extends BaseFragment implements WelcomeActivity.DataInterface {
+public class ListViewFragment extends BaseFragment<FragmentListViewBinding> implements WelcomeActivity.DataInterface {
 
     private static final String TAG = ListViewFragment.class.getSimpleName();
 
@@ -47,18 +45,6 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     private Disposable mDisposable;
     String jsonPlaceDetailsList;
 
-    private FragmentListViewBinding binding;
-
-    @Override
-    public View onCreateView (LayoutInflater inflater,
-                              ViewGroup container,
-                              Bundle savedInstanceState) {
-        binding = FragmentListViewBinding.inflate(inflater, container, false);
-
-        configureView();
-        configureRecyclerView();
-        return binding.getRoot();
-    }
 
     @Override
     public void onDestroyView() {
@@ -68,7 +54,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
 
 
     @Override
-    public BaseFragment newInstance() {
+    public BaseFragment<FragmentListViewBinding> newInstance() {
         ListViewFragment listViewFragment=new ListViewFragment();
         listViewFragment.name="List View";
 
@@ -76,9 +62,10 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     }
 
     @Override
-    protected int getFragmentLayout() {
-        return R.layout.fragment_list_view;
+    public FragmentListViewBinding getBinding(LayoutInflater inflater, ViewGroup container) {
+        return FragmentListViewBinding.inflate(inflater,container,false);
     }
+
 
     @Override
     protected void configureDesign(View v) {
@@ -111,6 +98,7 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
         this.mPlaceDetailsList =new ArrayList<>();
         if(jsonPlaceDetailsList!=null)
             mPlaceDetailsList= DataManager.jsonToPlaceDetailsList(jsonPlaceDetailsList);
+
         configureRecyclerView();
         configureSwipeRefreshLayout();
 
@@ -180,20 +168,6 @@ public class ListViewFragment extends BaseFragment implements WelcomeActivity.Da
     }
 
 
- /*   private void disposeWhenDestroy() {
-        if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
-
-
-
-    }*/
-
-
-
-   /* @Override
-    public void onDestroy() {
-        super.onDestroy();
-        disposeWhenDestroy();
-    }*/
 
 
 }
